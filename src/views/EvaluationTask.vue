@@ -4,7 +4,7 @@
     <div class="bottom-content">
       <div class="bottom-box">
         <div class="form-top">
-          <el-button type="primary" @click="addTask"> 新建评测任务 </el-button>
+          <el-button type="primary" class="mr" @click="addTask"> 新建评测任务 </el-button>
         </div>
         <p>我的评估任务</p>
         <div class="table-content">
@@ -57,12 +57,20 @@
           <TableDetail :data="viewData"></TableDetail>
         </el-dialog>
       </div>
+      <!-- <el-steps style="max-width: 600px" :active="active" finish-status="success">
+        <el-step title="Step 1" />
+        <el-step title="Step 2" />
+        <el-step title="Step 3" />
+      </el-steps>
+
+      <el-button style="margin-top: 12px" @click="next">Next step</el-button> -->
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { FormOption } from '@/types/form-option';
+import { useRouter } from 'vue-router';
 import {
   getDatasets,
   createTaskslist,
@@ -89,7 +97,7 @@ const viewData = ref({
   row: {},
   list: [],
 });
-
+const router = useRouter();
 const total = ref(0);
 const form = reactive({
   name: '', // 评测任务名称
@@ -98,6 +106,7 @@ const form = reactive({
   childType: '', //子任务类型
   status: '', //评测任务状态
 });
+// const active = ref(0)
 
 // 新增/编辑弹窗相关
 let dialogOptions = ref<FormOption>({
@@ -126,22 +135,25 @@ let columns = ref([
 ]);
 
 const addTask = () => {
-  visible.value = true;
-  isUpdate.value = false;
+  router.push('/create-evaluation-task');
 };
 
 // 运行评测任务
-async function getRunTask(id) {
+async function getRunTask(id: any) {
   console.log(id);
   try {
     const res = await runTask(id);
     console.log(res);
-    // const test = res.data.message;
-    // ElMessage.success(`测试指定版本模型服务${test}`);
+    const test = res.data.message;
+    ElMessage.success(`测试指定版本模型服务${test}`);
   } catch (error) {
     console.log(error);
   }
 }
+
+// function next() {
+//   if (active.value++ > 2) active.value = 0
+// }
 const rowData = ref({});
 
 function handleEdit(row: any) {
@@ -335,7 +347,7 @@ onMounted(() => {
 
 // 获取评测任务列表
 function getTaskslists() {
-  getTaskslist().then((res) => {
+  getTaskslist({ username: 'admin' }).then((res) => {
     if (res && res.data) {
       const start = (paramsObj.page - 1) * paramsObj.per_page;
       const end = start + paramsObj.per_page;
@@ -360,7 +372,7 @@ function getTaskslists() {
   p {
     margin-top: 15px;
     margin-bottom: 25px;
-    font-size: 20;
+    font-size: 20px;
     font-weight: 600;
     color: #717b8c;
   }
@@ -391,7 +403,6 @@ function getTaskslists() {
       color: #717b8c;
       font-size: 15px;
       font-weight: 400;
-      width: ;
     }
     p:last-child {
       color: #46d68b;
@@ -432,10 +443,13 @@ function getTaskslists() {
     height: 48px;
     display: flex;
     justify-content: flex-end;
+    
+    .mr {
+      margin-right: 60px;
+    }
   }
 
   .table-content {
-    margin-top: 50px;
     padding: 10px 20px;
     width: 100%;
     background: #fff;

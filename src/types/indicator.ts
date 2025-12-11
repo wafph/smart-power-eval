@@ -15,10 +15,13 @@ export interface CustomIndicator {
   description: string;
   weight: number;
   checked: boolean;
+  type: string;
+  created: string;
+  chinese_name: string;
+  available: boolean;
 }
-
 export interface ModelInfo {
   modelName: string;
-  dataset: string;
-  scenario: string;
+  dataset?: string;
+  scenario?: string;
 }

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { ElLoading, ElMessage } from 'element-plus';
 const service: AxiosInstance = axios.create({
-  timeout: 15000,
+  timeout: 5000,
 });
 let loadingInstance;
 service.interceptors.request.use(
@@ -31,7 +31,7 @@ service.interceptors.response.use(
     }
   },
   (error: AxiosError) => {
-    ElMessage.error(error.response.data?.error || error.response.data?.message || error?.message  || '执行结果响应失败');
+    ElMessage.error(error.response?.data?.error || error.response?.data?.message || error?.message  || '执行结果响应失败');
     loadingInstance.close();
     console.log(error);
     return Promise.reject();

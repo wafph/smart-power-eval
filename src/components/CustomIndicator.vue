@@ -1,47 +1,32 @@
 <template>
   <div class="custom-indicators">
     <div class="panel-title">自定义指标体系</div>
-    <div class="custom-header">
-      <div class="editing-tag">正在编辑</div>
-      <div class="indicator-type">所有指标类型</div>
-      <el-input
-        v-model="searchKeyword"
-        placeholder="搜索指标..."
-        clearable
-        class="search-input"
-      >
-        <template #prefix>
-          <el-icon><Search /></el-icon>
-        </template>
-      </el-input>
-      <el-button type="primary" @click="handleAddIndicator">
-        <el-icon><Plus /></el-icon>
-        新增指标
-      </el-button>
-    </div>
-
-    <h3>指标体系结构</h3>
-    <div class="indicator-desc">当前体系包含6项指标，拖动可调整顺序</div>
     <div
       v-for="indicator in filteredIndicators"
       :key="indicator.id"
       class="custom-indicator-item"
     >
       <div class="indicator-row">
-        <el-checkbox v-model="indicator.checked" class="indicator-checkbox" />
+        <el-checkbox v-model="indicator.available" class="indicator-checkbox" />
         <div class="indicator-details">
-          <div class="indicator-title">{{ indicator.name }}</div>
-          <div class="indicator-description">{{ indicator.description }}</div>
-        </div>
-        <div class="weight-input">
-          <el-input-number
-            v-model="indicator.weight"
-            :min="0"
-            :max="100"
-            controls-position="right"
-            class="weight-number"
-          />
-          <span class="weight-label">权重</span>
+          <div class="indicator-title">
+            <h3>指标名称：{{ indicator.name }}</h3>
+          </div>
+          <div class="indicator-title">
+            <h3>指标中文名称：{{ indicator.chinese_name }}</h3>
+          </div>
+          <div class="indicator-description">
+            <span>指标类型：</span>{{ indicator.type }}
+          </div>
+          <div class="indicator-description">
+            <span>指标描述：</span>{{ indicator.description }}
+          </div>
+          <div class="indicator-description">
+            <span>是否有效：</span>{{ indicator.available }}
+          </div>
+          <div class="indicator-description">
+            <span>创建时间：</span>{{ indicator.created }}
+          </div>
         </div>
       </div>
     </div>
@@ -85,6 +70,7 @@ const handleAddIndicator = () => {
 
 <style scoped lang="less">
 .custom-indicators {
+  width: 100%;
   padding: 20px;
 
   .panel-title {
@@ -103,24 +89,6 @@ const handleAddIndicator = () => {
     .search-input {
       width: 200px;
     }
-
-    // .editing-tag {
-    //   display: inline-block;
-    //   background-color: #f0f9ff;
-    //   color: #409eff;
-    //   font-size: 12px;
-    //   padding: 4px 12px;
-    //   border-radius: 3px;
-    //   margin-bottom: 16px;
-    // }
-  }
-
-  .indicator-desc {
-    color: grey;
-    font-size: 12px;
-    padding: 4px 0px;
-    border-radius: 3px;
-    margin-bottom: 16px;
   }
 }
 
@@ -132,8 +100,8 @@ const handleAddIndicator = () => {
 }
 
 .custom-indicator-item {
-  border: 1px solid #e4e7ed;
-  border-radius: 4px;
+  border: 1px solid #139a96;
+  border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
 }
@@ -153,6 +121,7 @@ const handleAddIndicator = () => {
 }
 
 .indicator-title {
+  display: flex;
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 4px;
@@ -161,23 +130,8 @@ const handleAddIndicator = () => {
 
 .indicator-description {
   font-size: 12px;
+  display: flex;
   color: #606266;
   line-height: 1.4;
-}
-
-.weight-input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.weight-number {
-  width: 100px;
-}
-
-.weight-label {
-  font-size: 12px;
-  color: #606266;
-  white-space: nowrap;
 }
 </style>

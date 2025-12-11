@@ -4,16 +4,11 @@
       <div class="info-label">当前模型</div>
       <div class="info-content">{{ modelInfo.modelName }}</div>
     </div>
-    <div class="info-item">
-      <div class="info-label">关联数据集</div>
-      <div class="info-content">{{ modelInfo.dataset }}</div>
-    </div>
-    <div class="info-item">
-      <div class="info-label">应用场景</div>
-      <div class="info-content">{{ modelInfo.scenario }}</div>
-    </div>
     <div class="info-end">
-      <div class="change-link" @click="handleChangeModel">更换模型/数据集</div>
+      <div class="change-link" @click="handleChangeModel">
+        <el-button type="primary" plain> 切换模型 </el-button>
+        <el-button type="primary"> 保存配置 </el-button>
+      </div>
     </div>
   </div>
 </template>

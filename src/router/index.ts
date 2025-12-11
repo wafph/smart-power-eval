@@ -55,6 +55,15 @@ const routes: RouteRecordRaw[] = [
           import(/* webpackChunkName: "login" */ '../views/EvaluationTask.vue'),
       },
       {
+        path: '/create-evaluation-task',
+        meta: {
+          title: '新建评测任务',
+          noAuth: true,
+        },
+        component: () =>
+          import(/* webpackChunkName: "login" */ '../views/CreateEvaluationTask.vue'),
+      },
+      {
         path: '/evaluation-report',
         meta: {
           title: '评估报告管理',

@@ -2,11 +2,8 @@
   <div class="data-container">
     <h2>评估报告管理</h2>
     <div class="bottom-content">
+      <InfoSection :model-info="modelInfo" @change-model="handleChangeModel" />
       <div class="bottom-box">
-        <div class="form-top">
-          <el-button type="primary" @click="addTask"> 新建评测任务 </el-button>
-          <P>我的评估任务</P>
-        </div>
         <div class="table-content">
           <TableCustom
             :columns="columns"
@@ -75,16 +72,23 @@ import {
   getTaskslist,
   getTasksLogs,
 } from '@/api';
+import type {
+  ModelInfo,
+} from './types/indicator';
+
 import { ElMessage } from 'element-plus';
 const tableData = ref([]);
 const visible = ref(false);
 const isEdit = ref(false);
 const loading = ref(false);
-const isVisable = ref(false);
 const isShowEdit = ref(true);
 const isShowDetail = ref(true);
 const isUpdate = ref(false);
 const tasklDetailVisible = ref(false);
+// 模型信息
+const modelInfo = reactive<ModelInfo>({
+  modelName: '图形分类模型V2.1',
+});
 const viewData = ref({
   row: {},
   list: [],
@@ -115,14 +119,11 @@ let dialogOptions = ref<FormOption>({
 // 表格相关
 let columns = ref([
   { type: 'index', label: '序号', width: 55, align: 'center' },
-  { prop: 'task_name', label: '任务名称' },
-  { prop: 'model_name', label: '评测评测任务' },
-  // { prop: 'metrics_names', label: '评测任务类型' },
-  { prop: 'dataset_name', label: '评测评测任务' },
-  { prop: 'metrics_names', label: '评估指标' },
-  { prop: 'last_run_time', label: '最后运行时间' },
-  { prop: 'task_status', label: '评测状态' },
-  { prop: 'operator', label: '操作', width: 500 },
+  { prop: 'task_name', label: '数据集' },
+  { prop: 'model_name', label: '任务类型' },
+  { prop: 'dataset_name', label: '模型' },
+  { prop: 'metrics_names', label: '指标' },
+  { prop: 'task_status', label: '结果' },
 ]);
 
 const addTask = () => {
@@ -320,22 +321,9 @@ onMounted(() => {
   getTaskslists();
 });
 
-// 页码改变事件
-// const handleCurrentChange = (page) => {
-//   ElMessage.info(`当前页切换至：第 ${page} 页`)
-//   // 实际项目中可在此处重新请求接口获取对应页数据
-// }
-
-// // 每页条数改变事件
-// const handleSizeChange = (size) => {
-//   ElMessage.info(`每页显示条数切换至：${size} 条`)
-//   currentPage.value = 1 // 切换页大小时重置为第1页
-//   // 实际项目中可在此处重新请求接口获取对应页数据
-// }
-
 // 获取评测任务列表
 function getTaskslists() {
-  getTaskslist().then((res) => {
+  getTaskslist({ username: localStorage.getItem('vuems_name') }).then((res) => {
     if (res && res.data) {
       const start = (paramsObj.page - 1) * paramsObj.per_page;
       const end = start + paramsObj.per_page;
@@ -344,13 +332,6 @@ function getTaskslists() {
     }
   });
 }
-
-// 处理后的表格数据（分页）
-// const tableData = computed(() => {
-//   const start = (currentPage.value - 1) * pageSize.value;
-//   const end = start + pageSize.value;
-//   return rawData.tasks.slice(start, end);
-// });
 </script>
 
 <style lang="less" scoped>
@@ -380,7 +361,6 @@ function getTaskslists() {
 
 .card-header {
   display: flex;
-  // flex-direction: column;
   align-items: center;
   text-align: center;
   width: 100%;
@@ -433,7 +413,6 @@ function getTaskslists() {
   }
 
   .table-content {
-    margin-top: 50px;
     padding: 10px 20px;
     width: 100%;
     background: #fff;

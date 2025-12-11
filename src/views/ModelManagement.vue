@@ -187,7 +187,7 @@
         />
       </el-dialog>
       <el-dialog
-        title="查看详情"
+        title="查看版本详情"
         v-model="versionDetailVisible"
         width="700px"
         destroy-on-close

@@ -5,8 +5,6 @@
       :default-active="onRoutes"
       active-text-color="#139a96"
       :collapse="sidebar.collapse"
-      :background-color="sidebar.bgColor"
-      :text-color="sidebar.textColor"
       router
     >
       <template v-for="item in menuData">

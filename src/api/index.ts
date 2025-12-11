@@ -217,10 +217,11 @@ export const getindicators = () => {
 };
 
 // 获取评测任务列表
-export const getTaskslist = () => {
+export const getTaskslist = (query: any) => {
   return request({
     url: 'rest/api4/api/tasks',
     method: 'get',
+    params: query,
   });
 };
 
