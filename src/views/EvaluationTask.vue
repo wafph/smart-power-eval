@@ -16,8 +16,8 @@
             :layouts="'total, sizes, prev, pager, next, jumper'"
             :currentPage="paramsObj.page"
             :total="total"
-            :isShowTest="true"
-            @connectionId="getRunTask"
+            :isRun="true"
+            @runId="getRunTask"
             @changePage="changeCurrentPage"
             @changeSize="changeSizePage"
             :viewFunc="handleView"
@@ -117,8 +117,7 @@ let dialogOptions = ref<FormOption>({
     { type: 'input', label: '模型ID', prop: 'model_id', required: true },
     { type: 'input', label: '指标ID列表', prop: 'indicator_ids', required: true },
     { type: 'input', label: '任务名称', prop: 'name', required: true },
-    { type: 'input', label: '裁判模型任务ID', prop: 'judge_model_id', required: false },
-    // { type: 'input', label: '扩展字段', prop: 'extension_fields', required: false },
+    { type: 'input', label: '裁判模型任务ID', prop: 'judge_model_id', required: false }
   ],
 });
 // 表格相关
@@ -126,12 +125,11 @@ let columns = ref([
   { type: 'index', label: '序号', width: 55, align: 'center' },
   { prop: 'task_name', label: '任务名称' },
   { prop: 'model_name', label: '评测评测任务' },
-  // { prop: 'metrics_names', label: '评测任务类型' },
   { prop: 'dataset_name', label: '评测评测任务' },
   { prop: 'metrics_names', label: '评估指标' },
   { prop: 'last_run_time', label: '最后运行时间' },
   { prop: 'task_status', label: '评测状态' },
-  { prop: 'operator', label: '操作', width: 500 },
+  { prop: 'operator', label: '操作', width: 480 },
 ]);
 
 const addTask = () => {
@@ -140,20 +138,16 @@ const addTask = () => {
 
 // 运行评测任务
 async function getRunTask(id: any) {
-  console.log(id);
+
   try {
     const res = await runTask(id);
-    console.log(res);
     const test = res.data.message;
-    ElMessage.success(`测试指定版本模型服务${test}`);
+    ElMessage.success(`${test}`);
   } catch (error) {
     console.log(error);
   }
 }
 
-// function next() {
-//   if (active.value++ > 2) active.value = 0
-// }
 const rowData = ref({});
 
 function handleEdit(row: any) {
@@ -175,10 +169,8 @@ function handelStop(row) {
 const handleView = (row) => {
   tasklDetailVisible.value = true;
   getTaskDetail(row.id).then((res) => {
-    console.log(res);
     viewData.value.row = res.data;
     console.log(res.data);
-    console.log(row);
   });
   viewData.value.list = [
     {
@@ -301,7 +293,7 @@ function getChildDatas(val) {
         console.log(res);
         visible.value = false;
         loading.value = false;
-        ElMessage.success(`新建评测任务${val.name}信息成功`);
+        ElMessage.success(`新建评测任务${val.name}成功`);
         getTaskslists();
       })
       .catch((err) => {
@@ -311,13 +303,11 @@ function getChildDatas(val) {
 }
 
 function changeCurrentPage(val: number) {
-  console.log(val);
   paramsObj.page = val;
   getTaskslists();
 }
 
 function changeSizePage(val: number) {
-  console.log(val);
   paramsObj.per_page = val;
   // paramsObj.page = val;
   getTaskslists();
@@ -392,7 +382,6 @@ function getTaskslists() {
 
 .card-header {
   display: flex;
-  // flex-direction: column;
   align-items: center;
   text-align: center;
   width: 100%;

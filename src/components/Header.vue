@@ -110,6 +110,7 @@ const setFullScreen = () => {
     font-size: 20px;
   }
 }
+
 .header-left {
   display: flex;
   align-items: center;

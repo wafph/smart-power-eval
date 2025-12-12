@@ -3,11 +3,12 @@
     <!-- 搜索区域 -->
     <h3 class="dataset-title" v-if="currentStep === 1">请选择数据集</h3>
     <h3 class="dataset-title" v-else-if="currentStep === 2">请选择模型</h3>
-    <h3 class="dataset-title" v-else>请选择评估</h3>
+    <h3 class="dataset-title" v-else-if="currentStep === 3">请选择评估指标</h3>
+    <h3 class="dataset-title" v-else>请选择裁判模型</h3>
     <div class="search-section">
-      <el-input
+      <!-- <el-input
         v-model="searchKeyword"
-        placeholder="请选择数据集"
+        :placeholder="placeholders"
         clearable
         class="search-input"
         @input="handleSearch"
@@ -15,7 +16,8 @@
         <template #prefix>
           <el-icon><Search /></el-icon>
         </template>
-      </el-input>
+      </el-input> -->
+      <!-- 请选择{{ placeholders }} -->
     </div>
 
     <!-- 主内容区域 -->
@@ -76,7 +78,7 @@ const activeCategory = ref('qa');
 
 // 搜索关键词
 const searchKeyword = ref('');
-
+const placeholders = ref('');
 // 选中的数据集ID列表
 const selectedDatasets = ref(['1da2d0']); // 默认选中 CommonsenseQA
 
@@ -125,9 +127,9 @@ const allModelsets = reactive({
       code: '(1da2d0)',
     },
     { id: '3', name: 'model3', code: '3' },
-    { id: '1dh4h2', name: 'model4', code: '(1dh4h2)' },
-    { id: '1di5i3', name: 'model5', code: '(1di5i3)' },
-    { id: '1dj6j4', name: 'model6', code: '(1dj6j4)' },
+    { id: '4', name: 'model4', code: '(1dh4h2)' },
+    { id: '5', name: 'model5', code: '(1di5i3)' },
+    { id: '6', name: 'model6', code: '(1dj6j4)' },
   ],
   h2: [
     {
@@ -150,6 +152,76 @@ const allModelsets = reactive({
     { id: '2f67g1', name: 'hello6', code: '(2f67g1)' },
   ],
 });
+
+const allMetrics = reactive({
+  h3: [
+    { id: '1', name: 'model1', code: '1' },
+    {
+      id: '2',
+      name: 'model2',
+      code: '(1da2d0)',
+    },
+    { id: '3', name: 'model3', code: '3' },
+    { id: '1dh4h2', name: 'model4', code: '(1dh4h2)' },
+    { id: '1di5i3', name: 'model5', code: '(1di5i3)' },
+    { id: '1dj6j4', name: 'model6', code: '(1dj6j4)' },
+  ],
+  h4: [
+    {
+      id: '2a12bc',
+      name: 'hello1',
+      code: '(2a12bc)',
+    },
+    { id: '2b23cd', name: 'hello2', code: '(2b23cd)' },
+    {
+      id: '2c34de',
+      name: 'hello3',
+      code: '(2c34de)',
+    },
+    {
+      id: '2d45ef',
+      name: 'hello4',
+      code: '(2d45ef)',
+    },
+    { id: '2e56f0', name: 'hello5', code: '(2e56f0)' },
+    { id: '2f67g1', name: 'hello6', code: '(2f67g1)' },
+  ],
+});
+
+const allModelConfig = reactive({
+  h5: [
+    { id: '1', name: '模型确认1', code: '1' },
+    {
+      id: '2',
+      name: '模型确认2',
+      code: '(1da2d0)',
+    },
+    { id: '3', name: '模型确认3', code: '3' },
+    { id: '1dh4h2', name: '模型确认4', code: '(1dh4h2)' },
+    { id: '1di5i3', name: '模型确认5', code: '(1di5i3)' },
+    { id: '1dj6j4', name: '模型确认6', code: '(1dj6j4)' },
+  ],
+  h6: [
+    {
+      id: '2a12bc',
+      name: 'green',
+      code: '(2a12bc)',
+    },
+    { id: '2b23cd', name: 'white', code: '(2b23cd)' },
+    {
+      id: '2c34de',
+      name: 'blue',
+      code: '(2c34de)',
+    },
+    {
+      id: '2d45ef',
+      name: 'yellow',
+      code: '(2d45ef)',
+    },
+    { id: '2e56f0', name: 'pink', code: '(2e56f0)' },
+    { id: '2f67g1', name: 'red', code: '(2f67g1)' },
+  ],
+});
 // 切换分类
 const switchCategory = (categoryId) => {
   activeCategory.value = categoryId;
@@ -159,29 +231,38 @@ const switchCategory = (categoryId) => {
 
 // 处理数据集选择
 const handleDatasetSelect = (datasetId) => {
-  console.log('选中的数据集ID:', datasetId);
   // 这里可以添加其他逻辑，如更新到store等
-};
-
-// 处理搜索
-const handleSearch = () => {
-  console.log('搜索关键词:', searchKeyword.value);
 };
 
 // 计算当前分类的数据集
 const currentDatasets = computed(() => {
-  //   const { currentStep } = toRefs(props);
-  //   console.log(currentStep);
-  console.log(props.currentStep);
   if (props.currentStep === 1) {
+    placeholders.value = '数据集';
     return allDatasets[activeCategory.value] || [];
   } else if (props.currentStep === 2) {
-    activeCategory.value = 'h2';
+    // activeCategory.value = 'h2';
+    placeholders.value = '模型';
     categories.value = [
       { id: 'h1', name: '填空类' },
       { id: 'h2', name: '应用类' },
     ];
     return allModelsets[activeCategory.value] || [];
+  } else if (props.currentStep === 3) {
+    // activeCategory.value = 'h2';
+    placeholders.value = '评估指标选择';
+    categories.value = [
+      { id: 'h3', name: '其他' },
+      { id: 'h4', name: '现有' },
+    ];
+    return allMetrics[activeCategory.value] || [];
+  } else if (props.currentStep === 4) {
+    // activeCategory.value = 'h2';
+    placeholders.value = '裁觉模型确认';
+    categories.value = [
+      { id: 'h5', name: '模型裁觉1' },
+      { id: 'h6', name: '模型裁觉2' },
+    ];
+    return allModelConfig[activeCategory.value] || [];
   }
 });
 
@@ -222,9 +303,7 @@ const filteredDatasets = computed(() => {
 
 .main-contents {
   display: flex;
-  flex-direction: column;
   gap: 20px;
-  min-height: 500px;
 }
 
 // 左侧分类菜单

@@ -52,6 +52,15 @@
                 <el-button
                   type="primary"
                   size="small"
+                  :icon="Box"
+                  @click="seeRun(row)"
+                  v-if="isRun"
+                >
+                  运行
+                </el-button>
+                <el-button
+                  type="primary"
+                  size="small"
                   plain
                   :icon="Notebook"
                   @click="seeVersion(row)"
@@ -78,6 +87,16 @@
                   查看
                 </el-button>
                 <el-button
+                  type="danger"
+                  size="small"
+                  :icon="DocumentChecked"
+                  plain
+                  @click="viewFunc(row)"
+                  v-if="isShowCheck"
+                >
+                  校验
+                </el-button>
+                <el-button
                   type="primary"
                   size="small"
                   plain
@@ -88,7 +107,7 @@
                   编辑
                 </el-button>
                 <el-button
-                  type="danger"
+                  type="warning"
                   size="small"
                   @click="stopFunc(row)"
                   v-if="isShowStop"
@@ -152,6 +171,8 @@ import {
   Download,
   Link,
   Notebook,
+  Box,
+  DocumentChecked
 } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
 const emits = defineEmits([
@@ -164,6 +185,7 @@ const emits = defineEmits([
   'versionId',
   'connectionId',
   'uploadFile',
+  'runId',
 ]);
 const loading = ref(false);
 const props = defineProps({
@@ -214,6 +236,14 @@ const props = defineProps({
     default: false,
   },
   isShowVersion: {
+    type: Boolean,
+    default: false,
+  },
+  isRun: {
+    type: Boolean,
+    default: false,
+  },
+  isShowCheck: {
     type: Boolean,
     default: false,
   },
@@ -296,12 +326,10 @@ const handleSelectionChange = (selection: any[]) => {
 };
 
 const handleSelectChange = (selection: any) => {
-  console.log(selection);
   emits('sendsSelec', selection);
 };
 
 const handleSizeChange = (val: number) => {
-  console.log(`${val} items per page`);
   emits('changeSize', val);
 };
 // 当前页码变化的事件
@@ -309,7 +337,7 @@ const handleCurrentChange = (val: number) => {
   emits('changePage', val);
 };
 
-const handleDelete = (row) => {
+const handleDelete = (row: any) => {
   ElMessageBox.confirm('确定要删除吗？', '提示', {
     type: 'warning',
   })
@@ -326,20 +354,24 @@ const handleDelete = (row) => {
 };
 
 // 下载数据集
-const handleDownload = (row) => {
+const handleDownload = (row: { id: any; }) => {
   emits('downloadId', row.id);
 };
 
-function uploadFile(row) {
+function uploadFile(row: { id: any; }) {
   emits('uploadFile', row.id);
 }
 
-function seeVersion(row) {
+function seeVersion(row: { id: any; }) {
   emits('versionId', row.id);
 }
 
-function seeTestConnection(row) {
+function seeTestConnection(row: { id: any; }) {
   emits('connectionId', row.id);
+}
+
+function seeRun(row: { id: any; }) {
+  emits('runId', row.id);
 }
 </script>
 

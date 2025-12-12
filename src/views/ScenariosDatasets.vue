@@ -2,56 +2,6 @@
   <div class="data-container">
     <h2>业务场景与数据集</h2>
     <p>选择应用场景，管理评估所需的各类数据集</p>
-    <el-row :gutter="20" type="flex">
-      <el-col :xl="6" :sm="24" :md="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>总数据集</p>
-              <h1>42</h1>
-              <p>较上月增长8%</p>
-            </div>
-            <img src="../assets/img/1.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :xl="6" :sm="24" :md="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>语义测试集</p>
-              <h1>42</h1>
-              <p>较上月增长6%</p>
-            </div>
-            <img src="../assets/img/2.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :xl="6" :sm="24" :md="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>多模态测试集</p>
-              <h1>42</h1>
-              <p>较上月增长8%</p>
-            </div>
-            <img src="../assets/img/3.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :xl="6" :xs="24" :sm="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>特殊测试集</p>
-              <h1>42</h1>
-              <p style="color: #d9543b">较上月下降8%</p>
-            </div>
-            <img src="../assets/img/4.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
     <div class="bottom-content">
       <div class="bottom-box">
         <div class="form-top">
@@ -140,6 +90,7 @@
             :viewFunc="handleView"
             :editFunc="handleEdit"
             :delFunc="handleDelete"
+            :isShowCheck="true"
             :isShowEdit="isShowEdit"
             :isShowDownload="isShowDownload"
             @downloadId="downloadDataSet"
@@ -188,7 +139,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, reactive, onMounted, computed } from 'vue';
-import { FormOption } from '@/types/form-option'
+import { FormOption } from '@/types/form-option';
 import {
   getDatasets,
   addDataSets,
@@ -216,6 +167,7 @@ const selectOptions = ref([]);
 const childOptions = ref([]);
 const total = ref(0);
 const datasetParent = ref({});
+const errMsg = ref('');
 const form = reactive({
   name: '', // 数据集名称
   scenario: '', //应用场景
@@ -258,11 +210,10 @@ let columns = ref([
   { prop: 'name', label: '数据集名称' },
   { prop: 'type', label: '类型' },
   { prop: 'scenario', label: '应用场景' },
-  { prop: 'sample_count', label: '样本量' },
   { prop: 'is_preset', label: '是否预制数据集' },
   { prop: 'status', label: '状态' },
   { prop: 'created_at', label: '创建时间' },
-  { prop: 'operator', label: '操作', width: 400 },
+  { prop: 'operator', label: '操作', width: 480 },
 ]);
 
 function handleScenarioClear() {
@@ -291,9 +242,7 @@ const handleEdit = (row: any) => {
   getDatasetType();
 
   // 回显数据集
-  getdatasetDetail(rowData.value.id).then((res) => {
-    console.log('回显', res);
-  });
+  getdatasetDetail(rowData.value.id).then((res) => {});
 };
 
 const closeEvent = (event) => {
@@ -314,19 +263,16 @@ const handleView = (row: {}) => {
   isVisable.value = true;
 };
 
+function showError(code: string) {
+  errMsg.value = errorMessageMap[code];
+}
+
 const downloadDataSet = (id) => {
-  console.log(id);
-
-  // 下载数据集
-  // downLoadDataset(id).then(res=> {
-
-  // })
   window.open(`/rest/api4/api/datasets/${id}/download`, '_blank');
 };
 
 function getFileInfo(info) {
   fileUploadVisible.value = true;
-  console.log(info);
 }
 
 function getLoading(isloading) {
@@ -334,7 +280,6 @@ function getLoading(isloading) {
 }
 
 const handleDelete = (row) => {
-  console.log(row.id);
   deleteDatasetDetail(row.id).then((res) => {
     ElMessage.success(`删除数据集${row.name}成功`);
   });
@@ -384,7 +329,6 @@ function getDatasetTypes() {
 function getChildDatas(val) {
   // addParams.value = val;
   loading.value = true;
-  console.log(val.id);
   if (isUpdate.value) {
     // 更新数据集
     getUpdateDatasetDetail(val.id, {
@@ -397,9 +341,8 @@ function getChildDatas(val) {
       description: val.description,
     })
       .then((res) => {
-        console.log(res);
         getDatasetsLIst();
-        ElMessage.success('修改数据集信息成功');
+        ElMessage.success('修改数据集成功');
         visible.value = false;
         loading.value = false;
         isUpdate.value = false;
@@ -420,10 +363,9 @@ function getChildDatas(val) {
 
     addDataSets(params)
       .then((res) => {
-        console.log(res);
         visible.value = false;
         loading.value = false;
-        ElMessage.success(`添加数据集${val.name}信息成功`);
+        ElMessage.success(`添加数据集${val.name}成功`);
         getDatasetsLIst();
       })
       .catch((err) => {
@@ -433,13 +375,11 @@ function getChildDatas(val) {
 }
 
 function changeCurrentPage(val: number) {
-  console.log(val);
   paramsObj.page = val;
   getDatasetsLIst();
 }
 
 function changeSizePage(val: number) {
-  console.log(val);
   paramsObj.per_page = val;
   // paramsObj.page = val;
   getDatasetsLIst();
@@ -457,17 +397,21 @@ onMounted(() => {
 
 // 获取数据集列表
 function getDatasetsLIst() {
-  getDatasets(paramsObj).then((res) => {
-    if (res && res.data) {
-      tableData.value = res.data.datasets;
-      res.data.datasets.forEach((item) => {
-        const endIndex = item.created_at.indexOf('T');
-        item.created_at = item.created_at.substring(0, endIndex);
-        item.is_preset = item.is_preset ? '是' : '否';
-      });
-      total.value = res.data.total;
-    }
-  });
+  getDatasets(paramsObj)
+    .then((res) => {
+      if (res && res.data) {
+        tableData.value = res.data.datasets;
+        res.data.datasets.forEach((item) => {
+          const endIndex = item.created_at.indexOf('T');
+          item.created_at = item.created_at.substring(0, endIndex);
+          item.is_preset = item.is_preset ? '是' : '否';
+        });
+        total.value = res.data.total;
+      }
+    })
+    .catch((err) => {
+      ElMessage.error(`修改数据集失败`);
+    });
 }
 
 const tableDataFilter = computed(() => {
@@ -498,11 +442,10 @@ function handleDatasetChange(e) {
       : e === '时序'
       ? 'temporal'
       : 'safety';
-  childOptions.value = datasetParent.value[a].map((item) => ({
+  childOptions.value = datasetParent.value[a].map((item: any) => ({
     value: Object.keys(item).join(''),
     label: Object.values(item).join(''),
   }));
-  console.log(childOptions);
 }
 </script>
 

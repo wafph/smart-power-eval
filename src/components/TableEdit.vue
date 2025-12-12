@@ -151,7 +151,6 @@ const saveEdit = (formEl: FormInstance | undefined) => {
 };
 
 const handleDatasetChange = (e) => {
-  console.log(e);
   emit('changeEmit', e);
 };
 

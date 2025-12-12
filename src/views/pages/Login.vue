@@ -4,38 +4,42 @@
       <div class="login-header">
         <div class="login-title">电力人工智能模型应用评估系统</div>
       </div>
-      <el-form :model="param" :rules="rules" ref="login" size="large">
-        <el-form-item prop="username">
-          <el-input v-model="param.username" placeholder="用户名">
-            <template #prepend>
-              <el-icon>
-                <User />
-              </el-icon>
-            </template>
-          </el-input>
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            type="password"
-            placeholder="密码"
-            v-model="param.password"
-            @keyup.enter="submitForm(login)"
-          >
-            <template #prepend>
-              <el-icon>
-                <Lock />
-              </el-icon>
-            </template>
-          </el-input>
-        </el-form-item>
-        <el-button
-          class="login-btn"
-          type="primary"
-          size="large"
-          @click="submitForm(login)"
-          >马上登录</el-button
-        >
-      </el-form>
+      <el-row :gutter="20" type="flex">
+        <el-col>
+          <el-form :model="param" :rules="rules" ref="login" size="large">
+            <el-form-item prop="username">
+              <el-input v-model="param.username" placeholder="用户名">
+                <template #prepend>
+                  <el-icon>
+                    <User />
+                  </el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input
+                type="password"
+                placeholder="密码"
+                v-model="param.password"
+                @keyup.enter="submitForm(login)"
+              >
+                <template #prepend>
+                  <el-icon>
+                    <Lock />
+                  </el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-button
+              class="login-btn"
+              type="primary"
+              size="large"
+              @click="submitForm(login)"
+              >马上登录</el-button
+            >
+          </el-form>
+        </el-col>
+      </el-row>
     </div>
   </div>
 </template>
@@ -164,7 +168,25 @@ tabs.clearTabs();
     font-size: 14px;
     color: #787878;
   }
-
 }
 
+@media only screen and (max-width: 768px) {
+  .login-container {
+    margin-right: 0;
+  }
+
+  .login-bg {
+    justify-content: center;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .login-container {
+    margin-right: 0;
+    width: 400px;
+    height: 400px;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}
 </style>

@@ -133,12 +133,8 @@ const addTask = () => {
 
 // 运行评测任务
 async function getRunTask(id) {
-  console.log(id);
   try {
     const res = await runTask(id);
-    console.log(res);
-    // const test = res.data.message;
-    // ElMessage.success(`测试指定版本模型服务${test}`);
   } catch (error) {
     console.log(error);
   }
@@ -163,11 +159,8 @@ function handelStop(row) {
 
 const handleView = (row) => {
   tasklDetailVisible.value = true;
-  getTaskDetail(row.id).then((res) => {
-    console.log(res);
+  getTaskDetail(row.id).then((res) =>
     viewData.value.row = res.data;
-    console.log(res.data);
-    console.log(row);
   });
   viewData.value.list = [
     {
@@ -214,7 +207,6 @@ const handleView = (row) => {
 };
 
 const handleDelete = (row) => {
-  console.log(row.id);
   deleteDatasetDetail(row.id).then((res) => {
     ElMessage.success(`删除评测任务${row.name}成功`);
   });
@@ -258,7 +250,6 @@ function convertValuesToNumbers(obj, exceptions = []) {
 // 创建/更新评测任务
 function getChildDatas(val) {
   loading.value = true;
-  console.log(val.id);
   val.user_name = 'admin';
   const strToNumber = convertValuesToNumbers(val, ['name', 'user_name']);
   if (isUpdate.value) {
@@ -273,7 +264,6 @@ function getChildDatas(val) {
       description: val.description,
     })
       .then((res) => {
-        console.log(res);
         getTaskslists();
         ElMessage.success('修改任务列表信息成功');
         visible.value = false;
@@ -287,7 +277,6 @@ function getChildDatas(val) {
     // 新建评测任务
     createTaskslist(strToNumber)
       .then((res) => {
-        console.log(res);
         visible.value = false;
         loading.value = false;
         ElMessage.success(`新建评测任务${val.name}信息成功`);
@@ -300,13 +289,11 @@ function getChildDatas(val) {
 }
 
 function changeCurrentPage(val: number) {
-  console.log(val);
   paramsObj.page = val;
   getTaskslists();
 }
 
 function changeSizePage(val: number) {
-  console.log(val);
   paramsObj.per_page = val;
   // paramsObj.page = val;
   getTaskslists();

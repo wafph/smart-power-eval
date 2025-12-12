@@ -1,28 +1,11 @@
 <template>
   <div class="data-container">
     <h2>模型管理</h2>
-    <p>管理所有AI横型，包括语义模型，视觉模型，多模态模型和时序模型</p>
+    <p>管理所有AI模型，包括文本模型，视觉模型，安全模型，多模态模型和时序模型</p>
     <div class="form-top">
       <el-form :inline="true" :model="form" class="demo-form-inline">
         <el-form-item label="模型名称">
           <el-input v-model="form.name" placeholder="搜索模型名称" />
-        </el-form-item>
-        <el-form-item label="模型类型">
-          <el-select
-            clearable
-            filterable
-            @clear="handleSingleClear"
-            allow-create
-            v-model="form.type"
-            placeholder="模型类型"
-          >
-            <el-option
-              v-for="item in selectOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
         </el-form-item>
         <el-form-item label="模型状态">
           <el-select
@@ -39,80 +22,36 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <el-button  type="primary" @click="addModels"> 创建模型 </el-button>
+      <el-button type="primary" @click="addModels"> 创建模型 </el-button>
     </div>
-    <el-row :gutter="20" type="flex">
-      <el-col :lg="6" :xs="24" :sm="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>全部模型</p>
-              <h1>42</h1>
-              <p>较上月增长8%</p>
-            </div>
-            <img src="../assets/img/1.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :lg="6" :xs="24" :sm="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>语义模型</p>
-              <h1>42</h1>
-              <p>较上月增长6%</p>
-            </div>
-            <img src="../assets/img/2.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :lg="6" :xs="24" :sm="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>视觉模型</p>
-              <h1>42</h1>
-              <p>较上月增长8%</p>
-            </div>
-            <img src="../assets/img/3.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :lg="6" :xs="24" :sm="12">
-        <el-card shadow="hover" :body-style="{ height: '166px' }">
-          <div class="card-header">
-            <div class="left">
-              <p>时序模型</p>
-              <h1>42</h1>
-              <p style="color: #d9543b">较上月下降8%</p>
-            </div>
-            <img src="../assets/img/4.png" alt="" />
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
     <div class="bottom-content">
       <div class="bottom-box">
         <div class="table-content">
-          <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-            <el-tab-pane label="全部模型" name="first">
-              <TableCustom
-                :columns="columns"
-                :tableData="tableDataFilter"
-                :total="total"
-                :delFunc="handleDelete"
-                :editFunc="handleEdit"
-                :isShowVersion="true"
-                :viewFunc="handleView"
-                :isShowTest="true"
-                @versionId="getVersionId"
-                @connectionId="getConnectionId"
-              ></TableCustom>
+          <el-tabs
+            v-model="activeName"
+            default-value="first"
+            class="demo-tabs"
+            @tab-click="handleClick"
+          >
+            <TableCustom
+              :columns="columns"
+              :tableData="activeName === 'first' ? tableDataFilter : tableDataTypeFilter"
+              :total="total"
+              :delFunc="handleDelete"
+              :editFunc="handleEdit"
+              :isShowVersion="true"
+              :viewFunc="handleView"
+              :isShowTest="true"
+              @versionId="getVersionId"
+              @connectionId="getConnectionId"
+            ></TableCustom>
+            <el-tab-pane
+              v-for="tab in tabs"
+              :key="tab.name"
+              :label="tab.label"
+              :name="tab.name"
+            >
             </el-tab-pane>
-            <el-tab-pane label="语义模型" name="second">语义测试集</el-tab-pane>
-            <el-tab-pane label="视觉模型" name="third">多模态测试集</el-tab-pane>
-            <el-tab-pane label="多模态模型" name="fourth">极端工况数据</el-tab-pane>
-            <el-tab-pane label="时序模型" name="five">对抗样例数据</el-tab-pane>
           </el-tabs>
           <el-dialog
             title="查看详情"
@@ -238,6 +177,15 @@ const form = reactive({
   status: '',
 });
 
+const tabs = ref([
+  { label: '全部模型', name: 'first' },
+  { label: '文本模型', name: '文本模型' },
+  { label: '视觉模型', name: '视觉模型' },
+  { label: '多模态模型', name: '多模态模型' },
+  { label: '时序模型', name: '时序模型' },
+  { label: '安全模型', name: '安全模型' },
+]);
+
 const viewData = ref({
   row: {},
   list: [],
@@ -250,11 +198,9 @@ const handleView = (row: any) => {
   getModelDetail(row.id)
     .then((res) => {
       const detailObj = res.data;
-      console.log(detailObj);
       ElMessage.success(`获取${row.name}信息成功`);
     })
     .catch((err) => {
-      console.log(err);
       ElMessage.error(`获取${row.name}信息失败`);
     });
   viewData.value.list = [
@@ -294,7 +240,6 @@ const handleViewVersion = (row: any) => {
   // 此处1应该是模型id
   getModelVersionDetail(1, row.id).then((res) => {
     const detailObj = res.data?.version;
-    console.log(detailObj);
   });
   viewData.value.list = [
     {
@@ -336,13 +281,10 @@ const handleViewVersion = (row: any) => {
 let columns = ref([
   { prop: 'name', label: '模型名称' },
   { prop: 'type', label: '模型类型' },
-  // { prop: 'version', label: '版本' },
-  // { prop: 'creation_method', label: '创建方式' },
-  // { prop: 'data_size_humana', label: '准确率' },
   { prop: 'status', label: '状态' },
   { prop: 'description', label: '描述' },
   { prop: 'created_at', label: '创建时间' },
-  { prop: 'operator', label: '操作', width: 500 },
+  { prop: 'operator', label: '操作', width: 450 },
 ]);
 
 // 模型版本表格
@@ -406,7 +348,6 @@ const updateData = () => {};
 const total = ref(0);
 const totalVersion = ref(0);
 const handleDelete = (row) => {
-  console.log(row.id);
   delModel(row.id).then((res) => {
     ElMessage.success(`删除模型${row.name}成功`);
     getModelLists();
@@ -414,11 +355,9 @@ const handleDelete = (row) => {
 };
 
 function handleDeleteVersion(row) {
-  console.log(row.id);
   // 此处1为模型id
   delModelVersion(1, row.id)
     .then((res) => {
-      console.log(res);
       ElMessage.success(`删除模型版本${row.model_name}成功`);
     })
     .catch((err) => {
@@ -471,7 +410,6 @@ async function getVersionId(id) {
 async function getConnectionId(id) {
   try {
     const res = await testConnection(id);
-    console.log(res);
     const test = res.data.message;
     ElMessage.success(`模型服务${test}`);
   } catch (error) {
@@ -481,10 +419,8 @@ async function getConnectionId(id) {
 
 // 测试指定版本连接
 async function getConnectionVersionId(versionId) {
-  console.log(versionId);
   try {
     const res = await testVersionConnection(1, versionId);
-    console.log(res);
     const test = res.data.message;
     ElMessage.success(`测试指定版本模型服务${test}`);
   } catch (error) {
@@ -495,7 +431,6 @@ async function getConnectionVersionId(versionId) {
 // 模型确认
 function getChildDatas(val) {
   loading.value = true;
-  console.log(val.id);
   if (isUpdate.value) {
     // 更新模型
     updateModel(val.id, {
@@ -525,10 +460,9 @@ function getChildDatas(val) {
 
     createModel(params)
       .then((res) => {
-        console.log(res);
         visible.value = false;
         loading.value = false;
-        ElMessage.success(`添加模型${val.name}信息成功`);
+        ElMessage.success(`添加模型${val.name}成功`);
         getModelLists();
       })
       .catch((err) => {
@@ -584,7 +518,7 @@ async function createVersion(val) {
 
   try {
     const res = await createModelVersion(1, params);
-    console.log(res);
+
     getVersionId(1);
     ElMessage.success('添加模型版本成功');
     getVersionId(1);
@@ -599,14 +533,13 @@ const handleEdit = (row: any) => {
   isEdit.value = true;
   visible.value = true;
   isUpdate.value = true;
-    getModelTypes();
+  getModelTypes();
 };
 
 const handleEditVersion = (row: any) => {
   isEditVersion.value = true;
   visibleCreateVersion.value = true;
   rowData.value = { ...row };
-  console.log(rowData.value);
 };
 
 onMounted(() => {
@@ -651,7 +584,6 @@ async function getModelLists() {
     if (res && res.data) {
       tableData.value = res.data.models;
       total.value = res.data.total;
-      console.log(form.name);
       res.data.models.forEach((item) => {
         const endIndex = item.created_at.indexOf('T');
         item.created_at = item.created_at.substring(0, endIndex);
@@ -674,16 +606,25 @@ const tableDataFilter = computed(() => {
     const namefilter = item.name.toLowerCase().includes(form.name?.toLowerCase());
     const phoneFilter = item.type.toLowerCase().includes(form.type?.toLowerCase());
     const accountFilter = item.status.toLowerCase().includes(form.status?.toLowerCase());
-    const three = namefilter && phoneFilter && accountFilter;
     return namefilter && phoneFilter && accountFilter;
   });
   total.value = filters?.length;
   return filters;
 });
 
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
-};
+const tableDataTypeFilter = computed(() => {
+  const a = tableData.value.filter((item) => {
+    if (activeName.value === 'first') {
+      return tableData.value;
+    } else {
+      return item?.type + '模型' === activeName.value;
+    }
+  });
+  total.value = a?.length;
+  return a;
+});
+
+const handleClick = (tab: TabsPaneContext) => {};
 </script>
 
 <style lang="less" scoped>
@@ -696,7 +637,6 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
     color: #717b8c;
   }
 }
-
 
 * {
   outline: 1px solid red; /* 显示所有元素边界 */
@@ -761,9 +701,7 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
   margin-bottom: 50px;
   display: flex;
   justify-content: space-between;
-  m
-
-  .selecct-width {
+  m .selecct-width {
     width: 500px;
   }
 }

@@ -48,14 +48,22 @@
           <SelectChecked :currentStep="currentStep" />
         </div>
         <div v-if="currentStep == 3">
-          <SelectChecked />
+          <SelectChecked :currentStep="currentStep" />
         </div>
         <div v-if="currentStep == 4">
-          <SelectChecked />
+          <SelectChecked :currentStep="currentStep" />
         </div>
       </div>
       <!-- 底部操作按钮 -->
       <div class="action-buttons">
+        <el-button
+          :disabled="!selectedTaskType"
+          plain
+          type="primary"
+          @click="handlPrevius"
+        >
+          上一步
+        </el-button>
         <el-button :disabled="!selectedTaskType" type="primary" @click="handleNext">
           下一步
         </el-button>
@@ -72,11 +80,11 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 // 步骤数据
 const steps = ref([
-  { title: '任务类型选择' },
-  { title: '数据集选择' },
-  { title: '模型配置' },
-  { title: '评估设置' },
-  { title: '裁判模型确认' },
+  { id: 1, title: '任务类型选择' },
+  { id: 2, title: '数据集选择' },
+  { id: 3, title: '模型配置' },
+  { id: 4, title: '评估指标选择' },
+  { id: 5, title: '裁判模型确认' },
 ]);
 
 // 任务类型数据
@@ -133,19 +141,18 @@ const selectedTask = computed(() => {
 // 方法
 function handleBack() {
   router.back();
-  // router.push('/evaluation-task');
 }
 
 function handleNext() {
-  // if (!selectedTaskType.value) {
-  //   ElMessage.warning('请先选择任务类型');
-  //   return;
-  // }
-
-  ElMessage.success(`已选择${selectedTask.value.label}，进入下一步`);
-  // 这里可以添加进入下一步的逻辑
-  // router.push('/next-step')
+  const a = steps.value.find((item) => {
+    return item.id === currentStep.value+2;
+  }).title;
+  ElMessage.success(`已选择${a}`);
   currentStep.value += 1;
+}
+
+function handlPrevius() {
+  currentStep.value -= 1;
 }
 
 // 模拟加载
