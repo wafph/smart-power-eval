@@ -91,7 +91,7 @@
                   size="small"
                   :icon="DocumentChecked"
                   plain
-                  @click="viewFunc(row)"
+                  @click="checkFunc(row)"
                   v-if="isShowCheck"
                 >
                   校验
@@ -113,6 +113,34 @@
                   v-if="isShowStop"
                 >
                   停止
+                </el-button>
+                <el-button
+                  type="primary"
+                  size="small"
+                  :icon="Download"
+                  @click="handleResult(row)"
+                  v-if="isShowResult"
+                >
+                  结果
+                </el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  :icon="Download"
+                  @click="handleReport(row)"
+                  v-if="isShowReport"
+                >
+                  报告
+                </el-button>
+                <el-button
+                  type="primary"
+                  plain
+                  size="small"
+                  :icon="Download"
+                  @click="handleSeeLogs(row)"
+                  v-if="isShowLog"
+                >
+                  日志
                 </el-button>
                 <el-button
                   type="danger"
@@ -172,7 +200,7 @@ import {
   Link,
   Notebook,
   Box,
-  DocumentChecked
+  DocumentChecked,
 } from '@element-plus/icons-vue';
 import { ElMessageBox } from 'element-plus';
 const emits = defineEmits([
@@ -186,6 +214,9 @@ const emits = defineEmits([
   'connectionId',
   'uploadFile',
   'runId',
+  'resultsId',
+  'reportId',
+  'logsId',
 ]);
 const loading = ref(false);
 const props = defineProps({
@@ -231,6 +262,19 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isShowResult: {
+    type: Boolean,
+    default: false,
+  },
+  isShowReport: {
+    type: Boolean,
+    default: false,
+  },
+  isShowLog: {
+    type: Boolean,
+    default: false,
+  },
+
   isShowUpload: {
     type: Boolean,
     default: false,
@@ -280,6 +324,10 @@ const props = defineProps({
     default: () => {},
   },
   stopFunc: {
+    type: Function,
+    default: () => {},
+  },
+  checkFunc: {
     type: Function,
     default: () => {},
   },
@@ -354,23 +402,36 @@ const handleDelete = (row: any) => {
 };
 
 // 下载数据集
-const handleDownload = (row: { id: any; }) => {
+const handleDownload = (row: { id: any }) => {
   emits('downloadId', row.id);
 };
 
-function uploadFile(row: { id: any; }) {
+// 下载数据集
+const handleResult = (row: { id: any }) => {
+  emits('resultsId', row.id);
+};
+
+// 下载数据集
+const handleReport = (row: { id: any }) => {
+  emits('reportId', row.id);
+};
+
+const handleSeeLogs = (row: { id: any }) => {
+  emits('logsId', row.id);
+};
+function uploadFile(row: { id: any }) {
   emits('uploadFile', row.id);
 }
 
-function seeVersion(row: { id: any; }) {
+function seeVersion(row: { id: any }) {
   emits('versionId', row.id);
 }
 
-function seeTestConnection(row: { id: any; }) {
+function seeTestConnection(row: { id: any }) {
   emits('connectionId', row.id);
 }
 
-function seeRun(row: { id: any; }) {
+function seeRun(row: { id: any }) {
   emits('runId', row.id);
 }
 </script>

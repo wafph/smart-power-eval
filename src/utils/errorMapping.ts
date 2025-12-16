@@ -18,13 +18,21 @@ const HTTP_ERRORS = {
   504: '网关超时',
 };
 
+const businessErrorMap = {
+  1001: '用户已存在',
+  1002: '验证码错误',
+  // ... 其他业务错误码
+}
 const errorMessageMap = {
   'Network Error': '网络错误，请检查网络连接',
   'Request failed with status code 401': '未授权，请重新登录',
   'Request failed with status code 403': '拒绝访问',
   'Request failed with status code 404': '请求的资源不存在',
   'Request failed with status code 500': '服务器内部错误',
+  'Only running or pending tasks can be stopped': '只有运行中的任务才可以停止',
+  'Task not completed': '任务没有完成',
+  'Report file not found': '报告文件没找到'
   // 可以继续添加更多映射
 };
 
-export { HTTP_ERRORS, errorMessageMap };
+export { HTTP_ERRORS, businessErrorMap, errorMessageMap };

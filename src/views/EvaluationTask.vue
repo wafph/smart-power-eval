@@ -20,6 +20,9 @@
             @runId="getRunTask"
             @changePage="changeCurrentPage"
             @changeSize="changeSizePage"
+            @resultsId="getResultId"
+            @reportId="getReportId"
+            @logsId="getlogs"
             :viewFunc="handleView"
             :editFunc="handleEdit"
             :stopFunc="handelStop"
@@ -27,6 +30,9 @@
             :isShowDetail="isShowDetail"
             :isShowEdit="isShowEdit"
             :isShowStop="true"
+            :isShowResult="true"
+            :isShowLog="true"
+            :isShowReport="true"
           ></TableCustom>
         </div>
         <el-dialog
@@ -57,22 +63,14 @@
           <TableDetail :data="viewData"></TableDetail>
         </el-dialog>
       </div>
-      <!-- <el-steps style="max-width: 600px" :active="active" finish-status="success">
-        <el-step title="Step 1" />
-        <el-step title="Step 2" />
-        <el-step title="Step 3" />
-      </el-steps>
-
-      <el-button style="margin-top: 12px" @click="next">Next step</el-button> -->
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { FormOption } from '@/types/form-option';
 import { useRouter } from 'vue-router';
 import {
-  getDatasets,
   createTaskslist,
   getTaskDetail,
   getUpdateDatasetDetail,
@@ -83,6 +81,7 @@ import {
   getTaskslist,
   getTasksLogs,
 } from '@/api';
+import { useState } from '@/utils/state';
 import { ElMessage } from 'element-plus';
 const tableData = ref([]);
 const visible = ref(false);
@@ -93,21 +92,19 @@ const isShowEdit = ref(true);
 const isShowDetail = ref(true);
 const isUpdate = ref(false);
 const tasklDetailVisible = ref(false);
+const taskId = ref<number>();
+const { setCurrentId } = useState();
+const currentStatus = ref('');
+let pollTimer: string | number | NodeJS.Timeout | null | undefined = null;
+const POLL_INTERVAL = 2000; // 2秒轮询一次
+const MAX_POLL_COUNT = 300; // 最多轮询5分钟 (300 * 2秒 = 10分钟)
+const isPolling = ref(false);
 const viewData = ref({
   row: {},
   list: [],
 });
 const router = useRouter();
 const total = ref(0);
-const form = reactive({
-  name: '', // 评测任务名称
-  scenario: '', //应用场景
-  type: '', //评测任务类型
-  childType: '', //子任务类型
-  status: '', //评测任务状态
-});
-// const active = ref(0)
-
 // 新增/编辑弹窗相关
 let dialogOptions = ref<FormOption>({
   labelWidth: '130px',
@@ -117,7 +114,7 @@ let dialogOptions = ref<FormOption>({
     { type: 'input', label: '模型ID', prop: 'model_id', required: true },
     { type: 'input', label: '指标ID列表', prop: 'indicator_ids', required: true },
     { type: 'input', label: '任务名称', prop: 'name', required: true },
-    { type: 'input', label: '裁判模型任务ID', prop: 'judge_model_id', required: false }
+    { type: 'input', label: '裁判模型任务ID', prop: 'judge_model_id', required: false },
   ],
 });
 // 表格相关
@@ -129,7 +126,7 @@ let columns = ref([
   { prop: 'metrics_names', label: '评估指标' },
   { prop: 'last_run_time', label: '最后运行时间' },
   { prop: 'task_status', label: '评测状态' },
-  { prop: 'operator', label: '操作', width: 480 },
+  { prop: 'operator', label: '操作', width: 620 },
 ]);
 
 const addTask = () => {
@@ -137,16 +134,83 @@ const addTask = () => {
 };
 
 // 运行评测任务
-async function getRunTask(id: any) {
-
+async function getRunTask(id: number) {
+  taskId.value = id;
   try {
     const res = await runTask(id);
     const test = res.data.message;
-    ElMessage.success(`${test}`);
+    ElMessage.success(`任务启动成功${test}开始监控状态`);
+
+    // 2. 开始轮询状态
+    startPollingStatus(id);
   } catch (error) {
     console.log(error);
   }
 }
+
+function getResultId(task_id: number) {
+  setCurrentId(task_id);
+  router.push('/evaluation-report');
+}
+
+function getReportId(task_id: number) {
+  setCurrentId(task_id);
+  router.push('/evaluation-report');
+}
+
+function getlogs(task_id: number) {
+  setCurrentId(task_id);
+  router.push('/evaluation-report2');
+}
+// 获取状态
+const fetchInitialStatus = async (taskId: number) => {
+  if (!taskId) return;
+  try {
+    const response = await getTaskStatus(taskId);
+    if (response.data) {
+      currentStatus.value = response.data.task_status;
+    }
+  } catch (error) {
+    console.warn('获取状态失败:', error);
+  }
+};
+
+// 启动轮询
+const startPollingStatus = (taskId: number) => {
+  let pollCount = 0;
+
+  // 立即执行一次
+  fetchInitialStatus(taskId);
+
+  // 设置轮询定时器
+  pollTimer = setInterval(() => {
+    pollCount++;
+
+    if (pollCount >= MAX_POLL_COUNT) {
+      stopPolling();
+      ElMessage.warning({
+        message: '任务监控时间过长，已停止监控',
+        duration: 5000,
+      });
+      return;
+    }
+
+    fetchInitialStatus(taskId);
+  }, POLL_INTERVAL);
+};
+
+// 停止轮询
+const stopPolling = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  isPolling.value = false;
+};
+// 组件卸载时清理
+onUnmounted(() => {
+  stopPolling();
+});
 
 const rowData = ref({});
 
@@ -432,7 +496,7 @@ function getTaskslists() {
     height: 48px;
     display: flex;
     justify-content: flex-end;
-    
+
     .mr {
       margin-right: 60px;
     }

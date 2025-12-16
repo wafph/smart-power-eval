@@ -59,10 +59,11 @@ export const downLoadDataset = (id) => {
 };
 
 // 审核数据集文件
-export const auditDataset = () => {
+export const auditDataset = (id, params:any) => {
   return request({
-    url: 'rest/api4/api/datasets/{id}/review',
+    url: `rest/api4/api/datasets/${id}/review`,
     method: 'post',
+    data: params,
   });
 };
 
@@ -77,7 +78,7 @@ export const getTypeDataset = () => {
 // 文件上传
 export const uploadfileDataset = (query) => {
   return request({
-    url: 'rest/api4/api/datasets/{id}/upload',
+    url: `rest/api4/api/datasets/{id}/upload`,
     method: 'post',
     data: query,
   });

@@ -90,6 +90,7 @@
             :viewFunc="handleView"
             :editFunc="handleEdit"
             :delFunc="handleDelete"
+            :checkFunc="handleCheck"
             :isShowCheck="true"
             :isShowEdit="isShowEdit"
             :isShowDownload="isShowDownload"
@@ -147,6 +148,7 @@ import {
   getUpdateDatasetDetail,
   deleteDatasetDetail,
   downLoadDataset,
+  auditDataset,
   getDataSetlist,
   getDatasetType,
 } from '@/api';
@@ -245,6 +247,13 @@ const handleEdit = (row: any) => {
   getdatasetDetail(rowData.value.id).then((res) => {});
 };
 
+const handleCheck = (row: {}) => {
+  const params = { review_status: 'approved', review_comment: '审核通过' };
+  auditDataset(row.id, params).then((res) => {
+     ElMessage.success(`审核数据集${row.name}成功`);
+  });
+};
+
 const closeEvent = (event) => {
   isVisable.value = event;
 };
@@ -262,10 +271,6 @@ const handleView = (row: {}) => {
   });
   isVisable.value = true;
 };
-
-function showError(code: string) {
-  errMsg.value = errorMessageMap[code];
-}
 
 const downloadDataSet = (id) => {
   window.open(`/rest/api4/api/datasets/${id}/download`, '_blank');
