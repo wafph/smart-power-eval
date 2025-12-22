@@ -37,8 +37,11 @@
               :columns="columns"
               :tableData="activeName === 'first' ? tableDataFilter : tableDataTypeFilter"
               :total="total"
+              @changePage="changeCurrentPage"
+              @changeSize="changeSizePage"
               :delFunc="handleDelete"
               :editFunc="handleEdit"
+              :versionFn="getVersionList"
               :isShowVersion="true"
               :viewFunc="handleView"
               :isShowTest="true"
@@ -96,11 +99,13 @@
         <TableCustom
           :columns="columnsVersion"
           :tableData="tableDataVersion"
+          :setDefaultFn="handleDefaultVersion"
           :total="totalVersion"
           :delFunc="handleDeleteVersion"
           :viewFunc="handleViewVersion"
           :editFunc="handleEditVersion"
-          :isShowTest="true"
+          :isShowDefault="true"
+          :isShowTest="false"
           @connectionId="getConnectionVersionId"
         ></TableCustom>
         <el-button type="primary" @click="createVersions" style="margin-top: 50px">
@@ -152,6 +157,7 @@ import {
   updateModelVersion,
   testConnection,
   testVersionConnection,
+  setDefaultVersion,
   getModelType,
 } from '@/api';
 import type { TabsPaneContext } from 'element-plus';
@@ -169,6 +175,9 @@ const tableDataVersion = ref([]);
 const selectOptions = ref([]);
 const loading = ref(false);
 const modelId = ref<number>();
+const modelType = ref('');
+const modelVersion = ref([]);
+const childOptions = ref([]);
 import { ElMessage, valueEquals } from 'element-plus';
 const form = reactive({
   industryNature: '',
@@ -236,9 +245,10 @@ const handleView = (row: any) => {
 };
 // 查看模型版本
 const handleViewVersion = (row: any) => {
+  debugger;
   viewData.value.row = { ...row };
   // 此处1应该是模型id
-  getModelVersionDetail(1, row.id).then((res) => {
+  getModelVersionDetail(modelId.value, row.id).then((res) => {
     const detailObj = res.data?.version;
   });
   viewData.value.list = [
@@ -284,7 +294,7 @@ let columns = ref([
   { prop: 'status', label: '状态' },
   { prop: 'description', label: '描述' },
   { prop: 'created_at', label: '创建时间' },
-  { prop: 'operator', label: '操作', width: 450 },
+  { prop: 'operator', label: '操作', width: 420 },
 ]);
 
 // 模型版本表格
@@ -314,21 +324,6 @@ let dialogOptions = ref<FormOption>({
       required: true,
       placeholder: '模型类型',
     },
-
-    {
-      type: 'select',
-      label: '创建方法',
-      opts: [
-        {
-          value: 'creation_method',
-          label: 'creation_method',
-        },
-      ],
-      prop: 'service_type',
-      required: true,
-      placeholder: '服务类型',
-    },
-    { type: 'input', label: '扩展方法', prop: 'extension_fields', required: false },
   ],
 });
 
@@ -339,6 +334,14 @@ let dialogVersionOptions = ref<FormOption>({
   list: [
     { type: 'input', label: '模型名称', prop: 'model_name', required: false },
     { type: 'input', label: '版本描述', prop: 'description', required: true },
+    {
+      type: 'select',
+      label: '子服务类型',
+      opts: childOptions,
+      prop: 'type',
+      required: true,
+      placeholder: '服务类型',
+    },
     { type: 'input', label: '服务地址', prop: 'service_url', required: true },
     { type: 'input', label: 'API密钥', prop: 'api_key', required: true },
   ],
@@ -354,19 +357,28 @@ const handleDelete = (row) => {
   });
 };
 
-function handleDeleteVersion(row) {
-  // 此处1为模型id
-  delModelVersion(1, row.id)
-    .then((res) => {
-      ElMessage.success(`删除模型版本${row.model_name}成功`);
-    })
-    .catch((err) => {
-      ElMessage.error(`删除模型版本失败`);
-    });
+function changeCurrentPage(val: number) {
+  paramsObj.page = val;
+  getModelLists();
 }
 
-function handleSingleClear() {
-  form.type = '';
+function changeSizePage(val: number) {
+  paramsObj.per_page = val;
+  getModelLists();
+}
+
+function handleDefaultVersion(row: any) {
+  setDefaultVersion(modelId.value, row.id).then((res: any) => {
+    if (res.data && res.data.message) {
+      ElMessage.success(`设置${row.version}版本为默认版本成功`);
+    }
+  });
+}
+
+function handleDeleteVersion(row: any) {
+  delModelVersion(modelId.value, row.id).then((res) => {
+    ElMessage.success(`删除模型版本${row.model_name}成功`);
+  });
 }
 
 function handleSingleClearStatus() {
@@ -376,7 +388,7 @@ function handleSingleClearStatus() {
 const paramsObj = reactive({
   page: 1,
   per_page: 10,
-  username: 'admin',
+  username: localStorage.getItem('vuems_name'),
   search: '',
 });
 
@@ -391,10 +403,13 @@ function addModels() {
 }
 
 // 获取模型版本列表
+async function getVersionList(row) {
+  modelType.value = row.type;
+}
+
 async function getVersionId(id) {
   visibleVersion.value = true;
   modelId.value = id;
-  id = 1;
   try {
     const res = await getModelVersionList(id);
     tableDataVersion.value = res.data.versions;
@@ -405,7 +420,6 @@ async function getVersionId(id) {
     totalVersion.value = res.data.total;
   } catch (error) {}
 }
-
 // 测试模型服务连接
 async function getConnectionId(id) {
   try {
@@ -413,7 +427,7 @@ async function getConnectionId(id) {
     const test = res.data.message;
     ElMessage.success(`模型服务${test}`);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
@@ -424,7 +438,7 @@ async function getConnectionVersionId(versionId) {
     const test = res.data.message;
     ElMessage.success(`测试指定版本模型服务${test}`);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
@@ -437,17 +451,13 @@ function getChildDatas(val) {
       name: val.name,
       description: val.description,
       type: val.type,
-    })
-      .then((res) => {
-        getModelLists();
-        ElMessage.success('修改模型成功');
-        visible.value = false;
-        loading.value = false;
-        isUpdate.value = false;
-      })
-      .catch((err) => {
-        ElMessage.error(`修改模型失败`);
-      });
+    }).then((res) => {
+      getModelLists();
+      ElMessage.success('修改模型成功');
+      visible.value = false;
+      loading.value = false;
+      isUpdate.value = false;
+    });
   } else {
     // 添加模型
     const params = {
@@ -471,7 +481,28 @@ function getChildDatas(val) {
   }
 }
 
+// 创建模型版本
 function createVersions() {
+  getModelTypes();
+  if (modelType.value === '文本') {
+    modelType.value = 'text';
+  } else if (modelType.value === '多模态') {
+    modelType.value = 'multimodal';
+  } else if (modelType.value === '视觉') {
+    modelType.value = 'vision';
+  } else if (modelType.value === '时序') {
+    modelType.value = 'temporal';
+  } else if (modelType.value === '安全') {
+    modelType.value = 'safety';
+  }
+  setTimeout(() => {
+    const a = modelVersion.value[modelType.value][0];
+    const keysss = Object.entries(a);
+    childOptions.value = keysss.map((item) => ({
+      value: item[0],
+      label: item[0] + '-' + item[1],
+    }));
+  }, 1000);
   visibleCreateVersion.value = true;
 }
 
@@ -489,9 +520,9 @@ function getChildDatasVersion(val) {
   };
   if (isEditVersion.value) {
     // 修改模型版本
-    updateModelVersion(1, val.id, params)
+    updateModelVersion(modelId.value, val.id, params)
       .then((res) => {
-        getVersionId(1);
+        getVersionId(modelId.value);
         ElMessage.success(`修改模型版本成功`);
       })
       .catch((err) => {
@@ -502,7 +533,7 @@ function getChildDatasVersion(val) {
         loading.value = false;
       });
   } else {
-    // 添加模型
+    // 添加模型版本
     createVersion(val);
   }
 }
@@ -514,18 +545,17 @@ async function createVersion(val) {
     service_url: val.service_url,
     api_key: val.api_key,
     model_name: val.model_name,
+    service_type: childOptions.value[0].value,
   };
 
   try {
-    const res = await createModelVersion(1, params);
-
-    getVersionId(1);
+    const res = await createModelVersion(modelId.value, params);
+    getVersionId(modelId.value);
     ElMessage.success('添加模型版本成功');
-    getVersionId(1);
     visibleCreateVersion.value = false;
     loading.value = false;
   } catch (error) {
-    ElMessage.success('添加模型版本失败');
+    // ElMessage.error('添加模型版本失败');
   }
 }
 const handleEdit = (row: any) => {
@@ -533,7 +563,6 @@ const handleEdit = (row: any) => {
   isEdit.value = true;
   visible.value = true;
   isUpdate.value = true;
-  getModelTypes();
 };
 
 const handleEditVersion = (row: any) => {
@@ -544,12 +573,12 @@ const handleEditVersion = (row: any) => {
 
 onMounted(() => {
   getModelLists();
-  getModelTypes();
 });
 
 function getModelTypes() {
   getModelType()
     .then((res) => {
+      modelVersion.value = res.data;
       const keys = Object.keys(res.data);
       selectOptions.value = keys.map((item) => ({
         value:
@@ -584,17 +613,11 @@ async function getModelLists() {
     if (res && res.data) {
       tableData.value = res.data.models;
       total.value = res.data.total;
-      res.data.models.forEach((item) => {
-        const endIndex = item.created_at.indexOf('T');
-        item.created_at = item.created_at.substring(0, endIndex);
-      });
     } else {
       // 处理响应数据为空的情况
       console.warn('响应数据为空');
     }
   } catch (error) {
-    console.error('获取模型列表失败:', error);
-    // 错误处理逻辑
   } finally {
     loading.value = false;
   }
@@ -604,11 +627,9 @@ const tableDataFilter = computed(() => {
   const filters = tableData.value.filter((item) => {
     // 转换为小写进行不区分大小写的匹配
     const namefilter = item.name.toLowerCase().includes(form.name?.toLowerCase());
-    const phoneFilter = item.type.toLowerCase().includes(form.type?.toLowerCase());
     const accountFilter = item.status.toLowerCase().includes(form.status?.toLowerCase());
-    return namefilter && phoneFilter && accountFilter;
+    return namefilter && accountFilter;
   });
-  total.value = filters?.length;
   return filters;
 });
 

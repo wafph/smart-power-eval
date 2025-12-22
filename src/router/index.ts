@@ -73,13 +73,13 @@ const routes: RouteRecordRaw[] = [
           import(/* webpackChunkName: "login" */ '../views/EvaluationReport.vue'),
       },
        {
-        path: '/evaluation-report2',
+        path: '/evaluation-logs',
         meta: {
           title: '评估报告管理',
           noAuth: true,
         },
         component: () =>
-          import(/* webpackChunkName: "login" */ '../views/EvaluationReport2.vue'),
+          import(/* webpackChunkName: "login" */ '../views/EvaluationLogs.vue'),
       },
     ],
   },

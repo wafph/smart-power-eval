@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    ActionDropdown: typeof import('./src/components/ActionDropdown.vue')['default']
     CustomIndicator: typeof import('./src/components/CustomIndicator.vue')['default']
     DirectoryViewer: typeof import('./src/components/DirectoryViewer/DirectoryViewer.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -15,7 +16,6 @@ declare module '@vue/runtime-core' {
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
     ElCol: typeof import('element-plus/es')['ElCol']
-    ElCollapseTransition: typeof import('element-plus/es')['ElCollapseTransition']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
     ElDescriptions: typeof import('element-plus/es')['ElDescriptions']
     ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']

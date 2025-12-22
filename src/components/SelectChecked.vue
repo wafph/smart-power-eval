@@ -5,25 +5,20 @@
     <h3 class="dataset-title" v-else-if="currentStep === 2">请选择模型</h3>
     <h3 class="dataset-title" v-else-if="currentStep === 3">请选择评估指标</h3>
     <h3 class="dataset-title" v-else>请选择裁判模型</h3>
-    <div class="search-section">
-      <!-- <el-input
-        v-model="searchKeyword"
+    <div class="search-section" v-if="currentStep === 1">
+      <el-input
+        v-model="taskName"
         :placeholder="placeholders"
         clearable
         class="search-input"
-        @input="handleSearch"
+        @blur="handleBlur"
       >
-        <template #prefix>
-          <el-icon><Search /></el-icon>
-        </template>
-      </el-input> -->
-      <!-- 请选择{{ placeholders }} -->
+      </el-input>
     </div>
-
     <!-- 主内容区域 -->
     <div class="main-contents">
       <!-- 左侧分类菜单 -->
-      <div class="category-menu">
+      <div class="category-menu" v-if="currentStep === 1">
         <div
           v-for="category in categories"
           :key="category.id"
@@ -35,27 +30,86 @@
           <div v-if="activeCategory === category.id" class="active-indicator"></div>
         </div>
       </div>
-
       <!-- 右侧数据集列表 -->
       <div class="dataset-list">
-        <div v-if="filteredDatasets.length === 0" class="no-data">暂无数据</div>
-
-        <div v-else class="datasets-container">
+        <div v-if="filteredDatasets.length === 0 && currentStep === 1" class="no-data">
+          暂无数据
+        </div>
+        <div class="datasets-container">
           <el-checkbox-group v-model="selectedDatasets" class="dataset-checkbox-group">
-            <div
-              v-for="dataset in filteredDatasets"
-              :key="dataset.id"
-              class="dataset-checkbox-item"
-            >
-              <el-checkbox
-                :label="dataset.id"
-                class="dataset-checkbox"
-                @change="handleDatasetSelect(dataset.id)"
+            <template v-if="currentStep == 1">
+              <div
+                v-for="dataset in filteredDatasets"
+                :key="dataset.id"
+                class="dataset-checkbox-item"
               >
-                <span class="dataset-name">{{ dataset.name }}</span>
-                <span class="dataset-code">{{ dataset.code }}</span>
-              </el-checkbox>
+                {{ dataset }}
+                <el-checkbox
+                  :label="dataset.id"
+                  class="dataset-checkbox"
+                  @change="handleDatasetSelect(dataset.id)"
+                >
+                  <span class="dataset-name">{{ dataset.name }}</span>
+                </el-checkbox>
+              </div>
+            </template>
+            <div v-else-if="currentStep == 2">
+              <template
+                v-for="dataset in filtereModal"
+                :key="dataset.id"
+                class="dataset-checkbox-item"
+              >
+                {{ dataset }}
+                <el-checkbox
+                  :label="dataset.id"
+                  class="dataset-checkbox"
+                  @change="handleDatasetSelect(dataset.id)"
+                >
+                  <span class="dataset-name">{{ dataset.name }}</span>
+                </el-checkbox>
+              </template>
             </div>
+            <div v-else-if="currentStep == 3">
+              <template
+                v-for="dataset in filterCustomIndicators"
+                :key="dataset.id"
+                class="dataset-checkbox-item"
+              >
+                {{ dataset }}
+                <el-checkbox
+                  :label="dataset.id"
+                  class="dataset-checkbox"
+                  @change="handleDatasetSelect(dataset.id)"
+                >
+                  <span class="dataset-name">{{ dataset.name }}</span>
+                </el-checkbox>
+              </template>
+            </div>
+            <template v-if="currentStep == 4">
+              <div>
+                是否使用裁判模型
+                <el-radio-group v-model="radio1" @change="handleChange">
+                  <el-radio value="1" size="large" border>是</el-radio>
+                  <el-radio value="2" size="large" border>否</el-radio>
+                </el-radio-group>
+              </div>
+              <div v-if="radio1 === '1'">
+                <div
+                  v-for="dataset in judgeModelName"
+                  :key="dataset.id"
+                  class="dataset-checkbox-item"
+                >
+                  {{ dataset }}
+                  <el-checkbox
+                    :label="dataset.id"
+                    class="dataset-checkbox"
+                    @change="handleDatasetSelect(dataset.id)"
+                  >
+                    <span class="dataset-name">{{ dataset.name }}</span>
+                  </el-checkbox>
+                </div>
+              </div>
+            </template>
           </el-checkbox-group>
         </div>
       </div>
@@ -64,228 +118,178 @@
 </template>
 
 <script setup>
-import { ref, toRefs, computed, reactive } from 'vue';
-import { Search } from '@element-plus/icons-vue';
-const props = defineProps(['currentStep']);
+import { ref, toRefs, onMounted, computed, reactive } from 'vue';
+import {
+  getDatasets,
+  getModelList,
+  getModelType,
+  getDatasetType,
+  getindicators,
+  getJudgeModels,
+  createTaskslist,
+} from '@/api';
+const props = defineProps(['currentStep', 'selectedTaskType']);
+const emit = defineEmits(['emitIds', 'taskName']);
+const { currentStep, selectedTaskType } = toRefs(props);
+const placeholders = ref('请输入任务名称');
 // 分类数据
-const categories = ref([
-  { id: 'qa', name: '问答类' },
-  { id: 'choice', name: '选择类' },
-]);
-
+const categories = ref([]);
+const radio1 = ref('1');
+const tableData = ref([]);
+const judgeModelName = ref([]);
+const taskName = ref('');
+const customIndicators = ref([]);
+const modalTableData = ref([]);
+const filterCustomIndicators = ref([]);
+const filtereModal = ref([]);
 // 当前激活的分类
-const activeCategory = ref('qa');
+const filteredDatasets = ref([]);
+const activeCategory = ref('mcq');
 
 // 搜索关键词
-const searchKeyword = ref('');
-const placeholders = ref('');
+const datasetParent = ref({});
 // 选中的数据集ID列表
-const selectedDatasets = ref(['1da2d0']); // 默认选中 CommonsenseQA
-
-// 所有数据集数据
-const allDatasets = reactive({
-  qa: [
-    { id: '1d56df', name: 'BoolQ', code: '(1d56df)' },
-    {
-      id: '1da2d0',
-      name: 'CommonsenseQA',
-      code: '(1da2d0)',
-    },
-    { id: '1dg3g1', name: 'PIQA', code: '(1dg3g1)' },
-    { id: '1dh4h2', name: 'SocialQA', code: '(1dh4h2)' },
-    { id: '1di5i3', name: 'Winogrande', code: '(1di5i3)' },
-    { id: '1dj6j4', name: 'HellaSwag', code: '(1dj6j4)' },
-  ],
-  choice: [
-    {
-      id: '2a12bc',
-      name: 'MultiChoiceQA',
-      code: '(2a12bc)',
-    },
-    { id: '2b23cd', name: 'ARC-Easy', code: '(2b23cd)' },
-    {
-      id: '2c34de',
-      name: 'ARC-Challenge',
-      code: '(2c34de)',
-    },
-    {
-      id: '2d45ef',
-      name: 'OpenBookQA',
-      code: '(2d45ef)',
-    },
-    { id: '2e56f0', name: 'RACE', code: '(2e56f0)' },
-    { id: '2f67g1', name: 'MCTest', code: '(2f67g1)' },
-  ],
-});
-
-const allModelsets = reactive({
-  h1: [
-    { id: '1', name: 'model1', code: '1' },
-    {
-      id: '2',
-      name: 'model2',
-      code: '(1da2d0)',
-    },
-    { id: '3', name: 'model3', code: '3' },
-    { id: '4', name: 'model4', code: '(1dh4h2)' },
-    { id: '5', name: 'model5', code: '(1di5i3)' },
-    { id: '6', name: 'model6', code: '(1dj6j4)' },
-  ],
-  h2: [
-    {
-      id: '2a12bc',
-      name: 'hello1',
-      code: '(2a12bc)',
-    },
-    { id: '2b23cd', name: 'hello2', code: '(2b23cd)' },
-    {
-      id: '2c34de',
-      name: 'hello3',
-      code: '(2c34de)',
-    },
-    {
-      id: '2d45ef',
-      name: 'hello4',
-      code: '(2d45ef)',
-    },
-    { id: '2e56f0', name: 'hello5', code: '(2e56f0)' },
-    { id: '2f67g1', name: 'hello6', code: '(2f67g1)' },
-  ],
-});
-
-const allMetrics = reactive({
-  h3: [
-    { id: '1', name: 'model1', code: '1' },
-    {
-      id: '2',
-      name: 'model2',
-      code: '(1da2d0)',
-    },
-    { id: '3', name: 'model3', code: '3' },
-    { id: '1dh4h2', name: 'model4', code: '(1dh4h2)' },
-    { id: '1di5i3', name: 'model5', code: '(1di5i3)' },
-    { id: '1dj6j4', name: 'model6', code: '(1dj6j4)' },
-  ],
-  h4: [
-    {
-      id: '2a12bc',
-      name: 'hello1',
-      code: '(2a12bc)',
-    },
-    { id: '2b23cd', name: 'hello2', code: '(2b23cd)' },
-    {
-      id: '2c34de',
-      name: 'hello3',
-      code: '(2c34de)',
-    },
-    {
-      id: '2d45ef',
-      name: 'hello4',
-      code: '(2d45ef)',
-    },
-    { id: '2e56f0', name: 'hello5', code: '(2e56f0)' },
-    { id: '2f67g1', name: 'hello6', code: '(2f67g1)' },
-  ],
-});
-
-const allModelConfig = reactive({
-  h5: [
-    { id: '1', name: '模型确认1', code: '1' },
-    {
-      id: '2',
-      name: '模型确认2',
-      code: '(1da2d0)',
-    },
-    { id: '3', name: '模型确认3', code: '3' },
-    { id: '1dh4h2', name: '模型确认4', code: '(1dh4h2)' },
-    { id: '1di5i3', name: '模型确认5', code: '(1di5i3)' },
-    { id: '1dj6j4', name: '模型确认6', code: '(1dj6j4)' },
-  ],
-  h6: [
-    {
-      id: '2a12bc',
-      name: 'green',
-      code: '(2a12bc)',
-    },
-    { id: '2b23cd', name: 'white', code: '(2b23cd)' },
-    {
-      id: '2c34de',
-      name: 'blue',
-      code: '(2c34de)',
-    },
-    {
-      id: '2d45ef',
-      name: 'yellow',
-      code: '(2d45ef)',
-    },
-    { id: '2e56f0', name: 'pink', code: '(2e56f0)' },
-    { id: '2f67g1', name: 'red', code: '(2f67g1)' },
-  ],
+const selectedDatasets = ref([]); // 默认选中 CommonsenseQA
+const paramsObj = reactive({
+  page: 1,
+  per_page: 100,
+  type: 'all',
+  status: 'all',
+  username: localStorage.getItem('vuems_name'),
 });
 // 切换分类
 const switchCategory = (categoryId) => {
   activeCategory.value = categoryId;
   // 切换分类时可以清空搜索关键词
-  searchKeyword.value = '';
+  const as = tableData.value.filter((item) => {
+    return (
+      item.type.includes(selectedTaskType.value) &&
+      item.extension_fields.dataset_format === categoryId
+    );
+  });
+  filteredDatasets.value = as.map((item) => {
+    return { id: item.id, name: item.name };
+  });
 };
 
-// 处理数据集选择
+function handleChange(label) {
+  radio1.value = String(label);
+}
+// 处理多选框数据集选择
 const handleDatasetSelect = (datasetId) => {
-  // 这里可以添加其他逻辑，如更新到store等
+  emit('emitIds', [...selectedDatasets.value]);
 };
 
-// 计算当前分类的数据集
-const currentDatasets = computed(() => {
-  if (props.currentStep === 1) {
-    placeholders.value = '数据集';
-    return allDatasets[activeCategory.value] || [];
-  } else if (props.currentStep === 2) {
-    // activeCategory.value = 'h2';
-    placeholders.value = '模型';
-    categories.value = [
-      { id: 'h1', name: '填空类' },
-      { id: 'h2', name: '应用类' },
-    ];
-    return allModelsets[activeCategory.value] || [];
-  } else if (props.currentStep === 3) {
-    // activeCategory.value = 'h2';
-    placeholders.value = '评估指标选择';
-    categories.value = [
-      { id: 'h3', name: '其他' },
-      { id: 'h4', name: '现有' },
-    ];
-    return allMetrics[activeCategory.value] || [];
-  } else if (props.currentStep === 4) {
-    // activeCategory.value = 'h2';
-    placeholders.value = '裁觉模型确认';
-    categories.value = [
-      { id: 'h5', name: '模型裁觉1' },
-      { id: 'h6', name: '模型裁觉2' },
-    ];
-    return allModelConfig[activeCategory.value] || [];
+function handleBlur(event) {
+  emit('taskName', taskName.value);
+}
+
+// 获取数据集列表
+function getDatasetsList() {
+  getDatasets(paramsObj).then((res) => {
+    if (res && res.data) {
+      tableData.value = res.data.datasets;
+    }
+  });
+}
+
+function getJudgeModelsList() {
+  getJudgeModels().then((res) => {
+    judgeModelName.value = res.data.judge_models.map((item) => ({
+      id: item.id,
+      name: item.name,
+    }));
+  });
+}
+
+// 获取指标列表
+function getCustomIndicatorsList() {
+  getindicators().then((res) => {
+    customIndicators.value = res.data.metrics;
+    filterCustomIndicators.value = customIndicators?.value.map((item) => ({
+      id: item.id,
+      name: item.name + '-' + item.chinese_name,
+    }));
+  });
+}
+
+// 模型列表
+async function getModelLists() {
+  const res = await getModelList(paramsObj);
+  if (res && res.data) {
+    modalTableData.value = res.data.models;
   }
+  const ms = modalTableData.value.filter((item) => {
+    return item.type.includes(selectedTaskType.value);
+  });
+  filtereModal.value = ms.map((item) => {
+    return { id: item.id, name: item.name };
+  });
+}
+
+function getDatasetTypes() {
+  getDatasetType().then((res) => {
+    datasetParent.value = res.data;
+    const keys = Object.keys(res.data);
+    let childtypes = [];
+    if (selectedTaskType.value === '文本') {
+      childtypes = 'text';
+    } else if (selectedTaskType.value === '多模态') {
+      childtypes = 'multimodal';
+    } else if (selectedTaskType.value === '视觉') {
+      childtypes = 'vision';
+    } else if (selectedTaskType.value === '时序') {
+      childtypes = 'temporal';
+    } else {
+      childtypes = 'safety';
+    }
+    categories.value = datasetParent.value[childtypes].map((item) => ({
+      id: Object.keys(item).join(''),
+      name: Object.values(item).join(''),
+    }));
+  });
+}
+
+// const allCheckedIds = computed(() => [...selectedDatasets.value]);
+
+function getModelTypes() {
+  getModelType()
+    .then((res) => {
+      const keys = Object.keys(res.data);
+      selectOptions.value = keys.map((item) => ({
+        value:
+          item === 'text'
+            ? '文本'
+            : item === 'multimodal'
+            ? '多模态'
+            : item === 'vision'
+            ? '视觉'
+            : item === 'temporal'
+            ? '时序'
+            : '安全',
+        label:
+          item === 'text'
+            ? '文本'
+            : item === 'multimodal'
+            ? '多模态'
+            : item === 'vision'
+            ? '视觉'
+            : item === 'temporal'
+            ? '时序'
+            : '安全',
+      }));
+    })
+    .catch((err) => {});
+}
+
+onMounted(() => {
+  getDatasetsList();
+  getDatasetTypes();
+  getModelLists();
+  getModelTypes();
+  getCustomIndicatorsList();
+  getJudgeModelsList();
 });
-
-// 计算过滤后的数据集
-const filteredDatasets = computed(() => {
-  if (!searchKeyword.value.trim()) {
-    return currentDatasets.value;
-  }
-
-  const keyword = searchKeyword.value.toLowerCase();
-  return currentDatasets.value.filter(
-    (dataset) =>
-      dataset.name.toLowerCase().includes(keyword) ||
-      dataset.code.toLowerCase().includes(keyword),
-  );
-});
-
-// // 获取选中数据集的详细信息
-// const selectedDatasetDetails = computed(() => {
-//   return currentDatasets.value.filter((dataset) =>
-//     selectedDatasets.value.includes(dataset.id),
-//   );
-// });
 </script>
 
 <style lang="less" scoped>
@@ -297,7 +301,7 @@ const filteredDatasets = computed(() => {
   margin-bottom: 30px;
 
   .search-input {
-    width: 300px;
+    width: 200px;
   }
 }
 

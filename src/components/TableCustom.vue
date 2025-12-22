@@ -71,6 +71,14 @@
                 <el-button
                   type="primary"
                   size="small"
+                  @click="setDefaultFn(row)"
+                  v-if="isShowDefault"
+                >
+                  设置为默认版本
+                </el-button>
+                <el-button
+                  type="primary"
+                  size="small"
                   :icon="Link"
                   @click="seeTestConnection(row)"
                   v-if="isShowTest"
@@ -107,42 +115,6 @@
                   编辑
                 </el-button>
                 <el-button
-                  type="warning"
-                  size="small"
-                  @click="stopFunc(row)"
-                  v-if="isShowStop"
-                >
-                  停止
-                </el-button>
-                <el-button
-                  type="primary"
-                  size="small"
-                  :icon="Download"
-                  @click="handleResult(row)"
-                  v-if="isShowResult"
-                >
-                  结果
-                </el-button>
-                <el-button
-                  type="danger"
-                  size="small"
-                  :icon="Download"
-                  @click="handleReport(row)"
-                  v-if="isShowReport"
-                >
-                  报告
-                </el-button>
-                <el-button
-                  type="primary"
-                  plain
-                  size="small"
-                  :icon="Download"
-                  @click="handleSeeLogs(row)"
-                  v-if="isShowLog"
-                >
-                  日志
-                </el-button>
-                <el-button
                   type="danger"
                   size="small"
                   :icon="Delete"
@@ -156,9 +128,31 @@
                   plain
                   size="small"
                   :icon="Download"
-                  @click="handleDownload(row)"
+                  @click="downLoadFn(row)"
                   v-if="isShowDownload"
                 >
+                  下载
+                </el-button>
+                <ActionDropdown
+                  v-if="selectedActionScheme"
+                  :task="row"
+                  @check="handleCheck(row)"
+                  @download="downLoadFn(row)"
+                  @stop="handleStopTask(row)"
+                  @result="handleResultTask(row)"
+                  @report="handleReportTask(row)"
+                  @logs="handleViewLogs(row)"
+                />
+              </template>
+              <template v-if="item.prop == 'task_type'">
+                {{ row.evaluation_results.task_type }}
+              </template>
+              <template v-if="item.prop == 'accuracy'">
+                {{ Object.keys(row.evaluation_results.metrics).join('') }}
+              </template>
+              <template v-if="item.prop == 'evaluation_results'">
+                {{ row.evaluation_results?.metrics.accuracy }}
+                <el-button type="primary" size="small" @click="downloadResult(row)">
                   下载
                 </el-button>
               </template>
@@ -202,21 +196,17 @@ import {
   Box,
   DocumentChecked,
 } from '@element-plus/icons-vue';
-import { ElMessageBox } from 'element-plus';
+import { ElMessageBox, ElMessage } from 'element-plus';
 const emits = defineEmits([
   'setLoading',
   'sendsSelection',
   'sendsSelec',
   'changePage',
   'changeSize',
-  'downloadId',
   'versionId',
   'connectionId',
   'uploadFile',
   'runId',
-  'resultsId',
-  'reportId',
-  'logsId',
 ]);
 const loading = ref(false);
 const props = defineProps({
@@ -254,32 +244,23 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  isShowStop: {
-    type: Boolean,
-    default: false,
-  },
   isShowDownload: {
     type: Boolean,
     default: false,
   },
-  isShowResult: {
+  selectedActionScheme: {
     type: Boolean,
     default: false,
   },
-  isShowReport: {
-    type: Boolean,
-    default: false,
-  },
-  isShowLog: {
-    type: Boolean,
-    default: false,
-  },
-
   isShowUpload: {
     type: Boolean,
     default: false,
   },
   isShowVersion: {
+    type: Boolean,
+    default: false,
+  },
+  isShowDefault: {
     type: Boolean,
     default: false,
   },
@@ -323,7 +304,31 @@ const props = defineProps({
     type: Function,
     default: () => {},
   },
+  downLoadFn: {
+    type: Function,
+    default: () => {},
+  },
   stopFunc: {
+    type: Function,
+    default: () => {},
+  },
+  versionFn: {
+    type: Function,
+    default: () => {},
+  },
+  setDefaultFn: {
+    type: Function,
+    default: () => {},
+  },
+  resultFunc: {
+    type: Function,
+    default: () => {},
+  },
+  reportFunc: {
+    type: Function,
+    default: () => {},
+  },
+  logsFunc: {
     type: Function,
     default: () => {},
   },
@@ -377,6 +382,42 @@ const handleSelectChange = (selection: any) => {
   emits('sendsSelec', selection);
 };
 
+const handleCheck = (row: any) => {
+  ElMessageBox.confirm(`确定要校验数据集 "${row.name}" 吗？`, '审核数据集', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    props.checkFunc(row);
+  });
+};
+
+const handleStopTask = (task: any) => {
+  ElMessageBox.confirm(`确定要停止任务吗？`, '停止任务', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    props.stopFunc(task);
+  });
+};
+
+const handleResultTask = (task) => {
+  props.resultFunc(task);
+};
+
+const handleReportTask = (task) => {
+  props.reportFunc(task);
+};
+
+const downloadResult = (row) => {
+  props.reportFunc(row);
+};
+
+const handleViewLogs = (task) => {
+  props.logsFunc(task);
+};
+
 const handleSizeChange = (val: number) => {
   emits('changeSize', val);
 };
@@ -401,29 +442,12 @@ const handleDelete = (row: any) => {
     .catch(() => {});
 };
 
-// 下载数据集
-const handleDownload = (row: { id: any }) => {
-  emits('downloadId', row.id);
-};
-
-// 下载数据集
-const handleResult = (row: { id: any }) => {
-  emits('resultsId', row.id);
-};
-
-// 下载数据集
-const handleReport = (row: { id: any }) => {
-  emits('reportId', row.id);
-};
-
-const handleSeeLogs = (row: { id: any }) => {
-  emits('logsId', row.id);
-};
 function uploadFile(row: { id: any }) {
   emits('uploadFile', row.id);
 }
 
-function seeVersion(row: { id: any }) {
+function seeVersion(row: any) {
+  props.versionFn(row);
   emits('versionId', row.id);
 }
 

@@ -6,6 +6,7 @@
         返回
       </el-button>
     </div>
+    {{ currentStep }}
 
     <!-- 主要内容区域 -->
     <div class="main-content">
@@ -26,7 +27,11 @@
         <div v-if="currentStep === 0">
           <h2 class="section-title">选择评估任务类型</h2>
           <!-- 任务类型选项 -->
-          <el-radio-group v-model="selectedTaskType" class="task-type-options">
+          <el-radio-group
+            v-model="selectedTaskType"
+            class="task-type-options"
+            @change="handleGroupChange"
+          >
             <div v-for="type in taskTypes" :key="type.value">
               <el-radio :value="type.value" class="custom-radio">
                 <div class="task-type-content">
@@ -42,16 +47,33 @@
           </el-radio-group>
         </div>
         <div v-if="currentStep == 1">
-          <SelectChecked :currentStep="currentStep" />
+          <SelectChecked
+            :currentStep="currentStep"
+            :selectedTaskType="selectedTaskType"
+            @emitIds="getOneSelectId"
+            @taskName="getTaskName"
+          />
         </div>
         <div v-if="currentStep == 2">
-          <SelectChecked :currentStep="currentStep" />
+          <SelectChecked
+            :currentStep="currentStep"
+            :selectedTaskType="selectedTaskType"
+            @emitIds="getModelSelectId"
+          />
         </div>
         <div v-if="currentStep == 3">
-          <SelectChecked :currentStep="currentStep" />
+          <SelectChecked
+            :currentStep="currentStep"
+            :selectedTaskType="selectedTaskType"
+            @emitIds="getMetricsSelectId"
+          />
         </div>
         <div v-if="currentStep == 4">
-          <SelectChecked :currentStep="currentStep" />
+          <SelectChecked
+            :currentStep="currentStep"
+            :selectedTaskType="selectedTaskType"
+            @emitIds="getjudgeModelSelectId"
+          />
         </div>
       </div>
       <!-- 底部操作按钮 -->
@@ -64,9 +86,36 @@
         >
           上一步
         </el-button>
-        <el-button :disabled="!selectedTaskType" type="primary" @click="handleNext">
-          下一步
-        </el-button>
+        <!-- {{ !selectedTaskType || dataSetIds.length === 0 }}
+        {{ dataSetIds.length !== 0 }} -->
+        <!-- {{ currentStep }}
+        {{ buttonDisable }} -->
+        <template v-if="currentStep !== 4">
+          <el-button
+            :disabled="
+              currentStep === 0
+                ? !selectedTaskType
+                : currentStep === 1 && taskNames !== ''
+                ? dataSetIds.length === 0
+                : currentStep === 2
+                ? modelIds.length === 0
+                : metricsIds.length === 0
+            "
+            type="primary"
+            @click="handleNext"
+          >
+            下一步
+          </el-button>
+        </template>
+        <template v-if="currentStep == 4">
+          <el-button
+            type="primary"
+            :disabled="judgeModelsId.length === 0"
+            @click="handlCreate"
+          >
+            开始创建
+          </el-button>
+        </template>
       </div>
     </div>
   </div>
@@ -74,9 +123,15 @@
 
 <script setup>
 import { ref, computed, shallowRef, onMounted } from 'vue';
-import { ArrowLeft, Document, Camera, Clock, Box } from '@element-plus/icons-vue';
+import { ArrowLeft, Document, Camera, View, Clock, Box } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { createTaskslist } from '@/api';
+const dataSetIds = ref([]);
+const modelIds = ref([]);
+const metricsIds = ref([]);
+const judgeModelsId = ref([]);
+const taskNames = ref('');
 const router = useRouter();
 // 步骤数据
 const steps = ref([
@@ -90,35 +145,35 @@ const steps = ref([
 // 任务类型数据
 const taskTypes = shallowRef([
   {
-    value: 'text',
+    value: '文本',
     label: '文本评估',
     icon: Document,
     type: 'NLP',
     tagType: 'primary',
   },
   {
-    value: 'multimodal',
+    value: '多模态',
     label: '多模态评估',
     icon: Box,
     type: '多模态',
     tagType: 'success',
   },
   {
-    value: 'vision',
+    value: '视觉',
     label: '视觉评估',
-    icon: Camera,
+    icon: View,
     type: 'CV',
     tagType: 'warning',
   },
   {
-    value: 'security',
+    value: '安全',
     label: '安全评估',
     icon: Camera,
     type: '安全',
     tagType: 'danger',
   },
   {
-    value: 'temporal',
+    value: '时序',
     label: '时序评估',
     icon: Clock,
     type: '时序',
@@ -128,7 +183,7 @@ const taskTypes = shallowRef([
 
 // 响应式数据
 const currentStep = ref(0);
-const selectedTaskType = ref('text');
+const selectedTaskType = ref('文本');
 
 // 计算属性
 const selectedTask = computed(() => {
@@ -143,14 +198,61 @@ function handleBack() {
   router.back();
 }
 
+function getOneSelectId(id) {
+  dataSetIds.value = id;
+  localStorage.setItem('dataset_id', dataSetIds.value);
+}
+
+function getTaskName(taskName) {
+  taskNames.value = taskName;
+  localStorage.setItem('name', taskNames.value);
+}
+
+function getModelSelectId(id) {
+  modelIds.value = id;
+  localStorage.setItem('model_id', modelIds.value);
+}
+
+function getMetricsSelectId(id) {
+  metricsIds.value = id;
+  localStorage.setItem('indicator_ids', JSON.stringify(metricsIds.value));
+}
+
+function getjudgeModelSelectId(id) {
+  judgeModelsId.value = id;
+  localStorage.setItem('judge_model_id', judgeModelsId.value);
+}
+
+const handleGroupChange = (value) => {
+  selectedTaskType.value = value;
+};
+
 function handleNext() {
   const a = steps.value.find((item) => {
-    return item.id === currentStep.value+2;
-  }).title;
-  ElMessage.success(`已选择${a}`);
+    return item.id === currentStep.value + 2;
+  })?.title;
   currentStep.value += 1;
 }
 
+function handlCreate() {
+  const datasetId = localStorage.getItem('dataset_id');
+  const modelIds = localStorage.getItem('model_id');
+  const metricsId = JSON.parse(localStorage.getItem('indicator_ids'));
+  const judgeModelsId = localStorage.getItem('judge_model_id');
+  const paramData = {
+    dataset_id: datasetId,
+    model_id: modelIds,
+    indicator_ids: metricsId,
+    name: localStorage.getItem('name'),
+    user_name: localStorage.getItem('vuems_name'),
+    judge_model_id: judgeModelsId,
+  };
+  createTaskslist(paramData).then((res) => {
+    if (res && res.data?.message) {
+      ElMessage.success(res.data?.message);
+    }
+  });
+}
 function handlPrevius() {
   currentStep.value -= 1;
 }

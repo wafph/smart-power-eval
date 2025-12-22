@@ -3,9 +3,7 @@
     <h2>评估指标选择</h2>
     <p>配置评估指标，构建指标体系，支持特定场景的评估需求</p>
     <div class="metrics-content">
-      <CustomIndicator
-        :indicators="customIndicators"
-      />
+      <CustomIndicator :indicators="customIndicators" />
     </div>
   </div>
 </template>
@@ -14,36 +12,10 @@
 import { ref, onMounted } from 'vue';
 import { getindicators } from '@/api';
 // 自定义指标数据
-const customIndicators = ref([
-  {
-    id: 1,
-    name: '均方误差(MSE)',
-    description: '衡量预测值与真实值之间的平均平方差',
-    weight: 30,
-    type: '11',
-    checked: true,
-  },
-  {
-    id: 2,
-    name: '平均绝对误差(MAE)',
-    description: '衡量预测值与真实值之间的平均绝对差',
-    weight: 20,
-    type: '112',
-    checked: true,
-  },
-  {
-    id: 3,
-    name: '均方根误差(RMSE)',
-    description: '衡量预测值与真实值之间的平方根误差',
-    weight: 10,
-    type: '113',
-    checked: true,
-  },
-]);
+const customIndicators = ref([]);
 
 onMounted(() => {
   getindicators().then((res: any) => {
-    console.log(res);
     customIndicators.value = res.data.metrics;
   });
 });

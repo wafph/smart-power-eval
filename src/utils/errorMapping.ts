@@ -25,10 +25,14 @@ const businessErrorMap = {
 }
 const errorMessageMap = {
   'Network Error': '网络错误，请检查网络连接',
+  'Request failed with status code 400': '请求参数错误',
   'Request failed with status code 401': '未授权，请重新登录',
-  'Request failed with status code 403': '拒绝访问',
+  'Request failed with status code 403': '拒绝访问，权限不足',
   'Request failed with status code 404': '请求的资源不存在',
+  'Request failed with status code 405': '请求方法不允许',
   'Request failed with status code 500': '服务器内部错误',
+  'Request failed with status code 502': '网关错误',
+  'Request failed with status code 503': '服务不可用',
   'Only running or pending tasks can be stopped': '只有运行中的任务才可以停止',
   'Task not completed': '任务没有完成',
   'Report file not found': '报告文件没找到'

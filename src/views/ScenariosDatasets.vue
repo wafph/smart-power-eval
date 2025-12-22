@@ -10,18 +10,7 @@
               <el-input v-model="form.name" placeholder="搜索数据集名称" />
             </el-form-item>
             <el-form-item label="应用场景">
-              <el-select
-                clearable
-                filterable
-                @clear="handleScenarioClear"
-                allow-create
-                v-model="form.scenario"
-                placeholder="应用场景"
-              >
-                <el-option label="场景1" value="场景1" />
-                <el-option label="场景2" value="场景2" />
-                <el-option label="场景3" value="场景3" />
-              </el-select>
+              <el-input v-model="form.scenario" placeholder="搜索应用场景" />
             </el-form-item>
             <el-form-item label="数据集类型">
               <el-select
@@ -45,9 +34,9 @@
               <el-select
                 clearable
                 filterable
-                @clear="handleTypeClear"
+                @clear="handleChildTypeClear"
                 allow-create
-                v-model="form.childType"
+                v-model="form.dataset_format"
                 placeholder="子任务类型"
               >
                 <el-option
@@ -85,16 +74,15 @@
             :layouts="'total, sizes, prev, pager, next, jumper'"
             :currentPage="paramsObj.page"
             :total="total"
+            :selectedActionScheme="true"
             @changePage="changeCurrentPage"
             @changeSize="changeSizePage"
             :viewFunc="handleView"
             :editFunc="handleEdit"
             :delFunc="handleDelete"
             :checkFunc="handleCheck"
-            :isShowCheck="true"
             :isShowEdit="isShowEdit"
-            :isShowDownload="isShowDownload"
-            @downloadId="downloadDataSet"
+            :downLoadFn="getDownLoadDataSet"
             :isShowUpload="isShowUpload"
             @uploadFile="getFileInfo"
           ></TableCustom>
@@ -127,7 +115,7 @@
           @close="closeDialog"
           draggable
         >
-          <FileUpload @uploading="getLoading" />
+          <FileUpload @uploading="getLoading" :getFileIds="fileId" />
         </el-dialog>
         <DirectoryPreview
           :dialogVisible="isVisable"
@@ -141,6 +129,7 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { FormOption } from '@/types/form-option';
+import { useState } from '@/utils/state';
 import {
   getDatasets,
   addDataSets,
@@ -152,6 +141,7 @@ import {
   getDataSetlist,
   getDatasetType,
 } from '@/api';
+const { setCurrentTestTask } = useState();
 import { ElMessage } from 'element-plus';
 import DirectoryPreview from '@/components/DirectoryViewer/DirectoryViewer.vue';
 const tableData = ref([]);
@@ -162,19 +152,18 @@ const isVisable = ref(false);
 const fileUploadVisible = ref(false);
 const isShowEdit = ref(true);
 const isUpdate = ref(false);
-const isShowDownload = ref(true);
 const isShowUpload = ref(true);
 const directoryData = ref([]);
 const selectOptions = ref([]);
 const childOptions = ref([]);
 const total = ref(0);
+const fileId = ref(2);
 const datasetParent = ref({});
-const errMsg = ref('');
 const form = reactive({
   name: '', // 数据集名称
   scenario: '', //应用场景
   type: '', //数据集类型
-  childType: '', //子任务类型
+  dataset_format: '', //子任务类型
   status: '', //数据集状态
 });
 
@@ -202,8 +191,6 @@ let dialogOptions = ref<FormOption>({
       placeholder: '子任务类型',
     },
     { type: 'input', label: '样本数量', prop: 'sample_count', required: true },
-    { type: 'input', label: '上传类型', prop: 'upload_type', required: false },
-    { type: 'input', label: '数据集格式', prop: 'dataset_format', required: true },
   ],
 });
 // 表格相关
@@ -215,12 +202,8 @@ let columns = ref([
   { prop: 'is_preset', label: '是否预制数据集' },
   { prop: 'status', label: '状态' },
   { prop: 'created_at', label: '创建时间' },
-  { prop: 'operator', label: '操作', width: 480 },
+  { prop: 'operator', label: '操作', width: 400 },
 ]);
-
-function handleScenarioClear() {
-  form.scenario = '';
-}
 
 function handleStatusClear() {
   form.status = '';
@@ -228,6 +211,9 @@ function handleStatusClear() {
 
 function handleTypeClear() {
   form.type = '';
+}
+function handleChildTypeClear() {
+  form.dataset_format = '';
 }
 
 const addDataSet = () => {
@@ -250,7 +236,7 @@ const handleEdit = (row: any) => {
 const handleCheck = (row: {}) => {
   const params = { review_status: 'approved', review_comment: '审核通过' };
   auditDataset(row.id, params).then((res) => {
-     ElMessage.success(`审核数据集${row.name}成功`);
+    ElMessage.success(`审核数据集${row.name}成功`);
   });
 };
 
@@ -272,19 +258,34 @@ const handleView = (row: {}) => {
   isVisable.value = true;
 };
 
-const downloadDataSet = (id) => {
-  window.open(`/rest/api4/api/datasets/${id}/download`, '_blank');
+onMounted(() => {
+  setCurrentTestTask(false);
+});
+const getDownLoadDataSet = (row: any) => {
+  window.open(`/rest/api4/api/datasets/${row.id}/download`, '_blank');
+  // downLoadDataset(row.id).then((response: any) => {
+  //   ElMessage.success('下载数据集成功');
+  //   const blob = new Blob([response.data], { type: 'application/octet-stream' });
+  //   const link = document.createElement('a');
+  //   link.href = window.URL.createObjectURL(blob);
+  //   link.download = '测试文件.json';
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  //   window.URL.revokeObjectURL(link.href);
+  // });
 };
 
-function getFileInfo(info) {
+function getFileInfo(id) {
+  fileId.value = id;
   fileUploadVisible.value = true;
 }
 
-function getLoading(isloading) {
+function getLoading(isloading: boolean) {
   fileUploadVisible.value = isloading;
 }
 
-const handleDelete = (row) => {
+const handleDelete = (row: any) => {
   deleteDatasetDetail(row.id).then((res) => {
     ElMessage.success(`删除数据集${row.name}成功`);
   });
@@ -296,11 +297,10 @@ const paramsObj = reactive({
   per_page: 10,
   type: 'all',
   status: 'all',
-  is_preset: 'all',
   username: localStorage.getItem('vuems_name'),
 });
 
-// 获取数据集列表
+// 获取数据集子类
 function getDatasetTypes() {
   getDatasetType().then((res) => {
     datasetParent.value = res.data;
@@ -332,7 +332,6 @@ function getDatasetTypes() {
 
 // 创建/更新数据集
 function getChildDatas(val) {
-  // addParams.value = val;
   loading.value = true;
   if (isUpdate.value) {
     // 更新数据集
@@ -362,20 +361,16 @@ function getChildDatas(val) {
       scenario: val.scenario,
       sample_count: val.sample_count,
       type: val.type,
-      username: 'admin',
-      dataset_format: 'mcq',
+      username: localStorage.getItem('vuems_name'),
+      dataset_format: val.dataset_format,
     };
 
-    addDataSets(params)
-      .then((res) => {
-        visible.value = false;
-        loading.value = false;
-        ElMessage.success(`添加数据集${val.name}成功`);
-        getDatasetsLIst();
-      })
-      .catch((err) => {
-        ElMessage.error(`添加数据集失败`);
-      });
+    addDataSets(params).then((res) => {
+      visible.value = false;
+      loading.value = false;
+      ElMessage.success(`添加数据集${val.name}成功`);
+      getDatasetsLIst();
+    });
   }
 }
 
@@ -386,7 +381,6 @@ function changeCurrentPage(val: number) {
 
 function changeSizePage(val: number) {
   paramsObj.per_page = val;
-  // paramsObj.page = val;
   getDatasetsLIst();
 }
 
@@ -402,21 +396,15 @@ onMounted(() => {
 
 // 获取数据集列表
 function getDatasetsLIst() {
-  getDatasets(paramsObj)
-    .then((res) => {
-      if (res && res.data) {
-        tableData.value = res.data.datasets;
-        res.data.datasets.forEach((item) => {
-          const endIndex = item.created_at.indexOf('T');
-          item.created_at = item.created_at.substring(0, endIndex);
-          item.is_preset = item.is_preset ? '是' : '否';
-        });
-        total.value = res.data.total;
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(`修改数据集失败`);
-    });
+  getDatasets(paramsObj).then((res: any) => {
+    if (res && res.data) {
+      tableData.value = res.data.datasets;
+      res.data.datasets.forEach((item: any) => {
+        item.is_preset = item.is_preset ? '是' : '否';
+      });
+      total.value = res.data.total;
+    }
+  });
 }
 
 const tableDataFilter = computed(() => {
@@ -427,11 +415,14 @@ const tableDataFilter = computed(() => {
       .toLowerCase()
       .includes(form.scenario?.toLowerCase());
     const typeFilter = item.type.toLowerCase().includes(form.type?.toLowerCase());
+    const datasetFormatFilter = item.extension_fields.dataset_format
+      .toLowerCase()
+      .includes(form.dataset_format?.toLowerCase());
     const statusFilter = item.status.toLowerCase().includes(form.status?.toLowerCase());
-    // const three = namefilter && typeFilter && accountFilter;
-    return namefilter && scenariofilter && typeFilter && statusFilter;
+    return (
+      namefilter && datasetFormatFilter && scenariofilter && typeFilter && statusFilter
+    );
   });
-  total.value = filters?.length;
   return filters;
 });
 

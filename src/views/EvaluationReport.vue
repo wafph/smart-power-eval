@@ -5,11 +5,14 @@
       <InfoSection :model-info="modelInfo" />
       <div class="bottom-box">
         <div class="table-content">
+          <p>详细评测结果</p>
           <TableCustom
             :columns="columns"
             :hasPagination="false"
+            :reportFunc="getReportTask"
             :tableData="tableData"
-          ></TableCustom>
+          >
+          </TableCustom>
         </div>
       </div>
     </div>
@@ -17,7 +20,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue';
-import { getTasksResults, getTasksReport } from '@/api';
+import { getTasksResults, getTasksReport, downloadFile } from '@/api';
 import type { ModelInfo } from './types/indicator';
 import { ElMessage } from 'element-plus';
 const tableData = ref([]);
@@ -30,34 +33,46 @@ const modelInfo = reactive<ModelInfo>({
 
 // 表格相关
 let columns = ref([
-  { type: 'index', label: '序号', width: 55, align: 'center' },
-  { prop: 'task_name', label: '数据集' },
-  { prop: 'model_name', label: '任务类型' },
-  { prop: 'dataset_name', label: '模型' },
-  { prop: 'metrics_names', label: '指标' },
-  { prop: 'task_status', label: '结果' },
+  { prop: 'dataset_name', label: '数据集' },
+  { prop: 'task_type', label: '任务类型' },
+  { prop: 'model_name', label: '模型' },
+  { prop: 'accuracy', label: '指标' },
+  { prop: 'evaluation_results', label: '结果' },
 ]);
 
 onMounted(() => {
   getTasksResultsList();
-  getTasksReports();
+  // getTasksReports();
 });
 
 // 获取评测任务结果
 function getTasksResultsList() {
-  getTasksResults(states.id).then((res) => {
-    console.log(res);
+  getTasksResults(states.id).then((res: any) => {
     if (res.data) {
+      tableData.value.push(res.data);
       ElMessage.success('获取评测结果成功');
     }
   });
 }
 
+function getReportTask() {
+  // window.open(`rest/api4/api/tasks/${states.id}/report`);
+  getTasksReports();
+}
+
 function getTasksReports() {
-  getTasksReport(states.id).then((res) => {
-    if (res.data) {
-      ElMessage.success('获取任务报告成功');
-    }
+  getTasksReport(states.id).then((response: any) => {
+    ElMessage.success('获取任务报告成功');
+    // const blob = new Blob([response.data], { type: response.headers['content-type'] });
+    // const blob = new Blob([response.data], { type: 'application/octet-stream' });
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    // link.download = '测试文件.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(link.href);
   });
 }
 </script>

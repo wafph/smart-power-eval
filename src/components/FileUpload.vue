@@ -15,7 +15,6 @@
       <template #trigger>
         <el-button type="primary">选择文件</el-button>
       </template>
-
       <el-button
         type="success"
         plain
@@ -31,16 +30,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, toRefs } from 'vue';
 import { ElMessage } from 'element-plus';
-
+const props = defineProps(['getFileIds']);
+const { getFileIds } = toRefs(props);
 // 响应式数据
 const uploadRef = ref(null);
 const fileList = ref([]);
 const uploading = ref(false);
 const emits = defineEmits(['uploading']);
 // 上传接口地址
-const uploadUrl = ref('rest/api4/api/datasets/9/upload'); // 替换为您的实际上传接口
+const uploadUrl = ref(`rest/api4/api/datasets/${getFileIds.value}/upload`); // 替换为您的实际上传接口
 
 // 文件选择变化处理
 const handleChange = (file, files) => {

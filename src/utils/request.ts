@@ -23,7 +23,7 @@ service.interceptors.request.use(
   },
   (error: AxiosError) => {
     loadingInstance.close();
-    console.log(error);
+    console.error(error);
     return Promise.reject();
   },
 );
@@ -31,14 +31,14 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     loadingInstance.close();
-    if (response.status === 200) {
+    if (response.status === 200 || response.status === 201) {
       return response;
     } else {
       Promise.reject();
     }
   },
   (error: AxiosError) => {
-    console.log(error);
+    console.error(error);
     if (error.response) {
       const status = error.response.status;
       let errorMessage =

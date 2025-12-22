@@ -20,19 +20,16 @@
             @runId="getRunTask"
             @changePage="changeCurrentPage"
             @changeSize="changeSizePage"
-            @resultsId="getResultId"
-            @reportId="getReportId"
-            @logsId="getlogs"
             :viewFunc="handleView"
             :editFunc="handleEdit"
             :stopFunc="handelStop"
+            :resultFunc="handleResult"
+            :reportFunc="handleReport"
+            :logsFunc="getLogs"
             :delFunc="handleDelete"
+            :selectedActionScheme="true"
             :isShowDetail="isShowDetail"
             :isShowEdit="isShowEdit"
-            :isShowStop="true"
-            :isShowResult="true"
-            :isShowLog="true"
-            :isShowReport="true"
           ></TableCustom>
         </div>
         <el-dialog
@@ -67,11 +64,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, markRaw, reactive, onMounted, onUnmounted } from 'vue';
 import { FormOption } from '@/types/form-option';
 import { useRouter } from 'vue-router';
 import {
-  createTaskslist,
   getTaskDetail,
   getUpdateDatasetDetail,
   deleteDatasetDetail,
@@ -79,25 +75,25 @@ import {
   stopTask,
   getTaskStatus,
   getTaskslist,
-  getTasksLogs,
 } from '@/api';
 import { useState } from '@/utils/state';
 import { ElMessage } from 'element-plus';
+import { VideoPlay, CopyDocument, Download, Document } from '@element-plus/icons-vue';
 const tableData = ref([]);
 const visible = ref(false);
 const isEdit = ref(false);
 const loading = ref(false);
 const isVisable = ref(false);
-const isShowEdit = ref(true);
+const isShowEdit = ref(false);
 const isShowDetail = ref(true);
 const isUpdate = ref(false);
 const tasklDetailVisible = ref(false);
 const taskId = ref<number>();
-const { setCurrentId } = useState();
+const { setCurrentId, setCurrentTestTask, setCurrentActions } = useState();
 const currentStatus = ref('');
 let pollTimer: string | number | NodeJS.Timeout | null | undefined = null;
-const POLL_INTERVAL = 2000; // 2秒轮询一次
-const MAX_POLL_COUNT = 300; // 最多轮询5分钟 (300 * 2秒 = 10分钟)
+const POLL_INTERVAL = 5000; // 5秒轮询一次
+const MAX_POLL_COUNT = 120; // 最多轮询5分钟 (300 * 5秒 = 10分钟=600秒)
 const isPolling = ref(false);
 const viewData = ref({
   row: {},
@@ -121,12 +117,12 @@ let dialogOptions = ref<FormOption>({
 let columns = ref([
   { type: 'index', label: '序号', width: 55, align: 'center' },
   { prop: 'task_name', label: '任务名称' },
-  { prop: 'model_name', label: '评测评测任务' },
-  { prop: 'dataset_name', label: '评测评测任务' },
+  { prop: 'model_name', label: '模型名称' },
+  { prop: 'dataset_name', label: '数据集名称' },
   { prop: 'metrics_names', label: '评估指标' },
   { prop: 'last_run_time', label: '最后运行时间' },
   { prop: 'task_status', label: '评测状态' },
-  { prop: 'operator', label: '操作', width: 620 },
+  { prop: 'operator', label: '操作', width: 340 },
 ]);
 
 const addTask = () => {
@@ -144,23 +140,23 @@ async function getRunTask(id: number) {
     // 2. 开始轮询状态
     startPollingStatus(id);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 }
 
-function getResultId(task_id: number) {
-  setCurrentId(task_id);
+function handleResult(row: any) {
+  setCurrentId(row.id);
   router.push('/evaluation-report');
 }
 
-function getReportId(task_id: number) {
-  setCurrentId(task_id);
+function handleReport(row: any) {
+  setCurrentId(row.id);
   router.push('/evaluation-report');
 }
 
-function getlogs(task_id: number) {
-  setCurrentId(task_id);
-  router.push('/evaluation-report2');
+function getLogs(row: any) {
+  setCurrentId(row.id);
+  router.push('/evaluation-logs');
 }
 // 获取状态
 const fetchInitialStatus = async (taskId: number) => {
@@ -225,7 +221,7 @@ function handleEdit(row: any) {
 function handelStop(row) {
   stopTask(row.id)
     .then((res) => {
-      console.log(res);
+      stopPolling();
     })
     .catch((err) => {});
 }
@@ -234,7 +230,6 @@ const handleView = (row) => {
   tasklDetailVisible.value = true;
   getTaskDetail(row.id).then((res) => {
     viewData.value.row = res.data;
-    console.log(res.data);
   });
   viewData.value.list = [
     {
@@ -281,7 +276,6 @@ const handleView = (row) => {
 };
 
 const handleDelete = (row) => {
-  console.log(row.id);
   deleteDatasetDetail(row.id).then((res) => {
     ElMessage.success(`删除评测任务${row.name}成功`);
   });
@@ -297,37 +291,10 @@ const paramsObj = reactive({
   username: localStorage.getItem('vuems_name'),
 });
 
-// 将字符串数字变为数字
-function convertValuesToNumbers(obj, exceptions = []) {
-  return Object.keys(obj).reduce((result, key) => {
-    const value = obj[key];
-
-    // 如果是例外字段，保持原样
-    if (exceptions.includes(key)) {
-      result[key] = value;
-      return result;
-    }
-
-    // 尝试转换为数字
-    const num = Number(value);
-
-    // 检查是否是有效数字（排除 NaN, Infinity）
-    if (!isNaN(num) && isFinite(value) && value !== '') {
-      result[key] = num;
-    } else {
-      result[key] = value;
-    }
-
-    return result;
-  }, {});
-}
-
 // 创建/更新评测任务
 function getChildDatas(val) {
-  loading.value = true;
-  console.log(val.id);
+  loading.value = true;;
   val.user_name = 'admin';
-  const strToNumber = convertValuesToNumbers(val, ['name', 'user_name']);
   if (isUpdate.value) {
     // 更新评测任务
     getUpdateDatasetDetail(val.id, {
@@ -340,25 +307,11 @@ function getChildDatas(val) {
       description: val.description,
     })
       .then((res) => {
-        console.log(res);
         getTaskslists();
         ElMessage.success('修改任务列表信息成功');
         visible.value = false;
         loading.value = false;
         isUpdate.value = false;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  } else {
-    // 新建评测任务
-    createTaskslist(strToNumber)
-      .then((res) => {
-        console.log(res);
-        visible.value = false;
-        loading.value = false;
-        ElMessage.success(`新建评测任务${val.name}成功`);
-        getTaskslists();
       })
       .catch((err) => {
         console.error(err);
@@ -373,7 +326,6 @@ function changeCurrentPage(val: number) {
 
 function changeSizePage(val: number) {
   paramsObj.per_page = val;
-  // paramsObj.page = val;
   getTaskslists();
 }
 
@@ -384,20 +336,14 @@ const closeDialog = () => {
 
 onMounted(() => {
   getTaskslists();
+  setCurrentTestTask(true);
+  setCurrentActions([
+    { command: 'stop', label: '停止', icon: markRaw(CopyDocument) },
+    { command: 'result', label: '结果', icon: markRaw(Download) },
+    { command: 'report', label: '报告', icon: markRaw(VideoPlay) },
+    { command: 'logs', label: '日志', icon: markRaw(Document) },
+  ]);
 });
-
-// 页码改变事件
-// const handleCurrentChange = (page) => {
-//   ElMessage.info(`当前页切换至：第 ${page} 页`)
-//   // 实际项目中可在此处重新请求接口获取对应页数据
-// }
-
-// // 每页条数改变事件
-// const handleSizeChange = (size) => {
-//   ElMessage.info(`每页显示条数切换至：${size} 条`)
-//   currentPage.value = 1 // 切换页大小时重置为第1页
-//   // 实际项目中可在此处重新请求接口获取对应页数据
-// }
 
 // 获取评测任务列表
 function getTaskslists() {
@@ -410,13 +356,6 @@ function getTaskslists() {
     }
   });
 }
-
-// 处理后的表格数据（分页）
-// const tableData = computed(() => {
-//   const start = (currentPage.value - 1) * pageSize.value;
-//   const end = start + pageSize.value;
-//   return rawData.tasks.slice(start, end);
-// });
 </script>
 
 <style lang="less" scoped>
