@@ -245,7 +245,6 @@ const handleView = (row: any) => {
 };
 // 查看模型版本
 const handleViewVersion = (row: any) => {
-  debugger;
   viewData.value.row = { ...row };
   // 此处1应该是模型id
   getModelVersionDetail(modelId.value, row.id).then((res) => {
@@ -607,19 +606,12 @@ function getModelTypes() {
 }
 
 async function getModelLists() {
-  loading.value = true;
-  try {
-    const res = await getModelList(paramsObj);
-    if (res && res.data) {
-      tableData.value = res.data.models;
-      total.value = res.data.total;
-    } else {
-      // 处理响应数据为空的情况
-      console.warn('响应数据为空');
-    }
-  } catch (error) {
-  } finally {
-    loading.value = false;
+  const res = await getModelList({ username: localStorage.getItem('vuems_name') });
+  if (res && res.data) {
+    const start = (paramsObj.page - 1) * paramsObj.per_page;
+    const end = start + paramsObj.per_page;
+    tableData.value = res.data.models.slice(start, end);
+    total.value = res.data.total;
   }
 }
 

@@ -22,7 +22,6 @@
             v-model="form[item.prop]"
             :disabled="item.disabled"
             :placeholder="'请选择' + item.label"
-            clearable
             @change="handleDatasetChange(form[item.prop])"
           >
             <el-option

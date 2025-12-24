@@ -5,7 +5,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 import { ElLoading, ElMessage } from 'element-plus';
-import { HTTP_ERRORS, errorMessageMap } from '@/utils/errorMapping';
+import { HTTP_ERRORS, responseMessageMap, errorMessageMap } from '@/utils/errorMapping';
 const service: AxiosInstance = axios.create({
   timeout: 5000,
 });
@@ -31,7 +31,14 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     loadingInstance.close();
+    console.log(response);
     if (response.status === 200 || response.status === 201) {
+      // let resMessage = response.data.message;
+      // if (resMessage) {
+      //   resMessage = responseMessageMap[resMessage];
+      //   ElMessage.success(resMessage);
+      // }
+      // return resMessage || response;
       return response;
     } else {
       Promise.reject();

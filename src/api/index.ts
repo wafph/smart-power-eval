@@ -236,6 +236,13 @@ export const createTaskslist = (params: any) => {
   });
 };
 
+export const deleteTask = (id: number) => {
+  return request({
+    url: `rest/api4/api/tasks/${id}`,
+    method: 'delete',
+  });
+};
+
 //创建评测任务
 export const getTaskDetail = (id: any) => {
   return request({

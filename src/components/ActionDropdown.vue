@@ -15,6 +15,7 @@
           :command="action.command"
           :divided="action.divided"
           :icon="action.icon"
+          :disabled="action.disabled"
         >
           {{ action.label }}
         </el-dropdown-item>
@@ -37,6 +38,10 @@ const props = defineProps({
   isTestTask: {
     type: Boolean,
     default: true,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
 });
 

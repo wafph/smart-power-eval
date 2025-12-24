@@ -6,8 +6,6 @@
         返回
       </el-button>
     </div>
-    {{ currentStep }}
-
     <!-- 主要内容区域 -->
     <div class="main-content">
       <!-- 步骤进度条 -->
@@ -25,6 +23,29 @@
       <!-- 任务类型选择区域 -->
       <div class="task-type-section">
         <div v-if="currentStep === 0">
+          <div class="search-section">
+            <!-- 任务名称：
+            <el-input
+              v-model="taskName"
+              :placeholder="placeholders"
+              clearable
+              class="search-input"
+              @blur="handleBlur"
+            >
+            </el-input> -->
+            <el-form
+              ref="ruleFormRef"
+              
+              :model="ruleForm"
+              status-icon
+              :rules="rules"
+              label-width="auto"
+            >
+              <el-form-item label="任务名称："prop="taskName">
+                <el-input class="search-input" v-model="ruleForm.taskName" type="text" autocomplete="off" />
+              </el-form-item>
+            </el-form>
+          </div>
           <h2 class="section-title">选择评估任务类型</h2>
           <!-- 任务类型选项 -->
           <el-radio-group
@@ -51,7 +72,6 @@
             :currentStep="currentStep"
             :selectedTaskType="selectedTaskType"
             @emitIds="getOneSelectId"
-            @taskName="getTaskName"
           />
         </div>
         <div v-if="currentStep == 2">
@@ -73,6 +93,7 @@
             :currentStep="currentStep"
             :selectedTaskType="selectedTaskType"
             @emitIds="getjudgeModelSelectId"
+            @radioValue="getRadioValue"
           />
         </div>
       </div>
@@ -86,16 +107,12 @@
         >
           上一步
         </el-button>
-        <!-- {{ !selectedTaskType || dataSetIds.length === 0 }}
-        {{ dataSetIds.length !== 0 }} -->
-        <!-- {{ currentStep }}
-        {{ buttonDisable }} -->
         <template v-if="currentStep !== 4">
           <el-button
             :disabled="
               currentStep === 0
-                ? !selectedTaskType
-                : currentStep === 1 && taskNames !== ''
+                ? !selectedTaskType || ruleForm.taskName === ''
+                : currentStep === 1
                 ? dataSetIds.length === 0
                 : currentStep === 2
                 ? modelIds.length === 0
@@ -110,7 +127,7 @@
         <template v-if="currentStep == 4">
           <el-button
             type="primary"
-            :disabled="judgeModelsId.length === 0"
+            :disabled="radioValue == '1' && judgeModelsId.length === 0"
             @click="handlCreate"
           >
             开始创建
@@ -121,9 +138,10 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, shallowRef, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, computed, reactive, shallowRef, onMounted } from 'vue';
 import { ArrowLeft, Document, Camera, View, Clock, Box } from '@element-plus/icons-vue';
+import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { createTaskslist } from '@/api';
@@ -131,7 +149,13 @@ const dataSetIds = ref([]);
 const modelIds = ref([]);
 const metricsIds = ref([]);
 const judgeModelsId = ref([]);
-const taskNames = ref('');
+const radioValue = ref('1');
+const ruleForm = reactive({
+  taskName: '',
+});
+const rules = reactive<FormRules>({
+  taskName: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
+});
 const router = useRouter();
 // 步骤数据
 const steps = ref([
@@ -203,14 +227,19 @@ function getOneSelectId(id) {
   localStorage.setItem('dataset_id', dataSetIds.value);
 }
 
-function getTaskName(taskName) {
-  taskNames.value = taskName;
-  localStorage.setItem('name', taskNames.value);
-}
+// function getTaskName(taskName) {
+//   taskNames.value = taskName;
+//   localStorage.setItem('name', taskNames.value);
+// }
 
 function getModelSelectId(id) {
   modelIds.value = id;
   localStorage.setItem('model_id', modelIds.value);
+}
+
+function getRadioValue(value) {
+  console.log(value);
+  radioValue.value = value;
 }
 
 function getMetricsSelectId(id) {
@@ -228,9 +257,6 @@ const handleGroupChange = (value) => {
 };
 
 function handleNext() {
-  const a = steps.value.find((item) => {
-    return item.id === currentStep.value + 2;
-  })?.title;
   currentStep.value += 1;
 }
 
@@ -243,14 +269,19 @@ function handlCreate() {
     dataset_id: datasetId,
     model_id: modelIds,
     indicator_ids: metricsId,
-    name: localStorage.getItem('name'),
+    name: ruleForm.taskName,
     user_name: localStorage.getItem('vuems_name'),
     judge_model_id: judgeModelsId,
   };
+  if (radioValue.value === '2') {
+    delete paramData.judge_model_id;
+  }
+  console.log(paramData);
   createTaskslist(paramData).then((res) => {
     if (res && res.data?.message) {
-      ElMessage.success(res.data?.message);
+      ElMessage.success('创建评测任务成功');
     }
+    router.push('/evaluation-task')
   });
 }
 function handlPrevius() {
@@ -315,6 +346,14 @@ onMounted(() => {});
             font-weight: 600;
           }
         }
+      }
+    }
+
+    .search-section {
+      margin-bottom: 30px;
+
+      .search-input {
+        width: 220px;
       }
     }
 

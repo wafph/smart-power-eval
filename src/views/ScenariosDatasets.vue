@@ -56,10 +56,9 @@
                 @clear="handleStatusClear"
                 placeholder="数据集状态"
               >
-                <el-option label="pending" value="pending" />
-                <el-option label="approved" value="approved" />
-                <el-option label="rejected" value="rejected" />
                 <el-option label="待审核" value="待审核" />
+                <el-option label="已通过" value="已通过" />
+                <el-option label="已拒绝" value="已拒绝" />
               </el-select>
             </el-form-item>
             <el-button type="primary" @click="addDataSet"> 新增数据集 </el-button>
@@ -198,6 +197,7 @@ let columns = ref([
   { type: 'index', label: '序号', width: 55, align: 'center' },
   { prop: 'name', label: '数据集名称' },
   { prop: 'type', label: '类型' },
+  // { prop: 'extension_fields', label: '子任务类型' },
   { prop: 'scenario', label: '应用场景' },
   { prop: 'is_preset', label: '是否预制数据集' },
   { prop: 'status', label: '状态' },
@@ -288,6 +288,7 @@ function getLoading(isloading: boolean) {
 const handleDelete = (row: any) => {
   deleteDatasetDetail(row.id).then((res) => {
     ElMessage.success(`删除数据集${row.name}成功`);
+    getDatasetsLIst();
   });
 };
 
@@ -396,12 +397,15 @@ onMounted(() => {
 
 // 获取数据集列表
 function getDatasetsLIst() {
-  getDatasets(paramsObj).then((res: any) => {
+  getDatasets({ username: localStorage.getItem('vuems_name') }).then((res: any) => {
     if (res && res.data) {
-      tableData.value = res.data.datasets;
-      res.data.datasets.forEach((item: any) => {
-        item.is_preset = item.is_preset ? '是' : '否';
-      });
+      // tableData.value = res.data.datasets;
+      // res.data.datasets.forEach((item: any) => {
+      //   item.is_preset = item.is_preset ? '是' : '否';
+      // });
+      const start = (paramsObj.page - 1) * paramsObj.per_page;
+      const end = start + paramsObj.per_page;
+      tableData.value = res.data.datasets.slice(start, end);
       total.value = res.data.total;
     }
   });
@@ -423,11 +427,13 @@ const tableDataFilter = computed(() => {
       namefilter && datasetFormatFilter && scenariofilter && typeFilter && statusFilter
     );
   });
+  //  total.value= filters.length;
   return filters;
 });
 
 function handleDatasetChange(e) {
   getDatasetTypes();
+  form.dataset_format = '';
   const a =
     e === '文本'
       ? 'text'
@@ -439,9 +445,11 @@ function handleDatasetChange(e) {
       ? 'temporal'
       : 'safety';
   childOptions.value = datasetParent.value[a].map((item: any) => ({
-    value: Object.keys(item).join(''),
+    value: Object.values(item).join(''),
     label: Object.values(item).join(''),
   }));
+
+  console.log(childOptions.value);
 }
 </script>
 

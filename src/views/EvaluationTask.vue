@@ -20,7 +20,7 @@
             @runId="getRunTask"
             @changePage="changeCurrentPage"
             @changeSize="changeSizePage"
-            :viewFunc="handleView"
+            :viewFunc="handleViews"
             :editFunc="handleEdit"
             :stopFunc="handelStop"
             :resultFunc="handleResult"
@@ -47,7 +47,6 @@
             :edit="isEdit"
             @saveEdit="getChildDatas"
             :update="updateData"
-            :viewFunc="handleView"
             :isSystem="true"
           />
         </el-dialog>
@@ -70,7 +69,7 @@ import { useRouter } from 'vue-router';
 import {
   getTaskDetail,
   getUpdateDatasetDetail,
-  deleteDatasetDetail,
+  deleteTask,
   runTask,
   stopTask,
   getTaskStatus,
@@ -191,6 +190,7 @@ const startPollingStatus = (taskId: number) => {
       return;
     }
 
+    getTaskslists();
     fetchInitialStatus(taskId);
   }, POLL_INTERVAL);
 };
@@ -206,6 +206,7 @@ const stopPolling = () => {
 // 组件卸载时清理
 onUnmounted(() => {
   stopPolling();
+  getTaskslists();
 });
 
 const rowData = ref({});
@@ -226,58 +227,75 @@ function handelStop(row) {
     .catch((err) => {});
 }
 
-const handleView = (row) => {
-  tasklDetailVisible.value = true;
+const handleViews = (row) => {
+  // setTimeout(() => {
+  //   tasklDetailVisible.value = true;
+  // },100);
+  // console.log(row);
   getTaskDetail(row.id).then((res) => {
     viewData.value.row = res.data;
+    if (res.data) {
+      tasklDetailVisible.value = true;
+      viewData.value.list = [
+        {
+          prop: 'task_name',
+          label: '任务名称',
+        },
+        {
+          prop: 'task_status',
+          label: '任务状态',
+        },
+        {
+          prop: 'model',
+          label: '模型',
+        },
+        {
+          prop: 'dataset',
+          label: '数据集',
+        },
+        {
+          prop: 'metrics_list',
+          label: '指标列表',
+        },
+        {
+          prop: 'last_run_time',
+          label: '最近运行时间',
+        },
+        {
+          prop: 'created_at',
+          label: '创建时间',
+        },
+        {
+          prop: 'execution_time',
+          label: '执行时间',
+        },
+        {
+          prop: 'evaluation_results',
+          label: '评测结果',
+        },
+        {
+          prop: 'use_judge_model',
+          label: '是否使用裁判评测任务',
+        },
+        {
+          prop: 'log_path',
+          label: '日志文件路径',
+        },
+        {
+          prop: 'report_path',
+          label: '报告文件路径',
+        },
+      ];
+    }
   });
-  viewData.value.list = [
-    {
-      prop: 'task_name',
-      label: '任务名称',
-    },
-    {
-      prop: 'task_status',
-      label: '任务状态',
-    },
-    {
-      prop: 'model',
-      label: '评测任务',
-    },
-    {
-      prop: 'dataset',
-      label: '评测任务',
-    },
-    {
-      prop: 'last_run_time',
-      label: '最近运行时间',
-    },
-    {
-      prop: 'execution_time',
-      label: '执行时间',
-    },
-    {
-      prop: 'evaluation_results',
-      label: '评测结果',
-    },
-    {
-      prop: 'use_judge_model',
-      label: '是否使用裁判评测任务',
-    },
-    {
-      prop: 'log_path',
-      label: '日志文件路径',
-    },
-    {
-      prop: 'created_at',
-      label: '创建时间',
-    },
-  ];
 };
 
 const handleDelete = (row) => {
-  deleteDatasetDetail(row.id).then((res) => {
-    ElMessage.success(`删除评测任务${row.name}成功`);
+  deleteTask(row.id).then((res) => {
+    if (res.data && res.data.message) {
+      ElMessage.success(`删除评测任务${row.task_name}成功`);
+      getTaskslists();
+    }
   });
 };
 
@@ -293,8 +311,8 @@ const paramsObj = reactive({
 
 // 创建/更新评测任务
 function getChildDatas(val) {
-  loading.value = true;;
-  val.user_name = 'admin';
+  loading.value = true;
+  val.user_name = localStorage.getItem('vuems_name');
   if (isUpdate.value) {
     // 更新评测任务
     getUpdateDatasetDetail(val.id, {
@@ -338,16 +356,16 @@ onMounted(() => {
   getTaskslists();
   setCurrentTestTask(true);
   setCurrentActions([
-    { command: 'stop', label: '停止', icon: markRaw(CopyDocument) },
-    { command: 'result', label: '结果', icon: markRaw(Download) },
-    { command: 'report', label: '报告', icon: markRaw(VideoPlay) },
-    { command: 'logs', label: '日志', icon: markRaw(Document) },
+    { command: 'stop', label: '停止', icon: markRaw(CopyDocument), disabled: false },
+    { command: 'result', label: '结果', icon: markRaw(Download), disabled: false },
+    { command: 'report', label: '报告', icon: markRaw(VideoPlay), disabled: false },
+    { command: 'logs', label: '日志', icon: markRaw(Document), disabled: false },
   ]);
 });
 
 // 获取评测任务列表
 function getTaskslists() {
-  getTaskslist({ username: 'admin' }).then((res) => {
+  getTaskslist({ username: localStorage.getItem('vuems_name') }).then((res) => {
     if (res && res.data) {
       const start = (paramsObj.page - 1) * paramsObj.per_page;
       const end = start + paramsObj.per_page;

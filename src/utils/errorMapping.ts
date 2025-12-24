@@ -22,7 +22,13 @@ const businessErrorMap = {
   1001: '用户已存在',
   1002: '验证码错误',
   // ... 其他业务错误码
-}
+};
+
+const responseMessageMap = {
+  'Eval system task created successfully': '评测任务创建成功',
+  'Dataset created successfully': '数据集已创建成功',
+};
+
 const errorMessageMap = {
   'Network Error': '网络错误，请检查网络连接',
   'Request failed with status code 400': '请求参数错误',
@@ -35,8 +41,8 @@ const errorMessageMap = {
   'Request failed with status code 503': '服务不可用',
   'Only running or pending tasks can be stopped': '只有运行中的任务才可以停止',
   'Task not completed': '任务没有完成',
-  'Report file not found': '报告文件没找到'
+  'Report file not found': '报告文件没找到',
   // 可以继续添加更多映射
 };
 
-export { HTTP_ERRORS, businessErrorMap, errorMessageMap };
+export { HTTP_ERRORS, businessErrorMap, responseMessageMap, errorMessageMap };

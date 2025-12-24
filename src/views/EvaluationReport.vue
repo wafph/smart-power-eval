@@ -42,7 +42,6 @@ let columns = ref([
 
 onMounted(() => {
   getTasksResultsList();
-  // getTasksReports();
 });
 
 // 获取评测任务结果
@@ -56,19 +55,15 @@ function getTasksResultsList() {
 }
 
 function getReportTask() {
-  // window.open(`rest/api4/api/tasks/${states.id}/report`);
   getTasksReports();
 }
 
 function getTasksReports() {
   getTasksReport(states.id).then((response: any) => {
     ElMessage.success('获取任务报告成功');
-    // const blob = new Blob([response.data], { type: response.headers['content-type'] });
-    // const blob = new Blob([response.data], { type: 'application/octet-stream' });
     const blob = new Blob([response.data], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
-    // link.download = '测试文件.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

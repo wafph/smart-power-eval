@@ -5,16 +5,6 @@
     <h3 class="dataset-title" v-else-if="currentStep === 2">请选择模型</h3>
     <h3 class="dataset-title" v-else-if="currentStep === 3">请选择评估指标</h3>
     <h3 class="dataset-title" v-else>请选择裁判模型</h3>
-    <div class="search-section" v-if="currentStep === 1">
-      <el-input
-        v-model="taskName"
-        :placeholder="placeholders"
-        clearable
-        class="search-input"
-        @blur="handleBlur"
-      >
-      </el-input>
-    </div>
     <!-- 主内容区域 -->
     <div class="main-contents">
       <!-- 左侧分类菜单 -->
@@ -129,7 +119,7 @@ import {
   createTaskslist,
 } from '@/api';
 const props = defineProps(['currentStep', 'selectedTaskType']);
-const emit = defineEmits(['emitIds', 'taskName']);
+const emit = defineEmits(['emitIds', 'radioValue']);
 const { currentStep, selectedTaskType } = toRefs(props);
 const placeholders = ref('请输入任务名称');
 // 分类数据
@@ -137,7 +127,6 @@ const categories = ref([]);
 const radio1 = ref('1');
 const tableData = ref([]);
 const judgeModelName = ref([]);
-const taskName = ref('');
 const customIndicators = ref([]);
 const modalTableData = ref([]);
 const filterCustomIndicators = ref([]);
@@ -174,15 +163,16 @@ const switchCategory = (categoryId) => {
 
 function handleChange(label) {
   radio1.value = String(label);
+  emit('radioValue', radio1.value);
 }
 // 处理多选框数据集选择
 const handleDatasetSelect = (datasetId) => {
   emit('emitIds', [...selectedDatasets.value]);
 };
 
-function handleBlur(event) {
-  emit('taskName', taskName.value);
-}
+// function handleBlur(event) {
+//   emit('taskName', taskName.value);
+// }
 
 // 获取数据集列表
 function getDatasetsList() {

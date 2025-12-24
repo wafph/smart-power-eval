@@ -54,6 +54,7 @@
                   size="small"
                   :icon="Box"
                   @click="seeRun(row)"
+                  :disabled="row.task_status !== 'pending'"
                   v-if="isRun"
                 >
                   运行
@@ -144,9 +145,11 @@
                   @logs="handleViewLogs(row)"
                 />
               </template>
+
               <template v-if="item.prop == 'task_type'">
                 {{ row.evaluation_results.task_type }}
               </template>
+
               <template v-if="item.prop == 'accuracy'">
                 {{ Object.keys(row.evaluation_results.metrics).join('') }}
               </template>
@@ -156,6 +159,20 @@
                   下载
                 </el-button>
               </template>
+              <template v-else-if="item.prop == 'task_status'">
+                <el-tag
+                  :type="
+                    row.task_status === 'success'
+                      ? 'success'
+                      : row.task_status === 'pending'
+                      ? 'primary'
+                      : row.task_status === 'running'
+                      ? 'warning'
+                      : 'danger'
+                  "
+                  >{{ row.task_status }}</el-tag
+                >
+              </template>
               <span v-else-if="item.formatter">
                 {{ item.formatter(row[item.prop]) }}
               </span>
@@ -164,6 +181,7 @@
               </span>
             </slot>
           </template>
+          <!-- {{ setDisabled }} -->
         </el-table-column>
       </template>
     </el-table>
@@ -184,7 +202,9 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs, PropType, ref } from 'vue';
+import { toRefs, PropType, computed, ref } from 'vue';
+import { useState } from '@/utils/state';
+const { states } = useState();
 import {
   Delete,
   Edit,
@@ -377,6 +397,19 @@ const handleSelectionChange = (selection: any[]) => {
   multipleSelection.value = selection;
   emits('sendsSelection', multipleSelection.value);
 };
+
+// const setDisabled = () => {
+//   const stopDisabled = states.actions.find((item) => {
+//     return item.command === 'stop';
+//   }).disabled;
+// };
+
+const setDisabled = computed(() => {
+  const stopDisabled = states.actions.find((item) => {
+    return item.command === 'stop';
+  }).disabled;
+  return stopDisabled;
+});
 
 const handleSelectChange = (selection: any) => {
   emits('sendsSelec', selection);
