@@ -54,7 +54,6 @@
                   size="small"
                   :icon="Box"
                   @click="seeRun(row)"
-                  :disabled="row.task_status !== 'pending'"
                   v-if="isRun"
                 >
                   运行

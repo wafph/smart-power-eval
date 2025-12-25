@@ -320,10 +320,10 @@ onMounted(() => {});
   .main-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding-top: 60px;
+    padding-top: 45px;
 
     .steps-section {
-      margin-bottom: 40px;
+      margin-bottom: 20px;
       padding: 20px;
       background: white;
       border-radius: 12px;
@@ -375,7 +375,6 @@ onMounted(() => {});
 
       .task-type-options {
         display: flex;
-        /* flex-direction: column; */
         gap: 20px;
 
         .custom-radio {

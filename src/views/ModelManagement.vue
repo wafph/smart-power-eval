@@ -17,8 +17,7 @@
             placeholder="模型状态"
           >
             <el-option label="草稿" value="草稿" />
-            <el-option label="已审核" value="已审核" />
-            <el-option label="待审核" value="待审核" />
+            <el-option label="就绪" value="就绪" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -202,46 +201,38 @@ const viewData = ref({
 
 // 查看模型获取指定模型的详细信息
 const handleView = (row: any) => {
-  modelDetailVisible.value = true;
-  viewData.value.row = { ...row };
-  getModelDetail(row.id)
-    .then((res) => {
-      const detailObj = res.data;
-      ElMessage.success(`获取${row.name}信息成功`);
-    })
-    .catch((err) => {
-      ElMessage.error(`获取${row.name}信息失败`);
-    });
-  viewData.value.list = [
-    {
-      prop: 'name',
-      label: '模型名称',
-    },
-    {
-      prop: 'type',
-      label: '模型类型',
-    },
-    {
-      prop: 'is_preset',
-      label: '是否预制模型',
-    },
-    {
-      prop: 'status',
-      label: '模型状态',
-    },
-    {
-      prop: 'description',
-      label: '模型描述',
-    },
-    // {
-    //   prop: 'service_url',
-    //   label: '服务地址',
-    // },
-    {
-      prop: 'created_at',
-      label: '创建时间',
-    },
-  ];
+  getModelDetail(row.id).then((res) => {
+    viewData.value.row = res.data;
+    if (res.data) {
+      modelDetailVisible.value = true;
+      viewData.value.list = [
+        {
+          prop: 'name',
+          label: '模型名称',
+        },
+        {
+          prop: 'type',
+          label: '模型类型',
+        },
+        {
+          prop: 'is_preset',
+          label: '是否预制模型',
+        },
+        {
+          prop: 'status',
+          label: '模型状态',
+        },
+        {
+          prop: 'description',
+          label: '模型描述',
+        },
+        {
+          prop: 'created_at',
+          label: '创建时间',
+        },
+      ];
+    }
+  });
 };
 // 查看模型版本
 const handleViewVersion = (row: any) => {
@@ -710,11 +701,9 @@ const handleClick = (tab: TabsPaneContext) => {};
 
 .form-top {
   width: 100%;
-  height: 48px;
-  margin-bottom: 50px;
   display: flex;
   justify-content: space-between;
-  m .selecct-width {
+  .selecct-width {
     width: 500px;
   }
 }
@@ -722,7 +711,6 @@ const handleClick = (tab: TabsPaneContext) => {};
 .bottom-content {
   background: #eef0fc;
   flex-direction: column;
-  margin-top: 20px;
   width: 100%;
 
   .bottom-box {

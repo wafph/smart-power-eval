@@ -16,7 +16,6 @@ service.interceptors.request.use(
     loadingInstance = ElLoading.service({
       lock: true,
       text: '加载中...',
-      // background: 'rgba(0, 0, 0, 0.5)',
       fullscreen: true,
     });
     return config;
@@ -31,14 +30,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     loadingInstance.close();
-    console.log(response);
     if (response.status === 200 || response.status === 201) {
-      // let resMessage = response.data.message;
-      // if (resMessage) {
-      //   resMessage = responseMessageMap[resMessage];
-      //   ElMessage.success(resMessage);
-      // }
-      // return resMessage || response;
       return response;
     } else {
       Promise.reject();

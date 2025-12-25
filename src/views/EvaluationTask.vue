@@ -228,10 +228,6 @@ function handelStop(row) {
 }
 
 const handleViews = (row) => {
-  // setTimeout(() => {
-  //   tasklDetailVisible.value = true;
-  // },100);
-  // console.log(row);
   getTaskDetail(row.id).then((res) => {
     viewData.value.row = res.data;
     if (res.data) {
@@ -381,8 +377,8 @@ function getTaskslists() {
   background: #f3f4f6;
 
   p {
-    margin-top: 15px;
-    margin-bottom: 25px;
+    margin-top: 10px;
+    margin-bottom: 15px;
     font-size: 20px;
     font-weight: 600;
     color: #717b8c;
@@ -446,11 +442,10 @@ function getTaskslists() {
 .bottom-content {
   display: flex;
   flex-direction: column;
-  margin-top: 20px;
+  margin-top: 15px;
 
   .form-top {
     width: 100%;
-    height: 48px;
     display: flex;
     justify-content: flex-end;
 

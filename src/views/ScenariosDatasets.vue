@@ -61,7 +61,9 @@
                 <el-option label="已拒绝" value="已拒绝" />
               </el-select>
             </el-form-item>
-            <el-button type="primary" @click="addDataSet"> 新增数据集 </el-button>
+            <el-form-item>
+              <el-button type="primary" @click="addDataSet"> 新增数据集 </el-button>
+            </el-form-item>
           </el-form>
         </div>
         <div class="table-content">
@@ -197,7 +199,6 @@ let columns = ref([
   { type: 'index', label: '序号', width: 55, align: 'center' },
   { prop: 'name', label: '数据集名称' },
   { prop: 'type', label: '类型' },
-  // { prop: 'extension_fields', label: '子任务类型' },
   { prop: 'scenario', label: '应用场景' },
   { prop: 'is_preset', label: '是否预制数据集' },
   { prop: 'status', label: '状态' },
@@ -489,7 +490,6 @@ function handleDatasetChange(e) {
       color: #717b8c;
       font-size: 15px;
       font-weight: 400;
-      width: ;
     }
     p:last-child {
       color: #46d68b;
@@ -527,11 +527,9 @@ function handleDatasetChange(e) {
 
   .form-top {
     width: 100%;
-    height: 48px;
   }
 
   .table-content {
-    margin-top: 50px;
     padding: 10px 20px;
     width: 100%;
     background: #fff;
