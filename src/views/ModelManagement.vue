@@ -34,8 +34,12 @@
           >
             <TableCustom
               :columns="columns"
-              :tableData="activeName === 'first' ? tableDataFilter : tableDataTypeFilter"
-              :total="total"
+              :tableData="activeName === 'first' ? pageData : tableDataTypeFilter"
+              :total="
+                activeName === 'first'
+                  ? tableDataFilter.length
+                  : tableDataTypeFilter.length
+              "
               @changePage="changeCurrentPage"
               @changeSize="changeSizePage"
               :delFunc="handleDelete"
@@ -599,10 +603,7 @@ function getModelTypes() {
 async function getModelLists() {
   const res = await getModelList({ username: localStorage.getItem('vuems_name') });
   if (res && res.data) {
-    const start = (paramsObj.page - 1) * paramsObj.per_page;
-    const end = start + paramsObj.per_page;
-    tableData.value = res.data.models.slice(start, end);
-    total.value = res.data.total;
+    tableData.value = res.data.models;
   }
 }
 
@@ -614,6 +615,13 @@ const tableDataFilter = computed(() => {
     return namefilter && accountFilter;
   });
   return filters;
+});
+
+// 分页数据
+const pageData = computed(() => {
+  const start = (paramsObj.page - 1) * paramsObj.per_page;
+  const end = start + paramsObj.per_page;
+  return tableDataFilter.value.slice(start, end);
 });
 
 const tableDataTypeFilter = computed(() => {

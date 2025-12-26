@@ -69,12 +69,12 @@
         <div class="table-content">
           <TableCustom
             :columns="columns"
-            :tableData="tableDataFilter"
+            :tableData="pagedData"
             :pageSizes="[10, 20, 50, 100]"
             :pageSize="paramsObj.per_page"
             :layouts="'total, sizes, prev, pager, next, jumper'"
             :currentPage="paramsObj.page"
-            :total="total"
+            :total="tableDataFilter.length"
             :selectedActionScheme="true"
             @changePage="changeCurrentPage"
             @changeSize="changeSizePage"
@@ -378,12 +378,13 @@ function getChildDatas(val) {
 
 function changeCurrentPage(val: number) {
   paramsObj.page = val;
-  getDatasetsLIst();
+  // getDatasetsLIst();
 }
 
 function changeSizePage(val: number) {
   paramsObj.per_page = val;
-  getDatasetsLIst();
+  // paramsObj.page = 1;
+  // getDatasetsLIst();
 }
 
 const closeDialog = () => {
@@ -400,21 +401,17 @@ onMounted(() => {
 function getDatasetsLIst() {
   getDatasets({ username: localStorage.getItem('vuems_name') }).then((res: any) => {
     if (res && res.data) {
-      // tableData.value = res.data.datasets;
-      // res.data.datasets.forEach((item: any) => {
-      //   item.is_preset = item.is_preset ? '是' : '否';
-      // });
-      const start = (paramsObj.page - 1) * paramsObj.per_page;
-      const end = start + paramsObj.per_page;
-      tableData.value = res.data.datasets.slice(start, end);
-      total.value = res.data.total;
+      tableData.value = res.data.datasets;
+      res.data.datasets.forEach((item: any) => {
+        item.is_preset = item.is_preset ? '是' : '否';
+      });
     }
   });
 }
 
 const tableDataFilter = computed(() => {
-  const filters = tableData.value.filter((item) => {
-    // 转换为小写进行不区分大小写的匹配
+  let data = [...tableData.value];
+  data = data.filter((item) => {
     const namefilter = item.name.toLowerCase().includes(form.name?.toLowerCase());
     const scenariofilter = item.scenario
       .toLowerCase()
@@ -428,8 +425,15 @@ const tableDataFilter = computed(() => {
       namefilter && datasetFormatFilter && scenariofilter && typeFilter && statusFilter
     );
   });
-  //  total.value= filters.length;
-  return filters;
+
+  return data;
+});
+
+// 分页数据
+const pagedData = computed(() => {
+  const start = (paramsObj.page - 1) * paramsObj.per_page;
+  const end = start + paramsObj.per_page;
+  return tableDataFilter.value.slice(start, end);
 });
 
 function handleDatasetChange(e) {
