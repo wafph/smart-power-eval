@@ -119,6 +119,7 @@
           <FileUpload @uploading="getLoading" :getFileIds="fileId" />
         </el-dialog>
         <DirectoryPreview
+          v-if="directoryData.length > 0"
           :dialogVisible="isVisable"
           :directoryData="directoryData"
           @closeDialogVisible="closeEvent"
@@ -246,15 +247,37 @@ const closeEvent = (event) => {
 };
 
 const handleView = (row: {}) => {
-  getDataSetlist(row.id).then((res) => {
+  console.log(row);
+  getDataSetlist(row.id, { path: row.file_path }).then((res) => {
+    console.log(res.data.data?.files[0].path);
     directoryData.value = [
       {
-        id: '21',
-        label: res.data.data.files[0].name,
-        type: 'file',
-        ext: 'md',
+        id: '1',
+        label: res.data?.files[0].path,
+        type: 'folder',
+        children: [
+          {
+            id: '2',
+            label: res.data?.files[1].name,
+            type: 'file',
+            // children: [
+            //   {
+            //     id: '4',
+            //     label: 'UserProfile.vue',
+            //     type: 'file',
+            //     ext: 'vue',
+            //   },
+            // ],
+          },
+        ],
       },
-    ];
+      // {
+      //   id: '20',
+      //   label: 'tsconfig.json',
+      //   type: 'file',
+      //   ext: 'json',
+      // },
+    ] as any;
   });
   isVisable.value = true;
 };
@@ -450,10 +473,9 @@ function handleDatasetChange(e) {
       ? 'temporal'
       : 'safety';
   childOptions.value = datasetParent.value[a].map((item: any) => ({
-    value: Object.values(item).join(''),
+    value: Object.keys(item).join(''),
     label: Object.values(item).join(''),
   }));
-
   console.log(childOptions.value);
 }
 </script>

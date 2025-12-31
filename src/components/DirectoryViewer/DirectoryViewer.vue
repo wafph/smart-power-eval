@@ -3,7 +3,7 @@
     <!-- 弹窗 -->
     <el-dialog
       v-model="dialogVisible"
-      title="项目目录结构"
+      title="数据集目录结构"
       width="600px"
       destroy-on-close
       :close-on-click-modal="false"
@@ -19,7 +19,6 @@
           prefix-icon="Search"
         />
       </div>
-
       <!-- 目录树 -->
       <div class="directory-tree">
         <el-tree
@@ -267,17 +266,17 @@ const sampleData: FileNode[] = [
   //   type: 'file',
   //   ext: 'json',
   // },
-  {
-    id: '21',
-    label: 'mcq_samples_computer_science_mcq.jsonl',
-    type: 'file',
-    ext: 'md',
-  },
+  // {
+  //   id: '21',
+  //   label: 'mcq_samples_computer_science_mcq.jsonl',
+  //   type: 'file',
+  //   ext: 'md',
+  // },
 ];
 
 // 使用props数据或示例数据
 const directoryData = ref<FileNode[]>(
-  props.directoryData.length ? props.directoryData : sampleData,
+ props.directoryData
 );
 
 // 获取文件图标

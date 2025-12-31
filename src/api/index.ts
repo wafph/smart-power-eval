@@ -78,10 +78,11 @@ export const uploadfileDataset = (query: any) => {
 };
 
 // 获取数据集文件列表
-export const getDataSetlist = (dataset_id: any) => {
+export const getDataSetlist = (dataset_id: any, query: any) => {
   return request({
     url: `rest/api4/api/datasets/${dataset_id}/files`,
     method: 'get',
+    params: query,
   });
 };
 
