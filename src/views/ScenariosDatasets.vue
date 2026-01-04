@@ -177,7 +177,7 @@ let dialogOptions = ref<FormOption>({
     { type: 'input', label: '数据集名称', prop: 'name', required: true },
     { type: 'input', label: '数据集场景', prop: 'scenario', required: true },
     {
-      type: 'select',
+      type: 'select1',
       label: '数据集类型',
       opts: selectOptions,
       prop: 'type',
@@ -185,7 +185,7 @@ let dialogOptions = ref<FormOption>({
       placeholder: '数据集类型',
     },
     {
-      type: 'select',
+      type: 'select2',
       label: '子任务类型',
       opts: childOptions,
       prop: 'dataset_format',
@@ -472,11 +472,11 @@ function handleDatasetChange(e) {
       : e === '时序'
       ? 'temporal'
       : 'safety';
+
   childOptions.value = datasetParent.value[a].map((item: any) => ({
     value: Object.keys(item).join(''),
     label: Object.values(item).join(''),
   }));
-  console.log(childOptions.value);
 }
 </script>
 

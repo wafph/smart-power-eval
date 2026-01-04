@@ -2,7 +2,7 @@
   <div class="data-container">
     <h2>评估报告管理</h2>
     <div class="bottom-content">
-      <InfoSection :model-info="modelInfo" />
+      <!-- <InfoSection :model-info="modelInfo" /> -->
       <div class="bottom-box">
         <div class="table-content">
           <p>详细评测结果</p>

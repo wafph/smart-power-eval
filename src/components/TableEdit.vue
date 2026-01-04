@@ -18,11 +18,23 @@
             controls-position="right"
           ></el-input-number>
           <el-select
-            v-else-if="item.type === 'select'"
+            v-else-if="item.type === 'select1'"
             v-model="form[item.prop]"
             :disabled="item.disabled"
             :placeholder="'请选择' + item.label"
             @change="handleDatasetChange(form[item.prop])"
+          >
+            <el-option
+              v-for="opt in item.opts"
+              :label="opt.label"
+              :value="opt.value"
+            ></el-option>
+          </el-select>
+          <el-select
+            v-else-if="item.type === 'select2'"
+            v-model="form[item.prop]"
+            :disabled="item.disabled"
+            :placeholder="'请选择' + item.label"
           >
             <el-option
               v-for="opt in item.opts"

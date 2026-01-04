@@ -311,7 +311,7 @@ let dialogOptions = ref<FormOption>({
     { type: 'input', label: '模型名称', prop: 'name', required: true },
     { type: 'input', label: '模型描述', prop: 'description', required: true },
     {
-      type: 'select',
+      type: 'select1',
       label: '模型类型',
       opts: selectOptions,
       prop: 'type',
