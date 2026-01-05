@@ -229,7 +229,6 @@ function getModelSelectId(id) {
 }
 
 function getRadioValue(value) {
-  console.log(value);
   radioValue.value = value;
 }
 
@@ -267,7 +266,6 @@ function handlCreate() {
   if (radioValue.value === '2') {
     delete paramData.judge_model_id;
   }
-  console.log(paramData);
   createTaskslist(paramData).then((res) => {
     if (res && res.data?.message) {
       ElMessage.success('创建评测任务成功');

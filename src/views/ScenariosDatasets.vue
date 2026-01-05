@@ -248,9 +248,8 @@ const closeEvent = (event) => {
 };
 
 const handleView = (row: {}) => {
-  console.log(row);
+
   getDataSetlist(row.id, { path: row.file_path }).then((res) => {
-    console.log(res.data.data?.files[0].path);
     directoryData.value = [
       {
         id: '1',
@@ -358,7 +357,6 @@ function getDatasetTypes() {
 
 // 创建/更新数据集
 function getChildDatas(val) {
-  console.log(val);
   loading.value = true;
   if (isUpdate.value) {
     // 更新数据集
@@ -402,7 +400,6 @@ function getChildDatas(val) {
 }
 
 function getFormValue(val:any) {
-  console.log(val);
   val.dataset_format = '';
 }
 
