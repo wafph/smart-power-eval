@@ -105,6 +105,7 @@
             :update="updateData"
             :isSystem="true"
             @changeEmit="handleDatasetChange"
+            @emitForm="getFormValue"
           />
         </el-dialog>
         <el-dialog
@@ -357,6 +358,7 @@ function getDatasetTypes() {
 
 // 创建/更新数据集
 function getChildDatas(val) {
+  console.log(val);
   loading.value = true;
   if (isUpdate.value) {
     // 更新数据集
@@ -397,6 +399,11 @@ function getChildDatas(val) {
       getDatasetsLIst();
     });
   }
+}
+
+function getFormValue(val:any) {
+  console.log(val);
+  val.dataset_format = '';
 }
 
 function changeCurrentPage(val: number) {

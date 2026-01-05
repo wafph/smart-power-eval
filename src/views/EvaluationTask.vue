@@ -298,7 +298,7 @@ const handleDelete = (row) => {
 const updateData = () => {};
 const paramsObj = reactive({
   page: 1,
-  per_page: 30,
+  per_page: 20,
   type: 'all',
   status: 'all',
   is_preset: 'all',
@@ -306,7 +306,7 @@ const paramsObj = reactive({
 });
 
 // 创建/更新评测任务
-function getChildDatas(val) {
+function getChildDatas(val:any) {
   loading.value = true;
   val.user_name = localStorage.getItem('vuems_name');
   if (isUpdate.value) {

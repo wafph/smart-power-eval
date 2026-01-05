@@ -99,7 +99,7 @@
 import { FormOption } from '@/types/form-option';
 import { FormInstance, FormRules, UploadProps } from 'element-plus';
 import { PropType, ref } from 'vue';
-const emit = defineEmits(['saveEdit', 'changeEmit']);
+const emit = defineEmits(['saveEdit', 'changeEmit', 'emitForm']);
 const { options, formData, edit, update, isSystem } = defineProps({
   options: {
     type: Object as PropType<FormOption>,
@@ -163,6 +163,7 @@ const saveEdit = (formEl: FormInstance | undefined) => {
 
 const handleDatasetChange = (e) => {
   emit('changeEmit', e);
+  emit('emitForm', form.value);
 };
 
 const resetForm = (formEl: FormInstance | undefined) => {

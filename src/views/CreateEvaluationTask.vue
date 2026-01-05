@@ -24,15 +24,6 @@
       <div class="task-type-section">
         <div v-if="currentStep === 0">
           <div class="search-section">
-            <!-- 任务名称：
-            <el-input
-              v-model="taskName"
-              :placeholder="placeholders"
-              clearable
-              class="search-input"
-              @blur="handleBlur"
-            >
-            </el-input> -->
             <el-form
               ref="ruleFormRef"
               
