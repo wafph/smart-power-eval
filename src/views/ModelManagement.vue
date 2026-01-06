@@ -329,7 +329,7 @@ let dialogVersionOptions = ref<FormOption>({
     { type: 'input', label: '模型名称', prop: 'model_name', required: false },
     { type: 'input', label: '版本描述', prop: 'description', required: true },
     {
-      type: 'select',
+      type: 'select1',
       label: '子服务类型',
       opts: childOptions,
       prop: 'type',

@@ -164,6 +164,9 @@ const fetchInitialStatus = async (taskId: number) => {
     const response = await getTaskStatus(taskId);
     if (response.data) {
       currentStatus.value = response.data.task_status;
+      if (currentStatus.value === 'failed' || currentStatus.value === 'success') {
+        stopPolling();
+      }
     }
   } catch (error) {
     console.warn('获取状态失败:', error);
@@ -306,7 +309,7 @@ const paramsObj = reactive({
 });
 
 // 创建/更新评测任务
-function getChildDatas(val:any) {
+function getChildDatas(val: any) {
   loading.value = true;
   val.user_name = localStorage.getItem('vuems_name');
   if (isUpdate.value) {
