@@ -5,7 +5,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 import { ElLoading, ElMessage } from 'element-plus';
-import { HTTP_ERRORS, responseMessageMap, errorMessageMap } from '@/utils/errorMapping';
+import { HTTP_ERRORS, errorMessageMap } from '@/utils/errorMapping';
 const service: AxiosInstance = axios.create({
   timeout: 5000,
 });
@@ -33,7 +33,7 @@ service.interceptors.response.use(
     if (response.status === 200 || response.status === 201) {
       return response;
     } else {
-      Promise.reject();
+      return Promise.reject();
     }
   },
   (error: AxiosError) => {

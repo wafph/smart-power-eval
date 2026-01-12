@@ -25,7 +25,6 @@
 </template>
 
 <script setup>
-import { defineEmits } from 'vue';
 import { useState } from '@/utils/state';
 const { states } = useState();
 import { ArrowDown, DocumentChecked, VideoPlay, Download } from '@element-plus/icons-vue';

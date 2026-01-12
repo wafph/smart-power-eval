@@ -21,7 +21,6 @@ const HTTP_ERRORS = {
 const businessErrorMap = {
   1001: '用户已存在',
   1002: '验证码错误',
-  // ... 其他业务错误码
 };
 
 const responseMessageMap = {
@@ -42,7 +41,7 @@ const errorMessageMap = {
   'Only running or pending tasks can be stopped': '只有运行中的任务才可以停止',
   'Task not completed': '任务没有完成',
   'Report file not found': '报告文件没找到',
-  // 可以继续添加更多映射
+  'Task not found':'任务没有找到'
 };
 
 export { HTTP_ERRORS, businessErrorMap, responseMessageMap, errorMessageMap };

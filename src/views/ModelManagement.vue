@@ -92,13 +92,13 @@
     <el-dialog
       title="模型版本列表"
       v-model="visibleVersion"
-      width="80%"
+      width="1250"
       destroy-on-close
       :close-on-click-modal="false"
       @close="closeDialog"
       draggable
     >
-      <div style="padding: 20px">
+      <div style="padding: 10px">
         <TableCustom
           :columns="columnsVersion"
           :tableData="tableDataVersion"
@@ -297,10 +297,10 @@ let columnsVersion = ref([
   { prop: 'version', label: '版本' },
   { prop: 'status', label: '状态' },
   { prop: 'service_type', label: '服务类型' },
-  { prop: 'service_url', label: '服务地址' },
+  { prop: 'service_url', label: '服务地址'  },
   { prop: 'api_key', label: 'api_key' },
   { prop: 'created_at', label: '创建时间' },
-  { prop: 'operator', label: '操作', width: 400 },
+  { prop: 'operator', label: '操作', width: 480 },
 ]);
 
 // 创建/编辑弹窗相关

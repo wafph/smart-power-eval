@@ -1,8 +1,9 @@
 import request from '../utils/request';
+const baseUrl = 'rest/api4';
 // 获取数据集管理
 export const getDatasets = (query: any) => {
   return request({
-    url: 'rest/api4/api/datasets',
+    url: `${baseUrl}/api/datasets`,
     method: 'get',
     params: query,
   });
@@ -11,7 +12,7 @@ export const getDatasets = (query: any) => {
 // 创建数据集管理
 export const addDataSets = (query: any) => {
   return request({
-    url: 'rest/api4/api/datasets',
+    url: `${baseUrl}/api/datasets`,
     method: 'post',
     data: query,
   });
@@ -20,7 +21,7 @@ export const addDataSets = (query: any) => {
 // 获取数据集详情/编辑查找数据集
 export const getdatasetDetail = (id: string) => {
   return request({
-    url: 'rest/api4/api/datasets/' + id,
+    url: `${baseUrl}/api/datasets/${id}`,
     method: 'get',
   });
 };
@@ -28,7 +29,7 @@ export const getdatasetDetail = (id: string) => {
 // 更新数据集
 export const getUpdateDatasetDetail = (id: string, query: any) => {
   return request({
-    url: 'rest/api4/api/datasets/' + id,
+    url: `${baseUrl}/api/datasets/${id}`,
     method: 'put',
     data: query,
   });
@@ -37,7 +38,7 @@ export const getUpdateDatasetDetail = (id: string, query: any) => {
 // 删除数据集
 export const deleteDatasetDetail = (id: any) => {
   return request({
-    url: `rest/api4/api/datasets/${id}`,
+    url: `${baseUrl}/api/datasets/${id}`,
     method: 'delete',
   });
 };
@@ -45,7 +46,7 @@ export const deleteDatasetDetail = (id: any) => {
 // 上传数据集文件
 export const uploadDataset = () => {
   return request({
-    url: 'rest/api4/api/datasets/{id}/upload',
+    url: `${baseUrl}/api/datasets/{id}/upload`,
     method: 'post',
   });
 };
@@ -53,7 +54,7 @@ export const uploadDataset = () => {
 // 下载数据集文件
 export const downLoadDataset = (id: any) => {
   return request({
-    url: `rest/api4/api/datasets/${id}/download`,
+    url: `${baseUrl}/api/datasets/${id}/download`,
     method: 'get',
     responseType: 'blob',
   });
@@ -62,16 +63,16 @@ export const downLoadDataset = (id: any) => {
 // 审核数据集文件
 export const auditDataset = (id: any, params: any) => {
   return request({
-    url: `rest/api4/api/datasets/${id}/review`,
+    url: `${baseUrl}/api/datasets/${id}/review`,
     method: 'post',
     data: params,
   });
 };
 
 // 文件上传
-export const uploadfileDataset = (query: any) => {
+export const uploadfileDataset = (id: any, query: any) => {
   return request({
-    url: `rest/api4/api/datasets/{id}/upload`,
+    url: `${baseUrl}/api/datasets/${id}/upload`,
     method: 'post',
     data: query,
   });
@@ -80,7 +81,7 @@ export const uploadfileDataset = (query: any) => {
 // 获取数据集文件列表
 export const getDataSetlist = (dataset_id: any, query: any) => {
   return request({
-    url: `rest/api4/api/datasets/${dataset_id}/files`,
+    url: `${baseUrl}/api/datasets/${dataset_id}/files`,
     method: 'get',
     params: query,
   });
@@ -89,7 +90,7 @@ export const getDataSetlist = (dataset_id: any, query: any) => {
 // 获取模型列表
 export const getModelList = (query: any) => {
   return request({
-    url: 'rest/api4/api/models',
+    url: `${baseUrl}/api/models`,
     method: 'get',
     params: query,
   });
@@ -98,7 +99,7 @@ export const getModelList = (query: any) => {
 // 获取指定模型的详细信息
 export const getModelDetail = (id: any) => {
   return request({
-    url: `rest/api4/api/models/${id}`,
+    url: `${baseUrl}/api/models/${id}`,
     method: 'get',
   });
 };
@@ -106,7 +107,7 @@ export const getModelDetail = (id: any) => {
 // 创建模型
 export const createModel = (query: any) => {
   return request({
-    url: 'rest/api4/api/models',
+    url: `${baseUrl}/api/models`,
     method: 'post',
     data: query,
   });
@@ -115,7 +116,7 @@ export const createModel = (query: any) => {
 // 更新模型
 export const updateModel = (id: string, query: any) => {
   return request({
-    url: 'rest/api4/api/models/' + id,
+    url: `${baseUrl}/api/models/${id}`,
     method: 'put',
     data: query,
   });
@@ -124,7 +125,7 @@ export const updateModel = (id: string, query: any) => {
 // 删除模型
 export const delModel = (id: string) => {
   return request({
-    url: 'rest/api4/api/models/' + id,
+    url: `${baseUrl}/api/models/${id}`,
     method: 'delete',
   });
 };
@@ -132,7 +133,7 @@ export const delModel = (id: string) => {
 // 获取模型版本列表
 export const getModelVersionList = (id: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/versions`,
+    url: `${baseUrl}/api/models/${id}/versions`,
     method: 'get',
   });
 };
@@ -140,7 +141,7 @@ export const getModelVersionList = (id: any) => {
 // 设置当前版本为默认版本
 export const setDefaultVersion = (id: any, version_id: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/versions/${version_id}/set-current`,
+    url: `${baseUrl}/api/models/${id}/versions/${version_id}/set-current`,
     method: 'post',
   });
 };
@@ -148,7 +149,7 @@ export const setDefaultVersion = (id: any, version_id: any) => {
 // 创建模型版本
 export const createModelVersion = (id: any, params: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/versions`,
+    url: `${baseUrl}/api/models/${id}/versions`,
     method: 'post',
     data: params,
   });
@@ -157,7 +158,7 @@ export const createModelVersion = (id: any, params: any) => {
 // 获取模型版本详情
 export const getModelVersionDetail = (id: any, version_id: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/versions/${version_id}`,
+    url: `${baseUrl}/api/models/${id}/versions/${version_id}`,
     method: 'get',
   });
 };
@@ -165,7 +166,7 @@ export const getModelVersionDetail = (id: any, version_id: any) => {
 // 删除模型版本
 export const delModelVersion = (id: any, version_id: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/versions/${version_id}`,
+    url: `${baseUrl}/api/models/${id}/versions/${version_id}`,
     method: 'delete',
   });
 };
@@ -173,7 +174,7 @@ export const delModelVersion = (id: any, version_id: any) => {
 // 修改模型版本
 export const updateModelVersion = (id: any, version_id: any, params: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/versions/${version_id}`,
+    url: `${baseUrl}/api/models/${id}/versions/${version_id}`,
     method: 'put',
     data: params,
   });
@@ -182,7 +183,7 @@ export const updateModelVersion = (id: any, version_id: any, params: any) => {
 // 测试模型服务链接
 export const testConnection = (id: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/test-connection`,
+    url: `${baseUrl}/api/models/${id}/test-connection`,
     method: 'post',
   });
 };
@@ -190,7 +191,7 @@ export const testConnection = (id: any) => {
 // 测试指定版本连接
 export const testVersionConnection = (id: any, version_id: any) => {
   return request({
-    url: `rest/api4/api/models/${id}/versions/${version_id}/test-connection`,
+    url: `${baseUrl}/api/models/${id}/versions/${version_id}/test-connection`,
     method: 'post',
   });
 };
@@ -198,7 +199,7 @@ export const testVersionConnection = (id: any, version_id: any) => {
 // 获取数据集类型
 export const getDatasetType = () => {
   return request({
-    url: 'rest/api4/api/datasets/categories',
+    url: `${baseUrl}/api/datasets/categories`,
     method: 'get',
   });
 };
@@ -206,7 +207,7 @@ export const getDatasetType = () => {
 // 获取模型服务类型
 export const getModelType = () => {
   return request({
-    url: 'rest/api4/api/models/service-types',
+    url: `${baseUrl}/api/models/service-types`,
     method: 'get',
   });
 };
@@ -214,7 +215,7 @@ export const getModelType = () => {
 // 获取模型服务类型
 export const getindicators = () => {
   return request({
-    url: 'rest/api4/api/indicators',
+    url: `${baseUrl}/api/indicators`,
     method: 'get',
   });
 };
@@ -222,7 +223,7 @@ export const getindicators = () => {
 // 获取评测任务列表
 export const getTaskslist = (query: any) => {
   return request({
-    url: 'rest/api4/api/tasks',
+    url: `${baseUrl}/api/tasks`,
     method: 'get',
     params: query,
   });
@@ -231,7 +232,7 @@ export const getTaskslist = (query: any) => {
 //创建评测任务
 export const createTaskslist = (params: any) => {
   return request({
-    url: 'rest/api4/api/tasks/eval-system',
+    url: `${baseUrl}/api/tasks/eval-system`,
     method: 'post',
     data: params,
   });
@@ -239,7 +240,7 @@ export const createTaskslist = (params: any) => {
 
 export const deleteTask = (id: number) => {
   return request({
-    url: `rest/api4/api/tasks/${id}`,
+    url: `${baseUrl}/api/tasks/${id}`,
     method: 'delete',
   });
 };
@@ -247,7 +248,7 @@ export const deleteTask = (id: number) => {
 //创建评测任务
 export const getTaskDetail = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}`,
+    url: `${baseUrl}/api/tasks/${id}`,
     method: 'get',
   });
 };
@@ -255,7 +256,7 @@ export const getTaskDetail = (id: any) => {
 // 运行评测任务
 export const runTask = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}/run`,
+    url: `${baseUrl}/api/tasks/${id}/run`,
     method: 'post',
   });
 };
@@ -263,7 +264,7 @@ export const runTask = (id: any) => {
 // 停止评测任务
 export const stopTask = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}/stop`,
+    url: `${baseUrl}/api/tasks/${id}/stop`,
     method: 'post',
   });
 };
@@ -271,7 +272,7 @@ export const stopTask = (id: any) => {
 // 获取任务状态 已有
 export const getTaskStatus = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}/status`,
+    url: `${baseUrl}/api/tasks/${id}/status`,
     method: 'get',
   });
 };
@@ -279,7 +280,7 @@ export const getTaskStatus = (id: any) => {
 // 获取任务结果
 export const getTasksResults = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}/results`,
+    url: `${baseUrl}/api/tasks/${id}/results`,
     method: 'get',
   });
 };
@@ -287,7 +288,7 @@ export const getTasksResults = (id: any) => {
 // 获取任务日志
 export const getTasksLogs = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}/logs`,
+    url: `${baseUrl}/api/tasks/${id}/logs`,
     method: 'get',
   });
 };
@@ -295,7 +296,7 @@ export const getTasksLogs = (id: any) => {
 // 实时日志流
 export const getTasksLogStream = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}/logs/stream`,
+    url: `${baseUrl}/api/tasks/${id}/logs/stream`,
     method: 'get',
   });
 };
@@ -303,7 +304,7 @@ export const getTasksLogStream = (id: any) => {
 // 获取任务报告
 export const getTasksReport = (id: any) => {
   return request({
-    url: `rest/api4/api/tasks/${id}/report`,
+    url: `${baseUrl}/api/tasks/${id}/report`,
     method: 'get',
     responseType: 'blob',
     // responseType: 'arraybuffer',
@@ -314,7 +315,7 @@ export const getTasksReport = (id: any) => {
 // 获取模型列表
 export const getJudgeModels = () => {
   return request({
-    url: 'rest/api4/api/judge-models',
+    url: `${baseUrl}/api/judge-models`,
     method: 'get',
   });
 };

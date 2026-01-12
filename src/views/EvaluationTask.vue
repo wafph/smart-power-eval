@@ -138,6 +138,7 @@ async function getRunTask(id: number) {
 
     // 2. 开始轮询状态
     startPollingStatus(id);
+    getTaskslists();
   } catch (error) {
     console.error(error);
   }

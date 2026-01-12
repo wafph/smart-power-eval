@@ -231,25 +231,46 @@ const handleEdit = (row: any) => {
   visible.value = true;
   isUpdate.value = true;
   getDatasetType();
-
+  rowData.value.dataset_format = rowData.value.extension_fields.dataset_format;
+  const data = { dataset_format: rowData.value.extension_fields.dataset_format };
+  rowData.value.dataset_format = getFormatName(data.dataset_format);
   // 回显数据集
-  getdatasetDetail(rowData.value.id).then((res) => {});
+  getdatasetDetail(rowData.value.id).then((res: any) => {});
 };
+
+// 映射函数
+function getFormatName(formatKey: any) {
+  const formatMap = {
+    qa: '语义理解（问答）',
+    mcq: '语义理解（选择题）',
+    image_generation: '图像生成',
+    image_captioning: '图像描述',
+    custom: '自定义',
+    image_classification: '图像分类',
+    object_detection: '目标检测',
+    image_segmentation: '图像分割',
+  };
+  return formatMap[formatKey] || '未知格式';
+}
+
+// 使用函数
 
 const handleCheck = (row: {}) => {
   const params = { review_status: 'approved', review_comment: '审核通过' };
-  auditDataset(row.id, params).then((res) => {
-    ElMessage.success(`审核数据集${row.name}成功`);
+  auditDataset(row.id, params).then((res: any) => {
+    if (res && res.data?.message) {
+      ElMessage.success(`审核数据集${row.name}成功`);
+      getDatasetsList();
+    }
   });
 };
 
-const closeEvent = (event) => {
+const closeEvent = (event: any) => {
   isVisable.value = event;
 };
 
 const handleView = (row: {}) => {
-
-  getDataSetlist(row.id, { path: row.file_path }).then((res) => {
+  getDataSetlist(row.id, { path: row.file_path }).then((res: any) => {
     directoryData.value = [
       {
         id: '1',
@@ -260,23 +281,9 @@ const handleView = (row: {}) => {
             id: '2',
             label: res.data?.files[1].name,
             type: 'file',
-            // children: [
-            //   {
-            //     id: '4',
-            //     label: 'UserProfile.vue',
-            //     type: 'file',
-            //     ext: 'vue',
-            //   },
-            // ],
           },
         ],
       },
-      // {
-      //   id: '20',
-      //   label: 'tsconfig.json',
-      //   type: 'file',
-      //   ext: 'json',
-      // },
     ] as any;
   });
   isVisable.value = true;
@@ -287,20 +294,9 @@ onMounted(() => {
 });
 const getDownLoadDataSet = (row: any) => {
   window.open(`/rest/api4/api/datasets/${row.id}/download`, '_blank');
-  // downLoadDataset(row.id).then((response: any) => {
-  //   ElMessage.success('下载数据集成功');
-  //   const blob = new Blob([response.data], { type: 'application/octet-stream' });
-  //   const link = document.createElement('a');
-  //   link.href = window.URL.createObjectURL(blob);
-  //   link.download = '测试文件.json';
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  //   window.URL.revokeObjectURL(link.href);
-  // });
 };
 
-function getFileInfo(id) {
+function getFileInfo(id: any) {
   fileId.value = id;
   fileUploadVisible.value = true;
 }
@@ -310,9 +306,11 @@ function getLoading(isloading: boolean) {
 }
 
 const handleDelete = (row: any) => {
-  deleteDatasetDetail(row.id).then((res) => {
-    ElMessage.success(`删除数据集${row.name}成功`);
-    getDatasetsLIst();
+  deleteDatasetDetail(row.id).then((res: any) => {
+    if (res && res.data?.message) {
+      ElMessage.success(`删除数据集${row.name}成功`);
+      getDatasetsList();
+    }
   });
 };
 
@@ -327,7 +325,7 @@ const paramsObj = reactive({
 
 // 获取数据集子类
 function getDatasetTypes() {
-  getDatasetType().then((res) => {
+  getDatasetType().then((res: any) => {
     datasetParent.value = res.data;
     const keys = Object.keys(res.data);
     selectOptions.value = keys.map((item) => ({
@@ -356,7 +354,8 @@ function getDatasetTypes() {
 }
 
 // 创建/更新数据集
-function getChildDatas(val) {
+function getChildDatas(val: any) {
+  console.log(val.dataset_format);
   loading.value = true;
   if (isUpdate.value) {
     // 更新数据集
@@ -367,16 +366,17 @@ function getChildDatas(val) {
       status: val.status,
       size: val.size,
       type: val.type,
+      dataset_format: val.dataset_format,
       description: val.description,
     })
-      .then((res) => {
-        getDatasetsLIst();
+      .then((res: any) => {
+        getDatasetsList();
         ElMessage.success('修改数据集成功');
         visible.value = false;
         loading.value = false;
         isUpdate.value = false;
       })
-      .catch((err) => {
+      .catch((err: any) => {
         ElMessage.error(`修改数据集失败`);
       });
   } else {
@@ -390,28 +390,25 @@ function getChildDatas(val) {
       dataset_format: val.dataset_format,
     };
 
-    addDataSets(params).then((res) => {
+    addDataSets(params).then((res: any) => {
       visible.value = false;
       loading.value = false;
       ElMessage.success(`添加数据集${val.name}成功`);
-      getDatasetsLIst();
+      getDatasetsList();
     });
   }
 }
 
-function getFormValue(val:any) {
+function getFormValue(val: any) {
   val.dataset_format = '';
 }
 
 function changeCurrentPage(val: number) {
   paramsObj.page = val;
-  // getDatasetsLIst();
 }
 
 function changeSizePage(val: number) {
   paramsObj.per_page = val;
-  // paramsObj.page = 1;
-  // getDatasetsLIst();
 }
 
 const closeDialog = () => {
@@ -420,12 +417,12 @@ const closeDialog = () => {
 };
 
 onMounted(() => {
-  getDatasetsLIst();
+  getDatasetsList();
   getDatasetTypes();
 });
 
 // 获取数据集列表
-function getDatasetsLIst() {
+function getDatasetsList() {
   getDatasets({ username: localStorage.getItem('vuems_name') }).then((res: any) => {
     if (res && res.data) {
       tableData.value = res.data.datasets;
@@ -438,7 +435,7 @@ function getDatasetsLIst() {
 
 const tableDataFilter = computed(() => {
   let data = [...tableData.value];
-  data = data.filter((item) => {
+  data = data.filter((item: any) => {
     const namefilter = item.name.toLowerCase().includes(form.name?.toLowerCase());
     const scenariofilter = item.scenario
       .toLowerCase()
