@@ -182,6 +182,7 @@ let dialogOptions = ref<FormOption>({
       label: '数据集类型',
       opts: selectOptions,
       prop: 'type',
+      disabled: isEdit,
       required: true,
       placeholder: '数据集类型',
     },
@@ -190,6 +191,7 @@ let dialogOptions = ref<FormOption>({
       label: '子任务类型',
       opts: childOptions,
       prop: 'dataset_format',
+      disabled: isEdit,
       required: true,
       placeholder: '子任务类型',
     },
@@ -230,7 +232,6 @@ const handleEdit = (row: any) => {
   isEdit.value = true;
   visible.value = true;
   isUpdate.value = true;
-  getDatasetType();
   rowData.value.dataset_format = rowData.value.extension_fields.dataset_format;
   const data = { dataset_format: rowData.value.extension_fields.dataset_format };
   rowData.value.dataset_format = getFormatName(data.dataset_format);
