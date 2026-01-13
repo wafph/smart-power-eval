@@ -356,7 +356,6 @@ function getDatasetTypes() {
 
 // 创建/更新数据集
 function getChildDatas(val: any) {
-  console.log(val.dataset_format);
   loading.value = true;
   if (isUpdate.value) {
     // 更新数据集

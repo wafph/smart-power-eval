@@ -154,7 +154,6 @@ const saveEdit = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.validate((valid) => {
     if (!valid) {
-      console.error('error save');
       return;
     }
     emit('saveEdit', form.value);

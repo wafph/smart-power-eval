@@ -422,7 +422,6 @@ async function getConnectionId(id) {
     const test = res.data.message;
     ElMessage.success(`模型服务${test}`);
   } catch (error) {
-    console.error(error);
   }
 }
 
@@ -433,7 +432,6 @@ async function getConnectionVersionId(versionId) {
     const test = res.data.message;
     ElMessage.success(`测试指定版本模型服务${test}`);
   } catch (error) {
-    console.error(error);
   }
 }
 
@@ -504,7 +502,6 @@ function createVersions() {
 
 // 模型版本确认
 function getChildDatasVersion(val) {
-  console.log(val);
   loading.value = true;
   const params = {
     model_name: val.name,
