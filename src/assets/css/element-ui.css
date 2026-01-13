@@ -1,0 +1,54 @@
+/* styles/element-ui.css */
+/* 覆盖主按钮样式 */
+.el-button--primary {
+  background-color: #139a96;
+  border-color: #139a96;
+  color: #fff;
+}
+
+.el-button--primary:hover {
+  background-color: #0f7069;
+  border-color: #0f7069;
+}
+
+.el-button--primary:focus {
+  background-color: #0f7069;
+  border-color: #0f7069;
+}
+
+/* styles/element-ui.css */
+/* 修改主要按钮的 plain 样式 */
+.el-button--primary.is-plain {
+  color: #139a96 !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: #139a96 !important;
+}
+
+.el-button--primary.is-plain:hover {
+  background: #139a96 !important;
+  border-color: #139a96 !important;
+  color: #fff !important;
+}
+
+/* 修改成功按钮的 plain 样式 */
+.el-button--success.is-plain {
+  color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.el-button--success.is-plain:hover {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #fff !important;
+}
+
+/* 修改所有输入框 */
+/* .el-input, .el-select {
+  border:  1px solid #139a96 !important;
+  border-radius: 4px;
+}
+
+.el-input:focus, .el-select:focus {
+  border: none important;
+} */
