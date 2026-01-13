@@ -123,7 +123,6 @@ const copyLogPath = async () => {
     await navigator.clipboard.writeText(taskLogs.log_path);
     ElMessage.success('日志路径已复制到剪贴板');
   } catch (err) {
-    console.error('复制失败:', err);
     ElMessage.error('复制失败');
   }
 };
@@ -163,7 +162,6 @@ const copyAllLogs = async () => {
     await navigator.clipboard.writeText(allLogs);
     ElMessage.success('所有日志已复制到剪贴板');
   } catch (err) {
-    console.error('复制失败:', err);
     ElMessage.error('复制失败');
   }
 };

@@ -118,7 +118,7 @@
       <el-dialog
         :title="isEditVersion ? '修改模型版本' : '创建模型版本'"
         v-model="visibleCreateVersion"
-        width="700px"
+        width="800px"
         destroy-on-close
         :close-on-click-modal="false"
         @close="closeDialog"
@@ -297,7 +297,7 @@ let columnsVersion = ref([
   { prop: 'version', label: '版本' },
   { prop: 'status', label: '状态' },
   { prop: 'service_type', label: '服务类型' },
-  { prop: 'service_url', label: '服务地址'  },
+  { prop: 'service_url', label: '服务地址' },
   { prop: 'api_key', label: 'api_key' },
   { prop: 'created_at', label: '创建时间' },
   { prop: 'operator', label: '操作', width: 480 },
@@ -332,8 +332,9 @@ let dialogVersionOptions = ref<FormOption>({
       type: 'select1',
       label: '子服务类型',
       opts: childOptions,
-      prop: 'type',
+      prop: 'service_type',
       required: true,
+      disabled: isEditVersion,
       placeholder: '服务类型',
     },
     { type: 'input', label: '服务地址', prop: 'service_url', required: true },
@@ -421,7 +422,6 @@ async function getConnectionId(id) {
     const test = res.data.message;
     ElMessage.success(`模型服务${test}`);
   } catch (error) {
-    console.error(error);
   }
 }
 
@@ -432,7 +432,6 @@ async function getConnectionVersionId(versionId) {
     const test = res.data.message;
     ElMessage.success(`测试指定版本模型服务${test}`);
   } catch (error) {
-    console.error(error);
   }
 }
 
@@ -477,6 +476,7 @@ function getChildDatas(val) {
 
 // 创建模型版本
 function createVersions() {
+  isEditVersion.value = false;
   getModelTypes();
   if (modelType.value === '文本') {
     modelType.value = 'text';
@@ -548,9 +548,7 @@ async function createVersion(val) {
     ElMessage.success('添加模型版本成功');
     visibleCreateVersion.value = false;
     loading.value = false;
-  } catch (error) {
-    // ElMessage.error('添加模型版本失败');
-  }
+  } catch (error) {}
 }
 const handleEdit = (row: any) => {
   rowData.value = { ...row };
