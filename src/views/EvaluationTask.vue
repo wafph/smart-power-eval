@@ -140,7 +140,6 @@ async function getRunTask(id: number) {
     startPollingStatus(id);
     getTaskslists();
   } catch (error) {
-    console.error(error);
   }
 }
 
@@ -170,7 +169,6 @@ const fetchInitialStatus = async (taskId: number) => {
       }
     }
   } catch (error) {
-    console.warn('获取状态失败:', error);
   }
 };
 
@@ -332,7 +330,6 @@ function getChildDatas(val: any) {
         isUpdate.value = false;
       })
       .catch((err) => {
-        console.error(err);
       });
   }
 }

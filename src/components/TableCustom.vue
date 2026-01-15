@@ -146,14 +146,14 @@
               </template>
 
               <template v-if="item.prop == 'task_type'">
-                {{ row.evaluation_results.task_type }}
+                {{ row.evaluation_results?.task_type }}
               </template>
 
-              <template v-if="item.prop == 'accuracy'">
-                {{ Object.keys(row.evaluation_results.metrics).join('') }}
+              <template v-if="item.prop == 'accuracy' && row.evaluation_results?.metrics">
+                {{ Object.keys(row.evaluation_results?.metrics).join('') }}
               </template>
               <template v-if="item.prop == 'evaluation_results'">
-                {{ row.evaluation_results?.metrics.accuracy }}
+                {{ row.evaluation_results?.metrics?.accuracy }}
                 <el-button type="primary" size="small" @click="downloadResult(row)">
                   下载
                 </el-button>
