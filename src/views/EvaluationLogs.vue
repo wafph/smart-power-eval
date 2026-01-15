@@ -67,20 +67,6 @@
         </div>
       </div>
     </el-card>
-
-    <!-- 错误详情弹窗 -->
-    <el-dialog v-model="showErrorDetail" title="错误详情" width="600px">
-      <div class="error-detail">
-        <h4>{{ currentError.type }}</h4>
-        <pre>{{ currentError.message }}</pre>
-        <div v-if="currentError.file" class="error-file">
-          <strong>文件:</strong> {{ currentError.file }}
-        </div>
-        <div v-if="currentError.line" class="error-line">
-          <strong>行号:</strong> {{ currentError.line }}
-        </div>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -90,10 +76,6 @@ import { ElMessage, ElNotification } from 'element-plus';
 import { CopyDocument } from '@element-plus/icons-vue';
 import { getTasksLogs, getTasksLogStream } from '@/api';
 import { useState } from '@/utils/state';
-
-// 响应式数据
-const showErrorDetail = ref(false);
-const currentError = ref({});
 const { states } = useState();
 // 任务日志数据
 const taskLogs = reactive({
@@ -119,11 +101,22 @@ const getLogLineClass = (log) => {
 
 // 复制日志路径
 const copyLogPath = async () => {
-  try {
-    await navigator.clipboard.writeText(taskLogs.log_path);
-    ElMessage.success('日志路径已复制到剪贴板');
-  } catch (err) {
-    ElMessage.error('复制失败');
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(taskLogs.log_path);
+      ElMessage.success('日志路径已复制到剪贴板');
+    } catch (err) {
+      ElMessage.error('复制失败');
+    }
+  } else {
+    // 降级方案
+    const textarea = document.createElement('textarea');
+    textarea.value = taskLogs.log_path;
+    document.body.appendChild(textarea);
+    textarea.select();
+    const success = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    success ? '日志路径已复制到剪贴板' : '复制失败（降级方案）';
   }
 };
 
@@ -157,12 +150,25 @@ function getTasksLogStreams() {
 
 // 复制所有日志
 const copyAllLogs = async () => {
-  try {
-    const allLogs = taskLogs.logs.join('\n');
-    await navigator.clipboard.writeText(allLogs);
-    ElMessage.success('所有日志已复制到剪贴板');
-  } catch (err) {
-    ElMessage.error('复制失败');
+  const allLogs = taskLogs.logs.join('\n');
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(allLogs);
+      ElMessage.success('所有日志已复制到剪贴板');
+    } catch (err) {
+      ElMessage.error('复制失败');
+    }
+  } else {
+    // 降级方案
+    const textarea = document.createElement('textarea');
+    textarea.value = allLogs;
+    document.body.appendChild(textarea);
+    textarea.select();
+    const success = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    success
+      ? ElMessage.success('所有日志已复制')
+      : ElMessage.error('复制失败（降级方案）');
   }
 };
 </script>
