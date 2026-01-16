@@ -61,9 +61,21 @@ function getReportTask() {
 function getTasksReports() {
   getTasksReport(states.id).then((response: any) => {
     ElMessage.success('获取任务报告成功');
-    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const blob = new Blob([response.data], { type: response.headers['content-type'] });
+    const contentDisposition = response.headers['content-disposition'];
+    let fileName = 'document.pdf';
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(
+        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/,
+      );
+      if (fileNameMatch && fileNameMatch[1]) {
+        fileName = fileNameMatch[1].replace(/['"]/g, '');
+        fileName = decodeURIComponent(fileName);
+      }
+    }
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

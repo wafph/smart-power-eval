@@ -307,8 +307,6 @@ export const getTasksReport = (id: any) => {
     url: `${baseUrl}/api/tasks/${id}/report`,
     method: 'get',
     responseType: 'blob',
-    // responseType: 'arraybuffer',
-    // headers: { 'Content-Type': 'application/pdf' },
   });
 };
 
