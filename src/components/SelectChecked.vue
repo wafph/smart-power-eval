@@ -280,7 +280,6 @@ function getModelTypes() {
             : '安全',
       }));
     })
-    .catch((err) => {});
 }
 
 onMounted(() => {

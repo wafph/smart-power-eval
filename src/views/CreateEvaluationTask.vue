@@ -26,14 +26,18 @@
           <div class="search-section">
             <el-form
               ref="ruleFormRef"
-              
               :model="ruleForm"
               status-icon
               :rules="rules"
               label-width="auto"
             >
-              <el-form-item label="任务名称："prop="taskName">
-                <el-input class="search-input" v-model="ruleForm.taskName" type="text" autocomplete="off" />
+              <el-form-item label="任务名称：" prop="taskName">
+                <el-input
+                  class="search-input"
+                  v-model="ruleForm.taskName"
+                  type="text"
+                  autocomplete="off"
+                />
               </el-form-item>
             </el-form>
           </div>
@@ -104,10 +108,10 @@
               currentStep === 0
                 ? !selectedTaskType || ruleForm.taskName === ''
                 : currentStep === 1
-                ? dataSetIds.length === 0
-                : currentStep === 2
-                ? modelIds.length === 0
-                : metricsIds.length === 0
+                  ? dataSetIds.length === 0
+                  : currentStep === 2
+                    ? modelIds.length === 0
+                    : metricsIds.length === 0
             "
             type="primary"
             @click="handleNext"
@@ -213,36 +217,31 @@ function handleBack() {
   router.back();
 }
 
-function getOneSelectId(id) {
+function getOneSelectId(id: any) {
   dataSetIds.value = id;
   localStorage.setItem('dataset_id', dataSetIds.value);
 }
 
-// function getTaskName(taskName) {
-//   taskNames.value = taskName;
-//   localStorage.setItem('name', taskNames.value);
-// }
-
-function getModelSelectId(id) {
+function getModelSelectId(id: any) {
   modelIds.value = id;
   localStorage.setItem('model_id', modelIds.value);
 }
 
-function getRadioValue(value) {
+function getRadioValue(value: any) {
   radioValue.value = value;
 }
 
-function getMetricsSelectId(id) {
+function getMetricsSelectId(id: any) {
   metricsIds.value = id;
   localStorage.setItem('indicator_ids', JSON.stringify(metricsIds.value));
 }
 
-function getjudgeModelSelectId(id) {
+function getjudgeModelSelectId(id: any) {
   judgeModelsId.value = id;
   localStorage.setItem('judge_model_id', judgeModelsId.value);
 }
 
-const handleGroupChange = (value) => {
+const handleGroupChange = (value: any) => {
   selectedTaskType.value = value;
 };
 
@@ -270,7 +269,7 @@ function handlCreate() {
     if (res && res.data?.message) {
       ElMessage.success('创建评测任务成功');
     }
-    router.push('/evaluation-task')
+    router.push('/evaluation-task');
   });
 }
 function handlPrevius() {

@@ -321,7 +321,7 @@ const paramsObj = reactive({
   per_page: 10,
   type: 'all',
   status: 'all',
-  username: localStorage.getItem('vuems_name'),
+  username: localStorage.getItem('vuems_name') || 'testuser',
 });
 
 // 获取数据集子类
@@ -334,22 +334,22 @@ function getDatasetTypes() {
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-          ? '多模态'
-          : item === 'vision'
-          ? '视觉'
-          : item === 'temporal'
-          ? '时序'
-          : '安全',
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
       label:
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-          ? '多模态'
-          : item === 'vision'
-          ? '视觉'
-          : item === 'temporal'
-          ? '时序'
-          : '安全',
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
     }));
   });
 }
@@ -369,16 +369,13 @@ function getChildDatas(val: any) {
       dataset_format: val.dataset_format,
       description: val.description,
     })
-      .then((res: any) => {
+      .then(() => {
         getDatasetsList();
         ElMessage.success('修改数据集成功');
         visible.value = false;
         loading.value = false;
         isUpdate.value = false;
       })
-      .catch((err: any) => {
-        ElMessage.error(`修改数据集失败`);
-      });
   } else {
     // 添加数据集
     const params = {
@@ -386,7 +383,7 @@ function getChildDatas(val: any) {
       scenario: val.scenario,
       sample_count: val.sample_count,
       type: val.type,
-      username: localStorage.getItem('vuems_name'),
+      username: localStorage.getItem('vuems_name') || 'testuser',
       dataset_format: val.dataset_format,
     };
 
@@ -423,14 +420,16 @@ onMounted(() => {
 
 // 获取数据集列表
 function getDatasetsList() {
-  getDatasets({ username: localStorage.getItem('vuems_name') }).then((res: any) => {
-    if (res && res.data) {
-      tableData.value = res.data.datasets;
-      res.data.datasets.forEach((item: any) => {
-        item.is_preset = item.is_preset ? '是' : '否';
-      });
-    }
-  });
+  getDatasets({ username: localStorage.getItem('vuems_name') || 'testuser' }).then(
+    (res: any) => {
+      if (res && res.data) {
+        tableData.value = res.data.datasets;
+        res.data.datasets.forEach((item: any) => {
+          item.is_preset = item.is_preset ? '是' : '否';
+        });
+      }
+    },
+  );
 }
 
 const tableDataFilter = computed(() => {
@@ -467,12 +466,12 @@ function handleDatasetChange(e) {
     e === '文本'
       ? 'text'
       : e === '多模态'
-      ? 'multimodal'
-      : e === '视觉'
-      ? 'vision'
-      : e === '时序'
-      ? 'temporal'
-      : 'safety';
+        ? 'multimodal'
+        : e === '视觉'
+          ? 'vision'
+          : e === '时序'
+            ? 'temporal'
+            : 'safety';
 
   childOptions.value = datasetParent.value[a].map((item: any) => ({
     value: Object.keys(item).join(''),

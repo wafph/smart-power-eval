@@ -131,16 +131,13 @@ const addTask = () => {
 // 运行评测任务
 async function getRunTask(id: number) {
   taskId.value = id;
-  try {
-    const res = await runTask(id);
-    const test = res.data.message;
-    ElMessage.success(`任务启动成功${test}开始监控状态`);
+  const res = await runTask(id);
+  const test = res.data.message;
+  ElMessage.success(`任务启动成功${test}开始监控状态`);
 
-    // 2. 开始轮询状态
-    startPollingStatus(id);
-    getTaskslists();
-  } catch (error) {
-  }
+  // 2. 开始轮询状态
+  startPollingStatus(id);
+  getTaskslists();
 }
 
 function handleResult(row: any) {
@@ -160,15 +157,12 @@ function getLogs(row: any) {
 // 获取状态
 const fetchInitialStatus = async (taskId: number) => {
   if (!taskId) return;
-  try {
-    const response = await getTaskStatus(taskId);
-    if (response.data) {
-      currentStatus.value = response.data.task_status;
-      if (currentStatus.value === 'failed' || currentStatus.value === 'success') {
-        stopPolling();
-      }
+  const response = await getTaskStatus(taskId);
+  if (response.data) {
+    currentStatus.value = response.data.task_status;
+    if (currentStatus.value === 'failed' || currentStatus.value === 'success') {
+      stopPolling();
     }
-  } catch (error) {
   }
 };
 
@@ -221,16 +215,14 @@ function handleEdit(row: any) {
 }
 
 //停止评测任务
-function handelStop(row) {
-  stopTask(row.id)
-    .then((res) => {
-      stopPolling();
-    })
-    .catch((err) => {});
+function handelStop(row: any) {
+  stopTask(row.id).then(() => {
+    stopPolling();
+  });
 }
 
-const handleViews = (row) => {
-  getTaskDetail(row.id).then((res) => {
+const handleViews = (row: any) => {
+  getTaskDetail(row.id).then((res:any) => {
     viewData.value.row = res.data;
     if (res.data) {
       tasklDetailVisible.value = true;
@@ -304,7 +296,7 @@ const paramsObj = reactive({
   type: 'all',
   status: 'all',
   is_preset: 'all',
-  username: localStorage.getItem('vuems_name'),
+  username: localStorage.getItem('vuems_name') || 'testuser',
 });
 
 // 创建/更新评测任务
@@ -322,15 +314,13 @@ function getChildDatas(val: any) {
       type: val.type,
       description: val.description,
     })
-      .then((res) => {
+      .then(() => {
         getTaskslists();
         ElMessage.success('修改任务列表信息成功');
         visible.value = false;
         loading.value = false;
         isUpdate.value = false;
       })
-      .catch((err) => {
-      });
   }
 }
 
@@ -362,14 +352,15 @@ onMounted(() => {
 
 // 获取评测任务列表
 function getTaskslists() {
-  getTaskslist({ username: localStorage.getItem('vuems_name') }).then((res) => {
-    if (res && res.data) {
-      const start = (paramsObj.page - 1) * paramsObj.per_page;
-      const end = start + paramsObj.per_page;
-      tableData.value = res.data.tasks.slice(start, end);
-      total.value = res.data.total;
-    }
-  });
+  getTaskslist({ username: localStorage.getItem('vuems_name') || 'testuser' })
+    .then((res: any) => {
+      if (res && res.data) {
+        const start = (paramsObj.page - 1) * paramsObj.per_page;
+        const end = start + paramsObj.per_page;
+        tableData.value = res.data.tasks.slice(start, end);
+        total.value = res.data.total;
+      }
+    })
 }
 </script>
 

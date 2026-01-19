@@ -2,7 +2,7 @@
   <div class="header">
     <!-- 折叠按钮 -->
     <div class="header-left">
-        <p>电力人工智能模型应用评估系统</p>
+      <p>电力人工智能模型应用评估系统</p>
       <div class="collapse-btn" @click="collapseChage">
         <el-icon v-if="sidebar.collapse">
           <Expand />
@@ -48,7 +48,7 @@ import { useRouter } from 'vue-router';
 import imgurl from '../assets/img/img.png';
 import logout from '../assets/img/logout.png';
 import { ElMessageBox } from 'element-plus';
-const username: string | null = localStorage.getItem('vuems_name');
+const username: string | null = localStorage.getItem('vuems_name') || 'testuser';
 
 // 初始化语言
 onMounted(() => {});
@@ -73,12 +73,10 @@ const handleCommand = (command: string) => {
   if (command == 'loginout') {
     ElMessageBox.confirm('确定要退出该系统吗？', '提示', {
       type: 'warning',
-    })
-      .then(async () => {
-        localStorage.removeItem('vuems_name');
-        router.push('/login');
-      })
-      .catch(() => {});
+    }).then(async () => {
+      localStorage.removeItem('vuems_name');
+      router.push('/login');
+    });
   }
 };
 
@@ -101,8 +99,6 @@ const setFullScreen = () => {
   color: var(--header-text-color);
   background: #139a96;
   border-bottom: 1px solid #ddd;
-
-
 }
 
 @media only screen and (max-width: 657px) {
@@ -117,10 +113,10 @@ const setFullScreen = () => {
   padding-left: 20px;
   height: 100%;
 
-    > p {
+  > p {
     font-weight: 700;
     font-style: normal;
-    font-size:22px;
+    font-size: 22px;
     color: #fff;
   }
 }

@@ -181,7 +181,7 @@ const modelId = ref<number>();
 const modelType = ref('');
 const modelVersion = ref([]);
 const childOptions = ref([]);
-import { ElMessage, valueEquals } from 'element-plus';
+import { ElMessage } from 'element-plus';
 const form = reactive({
   industryNature: '',
   name: '',
@@ -244,42 +244,44 @@ const handleViewVersion = (row: any) => {
   // 此处1应该是模型id
   getModelVersionDetail(modelId.value, row.id).then((res) => {
     const detailObj = res.data?.version;
+    if (detailObj) {
+      viewData.value.list = [
+        {
+          prop: 'version',
+          label: '模型版本',
+        },
+        {
+          prop: 'description',
+          label: '版本描述',
+        },
+        {
+          prop: 'status',
+          label: '版本状态',
+        },
+        {
+          prop: 'service_type',
+          label: '服务类型',
+        },
+        {
+          prop: 'service_url',
+          label: '服务地址',
+        },
+        {
+          prop: 'model_name',
+          label: '模型名称',
+        },
+        {
+          prop: 'created_at',
+          label: '创建时间',
+        },
+        {
+          prop: 'api_key',
+          label: 'api键',
+        },
+      ];
+    }
+    versionDetailVisible.value = true;
   });
-  viewData.value.list = [
-    {
-      prop: 'version',
-      label: '模型版本',
-    },
-    {
-      prop: 'description',
-      label: '版本描述',
-    },
-    {
-      prop: 'status',
-      label: '版本状态',
-    },
-    {
-      prop: 'service_type',
-      label: '服务类型',
-    },
-    {
-      prop: 'service_url',
-      label: '服务地址',
-    },
-    {
-      prop: 'model_name',
-      label: '模型名称',
-    },
-    {
-      prop: 'created_at',
-      label: '创建时间',
-    },
-    {
-      prop: 'api_key',
-      label: 'api键',
-    },
-  ];
-  versionDetailVisible.value = true;
 };
 // 表格相关
 let columns = ref([
@@ -383,7 +385,7 @@ function handleSingleClearStatus() {
 const paramsObj = reactive({
   page: 1,
   per_page: 10,
-  username: localStorage.getItem('vuems_name'),
+  username: localStorage.getItem('vuems_name') || 'testuser',
   search: '',
 });
 
@@ -398,45 +400,37 @@ function addModels() {
 }
 
 // 获取模型版本列表
-async function getVersionList(row) {
+async function getVersionList(row: any) {
   modelType.value = row.type;
 }
 
-async function getVersionId(id) {
+async function getVersionId(id: any) {
   visibleVersion.value = true;
   modelId.value = id;
-  try {
-    const res = await getModelVersionList(id);
-    tableDataVersion.value = res.data.versions;
-    res.data.versions.forEach((item) => {
-      const endIndex = item.created_at.indexOf('T');
-      item.created_at = item.created_at.substring(0, endIndex);
-    });
-    totalVersion.value = res.data.total;
-  } catch (error) {}
+  const res = await getModelVersionList(id);
+  tableDataVersion.value = res.data.versions;
+  res.data.versions.forEach((item: any) => {
+    const endIndex = item.created_at.indexOf('T');
+    item.created_at = item.created_at.substring(0, endIndex);
+  });
+  totalVersion.value = res.data.total;
 }
 // 测试模型服务连接
-async function getConnectionId(id) {
-  try {
-    const res = await testConnection(id);
-    const test = res.data.message;
-    ElMessage.success(`模型服务${test}`);
-  } catch (error) {
-  }
+async function getConnectionId(id: any) {
+  const res = await testConnection(id);
+  const test = res.data.message;
+  ElMessage.success(`模型服务${test}`);
 }
 
 // 测试指定版本连接
-async function getConnectionVersionId(versionId) {
-  try {
-    const res = await testVersionConnection(1, versionId);
-    const test = res.data.message;
-    ElMessage.success(`测试指定版本模型服务${test}`);
-  } catch (error) {
-  }
+async function getConnectionVersionId(versionId: any) {
+  const res = await testVersionConnection(1, versionId);
+  const test = res.data.message;
+  ElMessage.success(`测试指定版本模型服务${test}`);
 }
 
 // 模型确认
-function getChildDatas(val) {
+function getChildDatas(val: any) {
   loading.value = true;
   if (isUpdate.value) {
     // 更新模型
@@ -444,7 +438,7 @@ function getChildDatas(val) {
       name: val.name,
       description: val.description,
       type: val.type,
-    }).then((res) => {
+    }).then(() => {
       getModelLists();
       ElMessage.success('修改模型成功');
       visible.value = false;
@@ -455,20 +449,20 @@ function getChildDatas(val) {
     // 添加模型
     const params = {
       name: val.name,
-      username: localStorage.getItem('vuems_name'),
+      username: localStorage.getItem('vuems_name') || 'testuser',
       type: val.type,
       creation_method: val.creation_method,
       extension_fields: val.extension_fields,
     };
 
     createModel(params)
-      .then((res) => {
+      .then(() => {
         visible.value = false;
         loading.value = false;
         ElMessage.success(`添加模型${val.name}成功`);
         getModelLists();
       })
-      .catch((err) => {
+      .catch(() => {
         ElMessage.error(`添加模型失败`);
       });
   }
@@ -501,7 +495,7 @@ function createVersions() {
 }
 
 // 模型版本确认
-function getChildDatasVersion(val) {
+function getChildDatasVersion(val: any) {
   loading.value = true;
   const params = {
     model_name: val.name,
@@ -515,11 +509,11 @@ function getChildDatasVersion(val) {
   if (isEditVersion.value) {
     // 修改模型版本
     updateModelVersion(modelId.value, val.id, params)
-      .then((res) => {
+      .then(() => {
         getVersionId(modelId.value);
         ElMessage.success(`修改模型版本成功`);
       })
-      .catch((err) => {
+      .catch(() => {
         ElMessage.error(`修改模型版本失败`);
       })
       .finally(() => {
@@ -533,7 +527,7 @@ function getChildDatasVersion(val) {
 }
 
 // 添加模型版本
-async function createVersion(val) {
+async function createVersion(val: any) {
   const params = {
     description: val.description,
     service_url: val.service_url,
@@ -541,14 +535,13 @@ async function createVersion(val) {
     model_name: val.model_name,
     service_type: childOptions.value[0].value,
   };
-
-  try {
-    const res = await createModelVersion(modelId.value, params);
-    getVersionId(modelId.value);
+  const res = await createModelVersion(modelId.value, params);
+  getVersionId(modelId.value);
+  if (res && res.data.message) {
     ElMessage.success('添加模型版本成功');
-    visibleCreateVersion.value = false;
-    loading.value = false;
-  } catch (error) {}
+  }
+  visibleCreateVersion.value = false;
+  loading.value = false;
 }
 const handleEdit = (row: any) => {
   rowData.value = { ...row };
@@ -568,38 +561,38 @@ onMounted(() => {
 });
 
 function getModelTypes() {
-  getModelType()
-    .then((res) => {
-      modelVersion.value = res.data;
-      const keys = Object.keys(res.data);
-      selectOptions.value = keys.map((item) => ({
-        value:
-          item === 'text'
-            ? '文本'
-            : item === 'multimodal'
+  getModelType().then((res: any) => {
+    modelVersion.value = res.data;
+    const keys = Object.keys(res.data);
+    selectOptions.value = keys.map((item) => ({
+      value:
+        item === 'text'
+          ? '文本'
+          : item === 'multimodal'
             ? '多模态'
             : item === 'vision'
-            ? '视觉'
-            : item === 'temporal'
-            ? '时序'
-            : '安全',
-        label:
-          item === 'text'
-            ? '文本'
-            : item === 'multimodal'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
+      label:
+        item === 'text'
+          ? '文本'
+          : item === 'multimodal'
             ? '多模态'
             : item === 'vision'
-            ? '视觉'
-            : item === 'temporal'
-            ? '时序'
-            : '安全',
-      }));
-    })
-    .catch((err) => {});
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
+    }));
+  });
 }
 
 async function getModelLists() {
-  const res = await getModelList({ username: localStorage.getItem('vuems_name') });
+  const res = await getModelList({
+    username: localStorage.getItem('vuems_name') || 'testuser',
+  });
   if (res && res.data) {
     tableData.value = res.data.models;
   }

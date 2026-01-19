@@ -41,7 +41,8 @@ const errorMessageMap = {
   'Only running or pending tasks can be stopped': '只有运行中的任务才可以停止',
   'Task not completed': '任务没有完成',
   'Report file not found': '报告文件没找到',
-  'Task not found':'任务没有找到'
+  'Task not found':'任务没有找到',
+  'Username parameter is required': '用户名参数必传'
 };
 
 export { HTTP_ERRORS, businessErrorMap, responseMessageMap, errorMessageMap };
