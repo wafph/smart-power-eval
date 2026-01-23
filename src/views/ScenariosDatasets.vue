@@ -246,6 +246,10 @@ function getFormatName(formatKey: any) {
     mcq: '语义理解（选择题）',
     image_generation: '图像生成',
     image_captioning: '图像描述',
+    object_recognition: '物体识别',
+    scene_understanding: '场景理解',
+    behavior_inference: '行为推断',
+    counting: '计数',
     custom: '自定义',
     image_classification: '图像分类',
     object_detection: '目标检测',
@@ -368,14 +372,13 @@ function getChildDatas(val: any) {
       type: val.type,
       dataset_format: val.dataset_format,
       description: val.description,
-    })
-      .then(() => {
-        getDatasetsList();
-        ElMessage.success('修改数据集成功');
-        visible.value = false;
-        loading.value = false;
-        isUpdate.value = false;
-      })
+    }).then(() => {
+      getDatasetsList();
+      ElMessage.success('修改数据集成功');
+      visible.value = false;
+      loading.value = false;
+      isUpdate.value = false;
+    });
   } else {
     // 添加数据集
     const params = {

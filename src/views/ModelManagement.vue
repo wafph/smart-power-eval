@@ -374,6 +374,9 @@ function handleDefaultVersion(row: any) {
 
 function handleDeleteVersion(row: any) {
   delModelVersion(modelId.value, row.id).then((res) => {
+    if (res && res.data) {
+      getVersionId(modelId.value);
+    }
     ElMessage.success(`删除模型版本${row.model_name}成功`);
   });
 }
@@ -402,6 +405,7 @@ function addModels() {
 // 获取模型版本列表
 async function getVersionList(row: any) {
   modelType.value = row.type;
+  console.log(row);
 }
 
 async function getVersionId(id: any) {
