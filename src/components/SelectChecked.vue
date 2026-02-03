@@ -116,12 +116,10 @@ import {
   getDatasetType,
   getindicators,
   getJudgeModels,
-  createTaskslist,
 } from '@/api';
 const props = defineProps(['currentStep', 'selectedTaskType']);
 const emit = defineEmits(['emitIds', 'radioValue']);
 const { currentStep, selectedTaskType } = toRefs(props);
-const placeholders = ref('请输入任务名称');
 // 分类数据
 const categories = ref([]);
 const radio1 = ref('1');
@@ -133,7 +131,9 @@ const filterCustomIndicators = ref([]);
 const filtereModal = ref([]);
 // 当前激活的分类
 const filteredDatasets = ref([]);
+const selectOptions = ref([]);
 const activeCategory = ref('mcq');
+const indicator = ref('mcq');
 
 // 搜索关键词
 const datasetParent = ref({});
@@ -149,6 +149,7 @@ const paramsObj = reactive({
 // 切换分类
 const switchCategory = (categoryId) => {
   activeCategory.value = categoryId;
+  localStorage.setItem('item', activeCategory.value);
   // 切换分类时可以清空搜索关键词
   const as = tableData.value.filter((item) => {
     return (
@@ -159,6 +160,7 @@ const switchCategory = (categoryId) => {
   filteredDatasets.value = as.map((item) => {
     return { id: item.id, name: item.name };
   });
+  getCustomIndicatorsList();
 };
 
 function handleChange(label) {
@@ -169,10 +171,6 @@ function handleChange(label) {
 const handleDatasetSelect = (datasetId) => {
   emit('emitIds', [...selectedDatasets.value]);
 };
-
-// function handleBlur(event) {
-//   emit('taskName', taskName.value);
-// }
 
 // 获取数据集列表
 function getDatasetsList() {
@@ -211,6 +209,52 @@ function getCustomIndicatorsList() {
       id: item.id,
       name: item.name + '-' + item.chinese_name,
     }));
+    indicator.value = localStorage.getItem('item');
+    if (indicator.value === 'mcq') {
+      filterCustomIndicators.value = [
+        { id: 'rouge', name: 'ROUGE' },
+        { id: 'bleu', name: 'BLEU' },
+      ];
+    } else if (indicator.value === 'qa') {
+      filterCustomIndicators.value = [{ id: 'accuracy', name: 'accuracy-准确率' }];
+    } else if (indicator.value === 'object_recognition') {
+      filterCustomIndicators.value = [
+        { id: 'accuracy', name: 'Accuracy-准确率' },
+        { id: 'precision', name: 'Precision' },
+        { id: 'recall', name: 'Recall' },
+        { id: 'f1-score', name: 'F1-Score' },
+      ];
+    } else if (indicator.value === 'scene_understanding') {
+      filterCustomIndicators.value = [
+        { id: 'acc', name: 'Acc(VQA)' },
+        { id: 'clip_score', name: 'CLIP得分' },
+      ];
+    } else if (indicator.value === 'behavior_inference') {
+      filterCustomIndicators.value = [
+        { id: 'acc', name: 'Acc' },
+        { id: 'clip_score', name: 'CLIP得分' },
+      ];
+    } else if (indicator.value === 'counting') {
+      filterCustomIndicators.value = [{ id: 'acc', name: 'Acc' }];
+    } else if (indicator.value === 'image_classification') {
+      filterCustomIndicators.value = [
+        { id: 'accuracy', name: 'accuracy-准确率' },
+        { id: 'precision', name: 'Precision' },
+        { id: 'recall', name: 'Recall' },
+        { id: 'f1-score', name: 'F1-Score' },
+      ];
+    } else if (indicator.value === 'object_detection') {
+      filterCustomIndicators.value = [
+        { id: 'acc', name: 'Acc' },
+        { id: 'recall', name: 'Recall' },
+      ];
+    } else if (indicator.value === 'image_segmentation') {
+      filterCustomIndicators.value = [
+        { id: 'precision', name: 'Precision' },
+        { id: 'recall', name: 'Recall' },
+        { id: 'f1-score', name: 'F1-Score' },
+      ];
+    }
   });
 }
 
@@ -231,7 +275,6 @@ async function getModelLists() {
 function getDatasetTypes() {
   getDatasetType().then((res) => {
     datasetParent.value = res.data;
-    const keys = Object.keys(res.data);
     let childtypes = [];
     if (selectedTaskType.value === '文本') {
       childtypes = 'text';
@@ -251,38 +294,49 @@ function getDatasetTypes() {
   });
 }
 
-// const allCheckedIds = computed(() => [...selectedDatasets.value]);
-
 function getModelTypes() {
-  getModelType()
-    .then((res) => {
-      const keys = Object.keys(res.data);
-      selectOptions.value = keys.map((item) => ({
-        value:
-          item === 'text'
-            ? '文本'
-            : item === 'multimodal'
+  getModelType().then((res) => {
+    const keys = Object.keys(res.data);
+    selectOptions.value = keys.map((item) => ({
+      value:
+        item === 'text'
+          ? '文本'
+          : item === 'multimodal'
             ? '多模态'
             : item === 'vision'
-            ? '视觉'
-            : item === 'temporal'
-            ? '时序'
-            : '安全',
-        label:
-          item === 'text'
-            ? '文本'
-            : item === 'multimodal'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
+      label:
+        item === 'text'
+          ? '文本'
+          : item === 'multimodal'
             ? '多模态'
             : item === 'vision'
-            ? '视觉'
-            : item === 'temporal'
-            ? '时序'
-            : '安全',
-      }));
-    })
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
+    }));
+  });
 }
 
 onMounted(() => {
+  if (selectedTaskType.value === '文本') {
+    activeCategory.value = 'mcq';
+  } else if (selectedTaskType.value === '多模态') {
+    activeCategory.value = 'object_recognition';
+  } else if (selectedTaskType.value === '视觉') {
+    activeCategory.value = 'image_classification';
+  } else if (selectedTaskType.value === '时序') {
+    activeCategory.value = 'custom';
+  } else {
+    activeCategory.value = 'custom';
+  }
+  if (currentStep.value === 1) {
+    localStorage.setItem('item', activeCategory.value);
+  }
   getDatasetsList();
   getDatasetTypes();
   getModelLists();

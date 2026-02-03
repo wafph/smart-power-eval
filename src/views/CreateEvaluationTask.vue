@@ -36,6 +36,7 @@
                   class="search-input"
                   v-model="ruleForm.taskName"
                   type="text"
+                  :placeholders="placeholders"
                   autocomplete="off"
                 />
               </el-form-item>
@@ -140,9 +141,11 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { createTaskslist } from '@/api';
+const selectType = defineProps(['selectType']);
 const dataSetIds = ref([]);
 const modelIds = ref([]);
 const metricsIds = ref([]);
+const placeholders = ref('请输入任务名称');
 const judgeModelsId = ref([]);
 const radioValue = ref('1');
 const ruleForm = reactive({
@@ -203,14 +206,6 @@ const taskTypes = shallowRef([
 // 响应式数据
 const currentStep = ref(0);
 const selectedTaskType = ref('文本');
-
-// 计算属性
-const selectedTask = computed(() => {
-  return (
-    taskTypes.value.find((type) => type.value === selectedTaskType.value) ||
-    taskTypes.value[0]
-  );
-});
 
 // 方法
 function handleBack() {
