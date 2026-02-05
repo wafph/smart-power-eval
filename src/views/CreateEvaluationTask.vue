@@ -36,7 +36,7 @@
                   class="search-input"
                   v-model="ruleForm.taskName"
                   type="text"
-                  :placeholders="placeholders"
+                  :placeholder="placeholders"
                   autocomplete="off"
                 />
               </el-form-item>
@@ -97,6 +97,7 @@
       <div class="action-buttons">
         <el-button
           :disabled="!selectedTaskType"
+          v-if="currentStep > 0"
           plain
           type="primary"
           @click="handlPrevius"

@@ -226,16 +226,16 @@ function getCustomIndicatorsList() {
       ];
     } else if (indicator.value === 'scene_understanding') {
       filterCustomIndicators.value = [
-        { id: 'acc', name: 'Acc(VQA)' },
+        { id: 'accuracy', name: 'Acc(VQA)' },
         { id: 'clip_score', name: 'CLIP得分' },
       ];
     } else if (indicator.value === 'behavior_inference') {
       filterCustomIndicators.value = [
-        { id: 'acc', name: 'Acc' },
+        { id: 'accuracy', name: 'Accuracy-准确率' },
         { id: 'clip_score', name: 'CLIP得分' },
       ];
     } else if (indicator.value === 'counting') {
-      filterCustomIndicators.value = [{ id: 'acc', name: 'Acc' }];
+      filterCustomIndicators.value = [{ id: 'accuracy', name: 'Accuracy-准确率' }];
     } else if (indicator.value === 'image_classification') {
       filterCustomIndicators.value = [
         { id: 'accuracy', name: 'accuracy-准确率' },
@@ -245,7 +245,7 @@ function getCustomIndicatorsList() {
       ];
     } else if (indicator.value === 'object_detection') {
       filterCustomIndicators.value = [
-        { id: 'acc', name: 'Acc' },
+        { id: 'accuracy', name: 'accuracy-准确率' },
         { id: 'recall', name: 'Recall' },
       ];
     } else if (indicator.value === 'image_segmentation') {
