@@ -332,28 +332,29 @@ const paramsObj = reactive({
 function getDatasetTypes() {
   getDatasetType().then((res: any) => {
     datasetParent.value = res.data;
+    datasetParent.value.temporal = [{ a: '负荷预测' }, { b: '价格预测' }];
     const keys = Object.keys(res.data);
     selectOptions.value = keys.map((item) => ({
       value:
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-            ? '多模态'
-            : item === 'vision'
-              ? '视觉'
-              : item === 'temporal'
-                ? '时序'
-                : '安全',
+          ? '多模态'
+          : item === 'vision'
+          ? '视觉'
+          : item === 'temporal'
+          ? '时序'
+          : '安全',
       label:
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-            ? '多模态'
-            : item === 'vision'
-              ? '视觉'
-              : item === 'temporal'
-                ? '时序'
-                : '安全',
+          ? '多模态'
+          : item === 'vision'
+          ? '视觉'
+          : item === 'temporal'
+          ? '时序'
+          : '安全',
     }));
   });
 }
@@ -469,12 +470,12 @@ function handleDatasetChange(e) {
     e === '文本'
       ? 'text'
       : e === '多模态'
-        ? 'multimodal'
-        : e === '视觉'
-          ? 'vision'
-          : e === '时序'
-            ? 'temporal'
-            : 'safety';
+      ? 'multimodal'
+      : e === '视觉'
+      ? 'vision'
+      : e === '时序'
+      ? 'temporal'
+      : 'safety';
 
   childOptions.value = datasetParent.value[a].map((item: any) => ({
     value: Object.keys(item).join(''),

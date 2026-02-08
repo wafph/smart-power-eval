@@ -275,6 +275,7 @@ async function getModelLists() {
 function getDatasetTypes() {
   getDatasetType().then((res) => {
     datasetParent.value = res.data;
+    datasetParent.value.temporal = [{ a: '负荷预测' }, { b: '价格预测' }];
     let childtypes = [];
     if (selectedTaskType.value === '文本') {
       childtypes = 'text';
@@ -302,22 +303,22 @@ function getModelTypes() {
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-            ? '多模态'
-            : item === 'vision'
-              ? '视觉'
-              : item === 'temporal'
-                ? '时序'
-                : '安全',
+          ? '多模态'
+          : item === 'vision'
+          ? '视觉'
+          : item === 'temporal'
+          ? '时序'
+          : '安全',
       label:
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-            ? '多模态'
-            : item === 'vision'
-              ? '视觉'
-              : item === 'temporal'
-                ? '时序'
-                : '安全',
+          ? '多模态'
+          : item === 'vision'
+          ? '视觉'
+          : item === 'temporal'
+          ? '时序'
+          : '安全',
     }));
   });
 }

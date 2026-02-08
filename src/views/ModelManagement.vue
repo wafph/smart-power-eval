@@ -405,7 +405,6 @@ function addModels() {
 // 获取模型版本列表
 async function getVersionList(row: any) {
   modelType.value = row.type;
-  console.log(row);
 }
 
 async function getVersionId(id: any) {
