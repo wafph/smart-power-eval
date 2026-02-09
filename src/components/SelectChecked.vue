@@ -211,12 +211,12 @@ function getCustomIndicatorsList() {
     }));
     indicator.value = localStorage.getItem('item');
     if (indicator.value === 'mcq') {
+      filterCustomIndicators.value = [{ id: 'accuracy', name: 'accuracy-准确率' }];
+    } else if (indicator.value === 'qa') {
       filterCustomIndicators.value = [
         { id: 'rouge', name: 'ROUGE' },
         { id: 'bleu', name: 'BLEU' },
       ];
-    } else if (indicator.value === 'qa') {
-      filterCustomIndicators.value = [{ id: 'accuracy', name: 'accuracy-准确率' }];
     } else if (indicator.value === 'object_recognition') {
       filterCustomIndicators.value = [
         { id: 'accuracy', name: 'Accuracy-准确率' },
@@ -303,22 +303,22 @@ function getModelTypes() {
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-          ? '多模态'
-          : item === 'vision'
-          ? '视觉'
-          : item === 'temporal'
-          ? '时序'
-          : '安全',
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
       label:
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-          ? '多模态'
-          : item === 'vision'
-          ? '视觉'
-          : item === 'temporal'
-          ? '时序'
-          : '安全',
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
     }));
   });
 }
@@ -331,7 +331,7 @@ onMounted(() => {
   } else if (selectedTaskType.value === '视觉') {
     activeCategory.value = 'image_classification';
   } else if (selectedTaskType.value === '时序') {
-    activeCategory.value = 'custom';
+    activeCategory.value = 'a';
   } else {
     activeCategory.value = 'custom';
   }
