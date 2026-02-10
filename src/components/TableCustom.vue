@@ -36,6 +36,8 @@
           :width="item.width"
           :type="item.type"
           :align="item.align || 'center'"
+          :show-overflow-tooltip="true"
+          :fixed="item.fixed"
         >
           <template #default="{ row, column, $index }" v-if="!item.type">
             <slot :name="item.prop" :rows="row" :index="$index">
@@ -164,10 +166,10 @@
                     row.task_status === 'success'
                       ? 'success'
                       : row.task_status === 'pending'
-                      ? 'primary'
-                      : row.task_status === 'running'
-                      ? 'warning'
-                      : 'danger'
+                        ? 'primary'
+                        : row.task_status === 'running'
+                          ? 'warning'
+                          : 'danger'
                   "
                   >{{ row.task_status }}</el-tag
                 >

@@ -143,11 +143,11 @@ import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
 import { createTaskslist } from '@/api';
 const selectType = defineProps(['selectType']);
-const dataSetIds = ref([]);
-const modelIds = ref([]);
-const metricsIds = ref([]);
+const dataSetIds = ref('');
+const modelIds = ref('');
+const metricsIds = ref<string[]>([]);
 const placeholders = ref('请输入任务名称');
-const judgeModelsId = ref([]);
+const judgeModelsId = ref('');
 const radioValue = ref('1');
 const ruleForm = reactive({
   taskName: '',

@@ -96,7 +96,7 @@ const MAX_POLL_COUNT = 120; // 最多轮询5分钟 (300 * 5秒 = 10分钟=600秒
 const isPolling = ref(false);
 const viewData = ref({
   row: {},
-  list: [],
+  list: [{}],
 });
 const router = useRouter();
 const total = ref(0);
@@ -222,7 +222,7 @@ function handelStop(row: any) {
 }
 
 const handleViews = (row: any) => {
-  getTaskDetail(row.id).then((res:any) => {
+  getTaskDetail(row.id).then((res: any) => {
     viewData.value.row = res.data;
     if (res.data) {
       tasklDetailVisible.value = true;
@@ -280,8 +280,8 @@ const handleViews = (row: any) => {
   });
 };
 
-const handleDelete = (row) => {
-  deleteTask(row.id).then((res) => {
+const handleDelete = (row: any) => {
+  deleteTask(row.id).then((res:any) => {
     if (res.data && res.data.message) {
       ElMessage.success(`删除评测任务${row.task_name}成功`);
       getTaskslists();
@@ -313,14 +313,13 @@ function getChildDatas(val: any) {
       size: val.size,
       type: val.type,
       description: val.description,
-    })
-      .then(() => {
-        getTaskslists();
-        ElMessage.success('修改任务列表信息成功');
-        visible.value = false;
-        loading.value = false;
-        isUpdate.value = false;
-      })
+    }).then(() => {
+      getTaskslists();
+      ElMessage.success('修改任务列表信息成功');
+      visible.value = false;
+      loading.value = false;
+      isUpdate.value = false;
+    });
   }
 }
 
@@ -352,15 +351,16 @@ onMounted(() => {
 
 // 获取评测任务列表
 function getTaskslists() {
-  getTaskslist({ username: localStorage.getItem('vuems_name') || 'testuser' })
-    .then((res: any) => {
+  getTaskslist({ username: localStorage.getItem('vuems_name') || 'testuser' }).then(
+    (res: any) => {
       if (res && res.data) {
         const start = (paramsObj.page - 1) * paramsObj.per_page;
         const end = start + paramsObj.per_page;
         tableData.value = res.data.tasks.slice(start, end);
         total.value = res.data.total;
       }
-    })
+    },
+  );
 }
 </script>
 

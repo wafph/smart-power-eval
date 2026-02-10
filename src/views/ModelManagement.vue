@@ -92,7 +92,7 @@
     <el-dialog
       title="模型版本列表"
       v-model="visibleVersion"
-      width="1250"
+      width="80%"
       destroy-on-close
       :close-on-click-modal="false"
       @close="closeDialog"
@@ -136,7 +136,7 @@
       <el-dialog
         title="查看版本详情"
         v-model="versionDetailVisible"
-        width="700px"
+        width="80%"
         destroy-on-close
       >
         <TableDetail :data="viewData"></TableDetail>
@@ -200,7 +200,7 @@ const tabs = ref([
 
 const viewData = ref({
   row: {},
-  list: [],
+  list: [{}],
 });
 
 // 查看模型获取指定模型的详细信息
@@ -302,7 +302,7 @@ let columnsVersion = ref([
   { prop: 'service_url', label: '服务地址' },
   { prop: 'api_key', label: 'api_key' },
   { prop: 'created_at', label: '创建时间' },
-  { prop: 'operator', label: '操作', width: 480 },
+  { prop: 'operator', label: '操作', width: 400 },
 ]);
 
 // 创建/编辑弹窗相关
