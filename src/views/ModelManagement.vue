@@ -454,8 +454,7 @@ function getChildDatas(val: any) {
       name: val.name,
       username: localStorage.getItem('vuems_name') || 'testuser',
       type: val.type,
-      creation_method: val.creation_method,
-      extension_fields: val.extension_fields,
+      description: val.description,
     };
 
     createModel(params)

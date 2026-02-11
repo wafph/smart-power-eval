@@ -117,7 +117,8 @@
           @close="closeDialog"
           draggable
         >
-          <FileUpload @uploading="getLoading" :getFileIds="fileId" />
+          <!-- <FileUpload @uploading="getLoading" :getFileIds="fileId" /> -->
+         <FolderUploadModal :file-ids="fileId" />
         </el-dialog>
         <DirectoryPreview
           v-if="directoryData.length > 0"
@@ -338,22 +339,22 @@ function getDatasetTypes() {
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-          ? '多模态'
-          : item === 'vision'
-          ? '视觉'
-          : item === 'temporal'
-          ? '时序'
-          : '安全',
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
       label:
         item === 'text'
           ? '文本'
           : item === 'multimodal'
-          ? '多模态'
-          : item === 'vision'
-          ? '视觉'
-          : item === 'temporal'
-          ? '时序'
-          : '安全',
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
     }));
   });
 }
@@ -469,12 +470,12 @@ function handleDatasetChange(e) {
     e === '文本'
       ? 'text'
       : e === '多模态'
-      ? 'multimodal'
-      : e === '视觉'
-      ? 'vision'
-      : e === '时序'
-      ? 'temporal'
-      : 'safety';
+        ? 'multimodal'
+        : e === '视觉'
+          ? 'vision'
+          : e === '时序'
+            ? 'temporal'
+            : 'safety';
 
   childOptions.value = datasetParent.value[a].map((item: any) => ({
     value: Object.keys(item).join(''),

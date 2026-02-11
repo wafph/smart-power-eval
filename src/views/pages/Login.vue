@@ -83,11 +83,11 @@ const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.validate((valid) => {
     if (valid) {
-      ElMessage.success('登录成功');
       localStorage.setItem('vuems_name', param.username);
       const keys = permiss.defaultList[param.username == 'admin' ? 'admin' : 'user'];
       permiss.handleSet(keys);
       router.push('/scenarios-datasets');
+      ElMessage.success('登录成功');
       if (checked.value) {
         localStorage.setItem('login-param', JSON.stringify(param));
       } else {
