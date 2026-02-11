@@ -692,6 +692,8 @@ const uploadFile = async (uploadItem) => {
   try {
     const formData = new FormData();
     formData.append('file', uploadItem.file);
+    formData.append('upload_type', 'file');
+    formData.append('overwrite', true);
 
     // 如果需要保持文件夹结构，添加路径信息
     if (keepFolderStructure.value) {
@@ -713,10 +715,6 @@ const uploadFile = async (uploadItem) => {
       method: 'POST',
       body: formData,
       signal: uploadController.value?.signal,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-        Accept: 'application/json',
-      },
     });
 
     if (!response.ok) {
@@ -872,13 +870,13 @@ const formatFileSize = (bytes) => {
 <style scoped>
 /* 按钮样式 */
 .upload-btn {
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 8px 15px;
+  background: #139a96;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.3s;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -934,7 +932,7 @@ const formatFileSize = (bytes) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #139a96;
   color: white;
 }
 
@@ -996,13 +994,13 @@ const formatFileSize = (bytes) => {
 
 .type-btn:hover {
   background: #e8f4ff;
-  color: #409eff;
+  color: #139a96;
 }
 
 .type-btn.active {
-  background: #409eff;
+  background: #139a96;
   color: white;
-  border-color: #409eff;
+  border-color: #139a96;
   box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
 }
 
@@ -1038,7 +1036,7 @@ const formatFileSize = (bytes) => {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #409eff;
+  accent-color: #139a96;
 }
 
 .concurrent-select {
@@ -1054,7 +1052,7 @@ const formatFileSize = (bytes) => {
 
 .concurrent-select:focus {
   outline: none;
-  border-color: #409eff;
+  border-color: #139a96;
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
 }
 
@@ -1079,16 +1077,16 @@ const formatFileSize = (bytes) => {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: #139a96;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
 .upload-area:hover,
 .drag-over {
-  border-color: #409eff;
+  border-color: #139a96;
   background-color: #f8fbff;
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
   box-shadow: 0 8px 25px rgba(64, 158, 255, 0.1);
 }
 
@@ -1103,7 +1101,7 @@ const formatFileSize = (bytes) => {
 }
 
 .upload-placeholder svg {
-  color: #409eff;
+  color: #139a96;
   margin-bottom: 12px;
   stroke-width: 1.5;
 }
@@ -1152,8 +1150,8 @@ const formatFileSize = (bytes) => {
 
 .quick-btn:hover {
   background: #f8f9fa;
-  border-color: #409eff;
-  color: #409eff;
+  border-color: #139a96;
+  color: #139a96;
   transform: translateY(-1px);
 }
 
@@ -1261,7 +1259,7 @@ const formatFileSize = (bytes) => {
 }
 
 .file-item.is-folder {
-  border-left: 3px solid #409eff;
+  border-left: 3px solid #139a96;
 }
 
 .file-icon {
@@ -1317,7 +1315,7 @@ const formatFileSize = (bytes) => {
 }
 
 .folder-info {
-  color: #409eff;
+  color: #139a96;
   font-weight: 500;
 }
 
@@ -1339,7 +1337,7 @@ const formatFileSize = (bytes) => {
 
 .status-uploading {
   background: #e8f4ff;
-  color: #409eff;
+  color: #139a96;
 }
 
 .status-success {
@@ -1426,7 +1424,7 @@ const formatFileSize = (bytes) => {
 .progress-percent {
   font-size: 24px;
   font-weight: 700;
-  color: #409eff;
+  color: #139a96;
   min-width: 60px;
   text-align: right;
 }
@@ -1441,7 +1439,7 @@ const formatFileSize = (bytes) => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #409eff, #66b1ff);
+  background: linear-gradient(90deg, #139a96, #66b1ff);
   border-radius: 5px;
   transition: width 0.3s ease;
   position: relative;
@@ -1495,7 +1493,7 @@ const formatFileSize = (bytes) => {
 }
 
 .active-upload:hover {
-  border-color: #409eff;
+  border-color: #139a96;
   box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
 }
 
@@ -1694,7 +1692,7 @@ const formatFileSize = (bytes) => {
 }
 
 .upload-confirm-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #139a96;
   color: white;
   position: relative;
   overflow: hidden;
