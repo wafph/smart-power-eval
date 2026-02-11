@@ -214,8 +214,9 @@ const startUpload = async () => {
 
       // 使用FormData传输文件
       const formData = new FormData();
-      formData.append('file', fileItem.file);
-      formData.append('upload_type', 'file');
+      formData.append('files', fileItem.file);
+      // formData.append('upload_type', 'file');
+      formData.append('upload_type', 'folder');
       formData.append('overwrite', true);
       // 如果需要保持目录结构，可以添加路径信息
       if (fileItem.path) {
