@@ -118,8 +118,9 @@
           draggable
         >
           <!-- <FileUpload @uploading="getLoading" :getFileIds="fileId" /> -->
-         <FolderUploadModal :file-ids="fileId" />
+          <FolderUploadModal :file-ids="fileId" />
         </el-dialog>
+        {{ directoryData }}
         <DirectoryPreview
           v-if="directoryData.length > 0"
           :dialogVisible="isVisable"
@@ -275,21 +276,25 @@ const closeEvent = (event: any) => {
 };
 
 const handleView = (row: {}) => {
+  console.log(row.file_path)
   getDataSetlist(row.id, { path: row.file_path }).then((res: any) => {
-    directoryData.value = [
-      {
-        id: '1',
-        label: res.data?.files[0].path,
-        type: 'folder',
-        children: [
-          {
-            id: '2',
-            label: res.data?.files[1].name,
-            type: 'file',
-          },
-        ],
-      },
-    ] as any;
+    if(res && res.data.files){
+      directoryData.value = [
+        {
+          id: '1',
+          label: res.data?.files[0].path,
+          type: 'folder',
+          children: [
+            {
+              id: '2',
+              label: res.data?.files[1].name,
+              type: 'file',
+            },
+          ],
+        },
+      ] as any;
+      console.log(directoryData.value);
+    }
   });
   isVisable.value = true;
 };

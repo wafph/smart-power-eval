@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, toRefs } from 'vue';
+import { ref, watch, toRefs } from 'vue';
 import { ElTree, ElMessage } from 'element-plus';
 import type { FileNode } from './types';
 import { fileIcons } from './types';
@@ -75,7 +75,7 @@ const props = withDefaults(defineProps<Props>(), {
   dialogVisible: false,
 });
 
-const { dialogVisible } = toRefs(props);
+const { dialogVisible, directoryData } = toRefs(props);
 
 const emit = defineEmits(['closeDialogVisible']);
 const closeDialog = () => {
@@ -90,194 +90,6 @@ const defaultProps = {
   children: 'children',
   label: 'label',
 };
-
-// 示例目录数据
-// const sampleData: FileNode[] = [
-//   {
-//     id: '1',
-//     label: 'src',
-//     type: 'folder',
-//     children: [
-//       {
-//         id: '2',
-//         label: 'components',
-//         type: 'folder',
-//         children: [
-//           {
-//             id: '3',
-//             label: 'HelloWorld.vue',
-//             type: 'file',
-//             ext: 'vue',
-//           },
-//           {
-//             id: '4',
-//             label: 'UserProfile.vue',
-//             type: 'file',
-//             ext: 'vue',
-//           },
-//         ],
-//       },
-//       {
-//         id: '5',
-//         label: 'views',
-//         type: 'folder',
-//         children: [
-//           {
-//             id: '6',
-//             label: 'Home.vue',
-//             type: 'file',
-//             ext: 'vue',
-//           },
-//           {
-//             id: '7',
-//             label: 'About.vue',
-//             type: 'file',
-//             ext: 'vue',
-//           },
-//         ],
-//       },
-//       {
-//         id: '8',
-//         label: 'utils',
-//         type: 'folder',
-//         children: [
-//           {
-//             id: '9',
-//             label: 'request.ts',
-//             type: 'file',
-//             ext: 'ts',
-//           },
-//           {
-//             id: '10',
-//             label: 'tools.js',
-//             type: 'file',
-//             ext: 'js',
-//           },
-//         ],
-//       },
-//       {
-//         id: '11',
-//         label: 'assets',
-//         type: 'folder',
-//         children: [
-//           {
-//             id: '12',
-//             label: 'logo.png',
-//             type: 'file',
-//             ext: 'png',
-//           },
-//           {
-//             id: '13',
-//             label: 'styles.css',
-//             type: 'file',
-//             ext: 'css',
-//           },
-//         ],
-//       },
-//       {
-//         id: '14',
-//         label: 'main.ts',
-//         type: 'file',
-//         ext: 'ts',
-//       },
-//       {
-//         id: '15',
-//         label: 'App.vue',
-//         type: 'file',
-//         ext: 'vue',
-//       },
-//     ],
-//   },
-//   {
-//     id: '16',
-//     label: 'public',
-//     type: 'folder',
-//     children: [
-//       {
-//         id: '17',
-//         label: 'index.html',
-//         type: 'file',
-//         ext: 'html',
-//       },
-//       {
-//         id: '18',
-//         label: 'favicon.ico',
-//         type: 'file',
-//         ext: 'ico',
-//       },
-//     ],
-//   },
-//   {
-//     id: '19',
-//     label: 'package.json',
-//     type: 'file',
-//     ext: 'json',
-//   },
-//   {
-//     id: '20',
-//     label: 'tsconfig.json',
-//     type: 'file',
-//     ext: 'json',
-//   },
-//   {
-//     id: '21',
-//     label: 'README.md',
-//     type: 'file',
-//     ext: 'md',
-//   },
-// ];
-
-const sampleData: FileNode[] = [
-  // {
-  //   id: '1',
-  //   label: 'src',
-  //   type: 'folder',
-  //   children: [
-  //     {
-  //       id: '2',
-  //       label: 'components',
-  //       type: 'folder',
-  //       children: [
-  //         {
-  //           id: '4',
-  //           label: 'UserProfile.vue',
-  //           type: 'file',
-  //           ext: 'vue',
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       id: '14',
-  //       label: 'main.ts',
-  //       type: 'file',
-  //       ext: 'ts',
-  //     },
-  //     {
-  //       id: '15',
-  //       label: 'App.vue',
-  //       type: 'file',
-  //       ext: 'vue',
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: '20',
-  //   label: 'tsconfig.json',
-  //   type: 'file',
-  //   ext: 'json',
-  // },
-  // {
-  //   id: '21',
-  //   label: 'mcq_samples_computer_science_mcq.jsonl',
-  //   type: 'file',
-  //   ext: 'md',
-  // },
-];
-
-// 使用props数据或示例数据
-const directoryData = ref<FileNode[]>(
- props.directoryData
-);
 
 // 获取文件图标
 const getFileIcon = (data: FileNode) => {
@@ -308,16 +120,6 @@ const filterNode = (value: string, data: FileNode) => {
 watch(filterText, (val) => {
   treeRef.value?.filter(val);
 });
-
-// // 暴露方法给父组件
-// defineExpose({
-//   open: () => {
-//     dialogVisible.value = true;
-//   },
-//   close: () => {
-//     dialogVisible.value = false;
-//   },
-// });
 </script>
 
 <style scoped lang="less">
