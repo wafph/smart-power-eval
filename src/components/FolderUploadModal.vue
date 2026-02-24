@@ -92,8 +92,8 @@
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <p v-if="uploadType === 'file'">点击选择文件到这里</p>
-              <p v-if="uploadType === 'folder'">点击选择文件夹到这里</p>
+              <p v-if="uploadType === 'file'">点击选择或拖拽文件到这里</p>
+              <p v-if="uploadType === 'folder'">点击选择或拖拽选文件夹到这里,默认上传文件夹内所有文件，最后上传的文件会覆盖之前的文件</p>
               <p class="hint">支持批量上传</p>
             </div>
           </div>
@@ -442,112 +442,201 @@ const addFilesToQueue = async (fileList, isFromFolder = false, folderPath = '') 
   }
 };
 
-// 处理拖放
+// 修复后的 handleDrop 函数
 const handleDrop = async (event) => {
   event.preventDefault();
   const items = Array.from(event.dataTransfer.items);
   dragOver.value = false;
 
-  const filePromises = items.map(async (item) => {
+  // 用于收集所有文件的数组
+  const allFiles = [];
+  const folderInfo = {};
+
+  // 处理每个拖拽的项目
+  for (const item of items) {
     if (item.kind === 'file') {
       const entry = item.webkitGetAsEntry();
       if (entry) {
-        if (entry.isDirectory) {
-          return await traverseDirectory(entry, entry.name);
-        } else {
-          return new Promise((resolve) => {
-            entry.file((file) => {
-              resolve([{ file, path: entry.name, isFolder: false }]);
+        // 获取项目的结果
+        const results = await traverseDirectory(entry);
+        
+        // 分离文件夹和文件
+        const folders = results.filter(r => r.isFolder);
+        const files = results.filter(r => !r.isFolder);
+        
+        // 处理文件夹
+        folders.forEach(folder => {
+          // 如果这个文件夹还没被记录
+          if (folder.name && !folderInfo[folder.name]) {
+            folderInfo[folder.name] = {
+              name: folder.name,
+              path: folder.path,
+              isFolder: true,
+              files: [], // 稍后填充
+              fileCount: 0
+            };
+          }
+        });
+        
+        // 处理文件
+        files.forEach(file => {
+          // 如果文件属于某个拖拽的文件夹
+          if (file.path.includes('/')) {
+            const folderName = file.path.split('/')[0];
+            if (folderInfo[folderName]) {
+              folderInfo[folderName].files.push(file.file);
+              folderInfo[folderName].fileCount++;
+            }
+          } else {
+            // 独立文件
+            allFiles.push({
+              file: file.file,
+              path: file.path,
+              isFolder: false,
+              relativePath: file.relativePath
             });
-          });
-        }
+          }
+        });
       } else {
+        // 普通文件（非目录）
         const file = item.getAsFile();
-        return [{ file, path: file.name, isFolder: false }];
+        allFiles.push({
+          file,
+          path: file.name,
+          isFolder: false,
+          relativePath: file.name
+        });
       }
     }
-    return [];
-  });
+  }
 
-  const results = await Promise.all(filePromises);
-  const allFiles = results.flat();
-
-  // 按是否是文件夹分组
-  const folderFiles = allFiles.filter((f) => f.isFolder);
-  const normalFiles = allFiles.filter((f) => !f.isFolder);
-
-  // 添加文件夹
-  folderFiles.forEach((folderFile) => {
-    files.value.push({
-      name: folderFile.name,
-      path: folderFile.path,
-      isFolder: true,
-      files: folderFile.files,
-      fileCount: folderFile.files.length,
-      status: 'waiting',
-      size: folderFile.files.reduce((sum, file) => sum + file.size, 0),
-    });
-
-    // 添加文件夹内的文件到队列
-    folderFile.files.forEach((file) => {
-      uploadQueue.value.push({
-        file,
-        isFolderItem: true,
-        folderPath: folderFile.name,
+  // 1. 添加文件夹到显示列表
+  Object.values(folderInfo).forEach(folder => {
+    if (folder.files.length > 0) {
+      const totalSize = folder.files.reduce((sum, file) => sum + file.size, 0);
+      
+      // 添加到显示的文件列表
+      files.value.push({
+        name: folder.name,
+        path: folder.path,
+        isFolder: true,
+        files: folder.files,
+        fileCount: folder.fileCount,
         status: 'waiting',
-        relativePath: file.webkitRelativePath || '',
+        size: totalSize
       });
-    });
+
+      // 添加文件夹内的所有文件到上传队列
+      folder.files.forEach(file => {
+        uploadQueue.value.push({
+          file,
+          isFolderItem: true,
+          folderPath: folder.name,
+          status: 'waiting',
+          relativePath: file.webkitRelativePath || file.name
+        });
+      });
+    }
   });
 
-  // 添加普通文件
-  normalFiles.forEach((normalFile) => {
-    files.value.push({
-      file: normalFile.file,
-      name: normalFile.file.name,
-      path: normalFile.path,
-      isFolder: false,
-      size: normalFile.file.size,
-      status: 'waiting',
-    });
+  // 2. 添加独立的文件
+  allFiles.forEach(fileItem => {
+    if (!fileItem.isFolder) {
+      // 添加到显示的文件列表
+      files.value.push({
+        file: fileItem.file,
+        name: fileItem.file.name,
+        path: fileItem.path,
+        isFolder: false,
+        size: fileItem.file.size,
+        status: 'waiting'
+      });
 
-    uploadQueue.value.push({
-      file: normalFile.file,
-      isFolderItem: false,
-      folderPath: '',
-      status: 'waiting',
-      relativePath: normalFile.path,
-    });
+      // 添加到上传队列
+      uploadQueue.value.push({
+        file: fileItem.file,
+        isFolderItem: false,
+        folderPath: '',
+        status: 'waiting',
+        relativePath: fileItem.relativePath
+      });
+    }
   });
 };
 
 // 遍历目录
-const traverseDirectory = async (entry, path) => {
-  return new Promise((resolve) => {
+// 更简洁的遍历目录函数
+const traverseDirectory = async (entry, basePath = '') => {
+  return new Promise(async (resolve, reject) => {
+    const files = [];
+    
+    // 递归遍历函数
+    const readEntries = async (dirEntry, currentPath) => {
+      return new Promise((resolveRead) => {
+        const dirReader = dirEntry.createReader();
+        
+        const readBatch = () => {
+          dirReader.readEntries(async (entries) => {
+            if (entries.length === 0) {
+              resolveRead();
+              return;
+            }
+            
+            for (const entry of entries) {
+              const entryPath = currentPath ? `${currentPath}/${entry.name}` : entry.name;
+              
+              if (entry.isFile) {
+                const file = await new Promise((resolveFile) => {
+                  entry.file(resolveFile);
+                });
+                
+                files.push({
+                  file,
+                  path: entryPath,
+                  isFolder: false,
+                  relativePath: entryPath
+                });
+              } else if (entry.isDirectory) {
+                await readEntries(entry, entryPath);
+              }
+            }
+            
+            // 继续读取下一批
+            readBatch();
+          });
+        };
+        
+        readBatch();
+      });
+    };
+    
     if (entry.isFile) {
-      entry.file((file) => {
-        resolve([{ file, path, isFolder: false }]);
+      const file = await new Promise((resolveFile) => {
+        entry.file(resolveFile);
       });
+      
+      resolve([{
+        file,
+        path: basePath ? `${basePath}/${entry.name}` : entry.name,
+        isFolder: false,
+        relativePath: basePath ? `${basePath}/${entry.name}` : entry.name
+      }]);
     } else if (entry.isDirectory) {
-      const reader = entry.createReader();
-      reader.readEntries(async (entries) => {
-        const promises = entries.map((subEntry) =>
-          traverseDirectory(subEntry, path + '/' + subEntry.name),
-        );
-        const results = await Promise.all(promises);
-        const allFiles = results.flat();
-
-        // 返回文件夹信息
-        resolve([
-          {
-            name: entry.name,
-            path: path,
-            isFolder: true,
-            files: allFiles.map((f) => f.file).filter(Boolean),
-            fileCount: allFiles.length,
-          },
-        ]);
-      });
+      await readEntries(entry, basePath ? `${basePath}/${entry.name}` : entry.name);
+      
+      // 返回文件夹信息和所有文件
+      resolve([
+        {
+          name: entry.name,
+          path: basePath ? `${basePath}/${entry.name}` : entry.name,
+          isFolder: true,
+          files: files.map(f => f.file),
+          fileCount: files.length
+        },
+        ...files
+      ]);
+    } else {
+      resolve([]);
     }
   });
 };
@@ -688,7 +777,7 @@ const processUploadQueue = async () => {
 // 上传单个文件
 const uploadFile = async (uploadItem) => {
   const activeUpload = activeUploads.value.find((au) => au.uploadItem === uploadItem);
-
+  
   try {
     const formData = new FormData();
     formData.append('file', uploadItem.file);
@@ -755,7 +844,6 @@ const uploadFile = async (uploadItem) => {
       uploadItem.status = 'error';
       uploadItem.error = error.message;
     }
-    console.error('上传失败:', error);
   } finally {
     // 从活动上传列表移除
     if (activeUpload) {
@@ -1069,24 +1157,10 @@ const formatFileSize = (bytes) => {
   position: relative;
   overflow: hidden;
 }
-
-.upload-area::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: #139a96;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
 .upload-area:hover,
 .drag-over {
   border-color: #139a96;
   background-color: #f8fbff;
-  /* transform: translateY(-2px); */
   box-shadow: 0 8px 25px rgba(64, 158, 255, 0.1);
 }
 
@@ -1698,20 +1772,9 @@ const formatFileSize = (bytes) => {
   overflow: hidden;
 }
 
-.upload-confirm-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
 .upload-confirm-btn:hover:not(:disabled) {
   transform: translateY(-2px);
+  opacity: 0.8;
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
