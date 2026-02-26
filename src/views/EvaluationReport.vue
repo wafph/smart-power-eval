@@ -35,8 +35,9 @@ let columns = ref([
   { prop: 'dataset_name', label: '数据集' },
   { prop: 'task_type', label: '任务类型' },
   { prop: 'model_name', label: '模型' },
-  { prop: 'accuracy', label: '指标' },
-  { prop: 'evaluation_results', label: '结果' },
+  { prop: 'metrics', label: '指标' },
+  { prop: 'results', label: '结果' },
+  { prop: 'evaluation_report', label: '报告' },
 ]);
 
 onMounted(() => {

@@ -151,11 +151,29 @@
                 {{ row.evaluation_results?.task_type }}
               </template>
 
-              <template v-if="item.prop == 'accuracy' && row.evaluation_results?.metrics">
-                {{ Object.keys(row.evaluation_results?.metrics).join('') }}
+              <template v-if="item.prop == 'metrics' && row.evaluation_results?.metrics">
+                <div>
+                  {{ Object.keys(row.evaluation_results?.metrics)[0] }}
+                </div>
+                <div>
+                  {{ Object.keys(row.evaluation_results?.metrics)[1] }}
+                </div>
+                <div>
+                  {{ Object.keys(row.evaluation_results?.metrics)[2] }}
+                </div>
               </template>
-              <template v-if="item.prop == 'evaluation_results'">
-                {{ row.evaluation_results?.metrics?.accuracy }}
+              <template v-if="item.prop == 'results' && row.evaluation_results?.metrics">
+                <div>
+                  {{ Object.values(row.evaluation_results?.metrics)[0] }}
+                </div>
+                <div>
+                  {{ Object.values(row.evaluation_results?.metrics)[1] }}
+                </div>
+                <div>
+                  {{ Object.values(row.evaluation_results?.metrics)[2] }}
+                </div>
+              </template>
+              <template v-if="item.prop == 'evaluation_report'">
                 <el-button type="primary" size="small" @click="downloadResult(row)">
                   下载
                 </el-button>
