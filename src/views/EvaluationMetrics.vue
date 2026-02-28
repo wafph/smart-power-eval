@@ -1,7 +1,7 @@
 <template>
   <div class="evaluation-container">
-    <h2>评估指标选择</h2>
-    <p>配置评估指标，构建指标体系，支持特定场景的评估需求</p>
+      <h2>评估指标选择</h2>
+      <p>配置评估指标，构建指标体系，支持特定场景的评估需求</p>
     <div class="metrics-content">
       <CustomIndicator :indicators="customIndicators" />
     </div>
@@ -49,7 +49,6 @@ onMounted(() => {
       },
     ];
     customIndicators.value = res.data.metrics.concat(a);
-
   });
 });
 </script>
@@ -61,9 +60,10 @@ onMounted(() => {
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  height: 100%;
 
   p {
-    margin: 20px 0;
+    margin: 12px 0 6px;
   }
 }
 
