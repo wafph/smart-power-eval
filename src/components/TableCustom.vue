@@ -161,6 +161,12 @@
                 <div>
                   {{ Object.keys(row.evaluation_results?.metrics)[2] }}
                 </div>
+                <div>
+                  {{ Object.keys(row.evaluation_results?.metrics)[3] }}
+                </div>
+                  <div>
+                  {{ Object.keys(row.evaluation_results?.metrics)[4] }}
+                </div>
               </template>
               <template v-if="item.prop == 'results' && row.evaluation_results?.metrics">
                 <div>
@@ -171,6 +177,12 @@
                 </div>
                 <div>
                   {{ Object.values(row.evaluation_results?.metrics)[2] }}
+                </div>
+                <div>
+                  {{ Object.values(row.evaluation_results?.metrics)[3] }}
+                </div>
+                  <div>
+                  {{ Object.values(row.evaluation_results?.metrics)[4] }}
                 </div>
               </template>
               <template v-if="item.prop == 'evaluation_report'">
@@ -416,12 +428,6 @@ const handleSelectionChange = (selection: any[]) => {
   multipleSelection.value = selection;
   emits('sendsSelection', multipleSelection.value);
 };
-
-// const setDisabled = () => {
-//   const stopDisabled = states.actions.find((item) => {
-//     return item.command === 'stop';
-//   }).disabled;
-// };
 
 const setDisabled = computed(() => {
   const stopDisabled = states.actions.find((item) => {

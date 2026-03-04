@@ -3,33 +3,33 @@
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧树状目录 -->
-       <div style="height: 80vh;overflow-y: auto;">
-         <div class="left-sidebar">
-           <div class="directory-header">
-             <span class="directory-title">内置指标体系</span>
-           </div>
-           <div class="tree-container">
-             <el-tree
-               ref="treeRef"
-               :data="treeData"
-               :props="defaultProps"
-               node-key="id"
-               default-expand-all
-               :expand-on-click-node="false"
-               :highlight-current="true"
-               class="directory-tree"
-               @node-click="handleNodeClick"
-             >
-               <template #default="{ node, data }">
-                 <span class="custom-tree-node">
-                   <span class="node-label">{{ node.label }}</span>
-                   <span v-if="data.count" class="node-count">({{ data.count }})</span>
-                 </span>
-               </template>
-             </el-tree>
-           </div>
-         </div>
-       </div>
+      <div style="height: 80vh; overflow-y: auto">
+        <div class="left-sidebar">
+          <div class="directory-header">
+            <span class="directory-title">内置指标体系</span>
+          </div>
+          <div class="tree-container">
+            <el-tree
+              ref="treeRef"
+              :data="treeData"
+              :props="defaultProps"
+              node-key="id"
+              default-expand-all
+              :expand-on-click-node="false"
+              :highlight-current="true"
+              class="directory-tree"
+              @node-click="handleNodeClick"
+            >
+              <template #default="{ node, data }">
+                <span class="custom-tree-node">
+                  <span class="node-label">{{ node.label }}</span>
+                  <span v-if="data.count" class="node-count">({{ data.count }})</span>
+                </span>
+              </template>
+            </el-tree>
+          </div>
+        </div>
+      </div>
 
       <!-- 右侧自定义指标体系 -->
       <div class="right-content">
@@ -38,10 +38,7 @@
             <span class="section-title">自定义指标体系</span>
           </div>
           <div class="header-right">
-            <el-button
-              type="primary"
-              @click="handleNewIndicator"
-            >
+            <el-button type="primary" @click="handleNewIndicator">
               <el-icon class="el-icon--left"><Plus /></el-icon>
               新建指标体系
             </el-button>
@@ -87,22 +84,25 @@
                     :icon="View"
                     title="查看"
                     @click="handleView(scope.row)"
-                  >查看</el-button>
+                    >查看</el-button
+                  >
                   <el-button
                     size="small"
                     type="primary"
                     :icon="Edit"
                     title="编辑"
                     @click="handleEdit(scope.row)"
-                  >编辑</el-button>
+                    >编辑</el-button
+                  >
                   <el-button
                     size="small"
                     type="danger"
                     :icon="Delete"
                     title="删除"
                     @click="handleDelete(scope.row)"
-                  
-                  > 删除</el-button>
+                  >
+                    删除</el-button
+                  >
                 </div>
               </template>
             </el-table-column>
@@ -146,7 +146,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="子任务类型" prop="subtaskType">
-            <el-select v-model="formData.subtaskType" placeholder="请选择子任务类型">
+          <el-select v-model="formData.subtaskType" placeholder="请选择子任务类型">
             <el-option label="目标检测" value="目标检测" />
             <el-option label="图像分割" value="图像分割" />
             <el-option label="图像分类" value="图像分类" />
@@ -233,8 +233,8 @@ const treeData = ref([
         id: '2-3',
         label: '行为推断',
         children: [
-          { id: '2-2-1', label: 'Accuracy准确率' },
-          { id: '2-2-2', label: 'CLIPScore' },
+          { id: '2-3-1', label: 'Accuracy准确率' },
+          { id: '2-3-2', label: 'CLIPScore' },
         ],
       },
       {
@@ -262,20 +262,20 @@ const treeData = ref([
         id: '3-2',
         label: '目标检测',
         children: [
-          { id: '3-1-1', label: 'Accuracy准确率' },
-          { id: '3-1-2', label: 'Precision精确率' },
-          { id: '3-1-3', label: 'Recall召回率' },
-          { id: '3-1-4', label: 'Discovery_Rate发现率' },
-          { id: '3-1-4', label: 'error_rate误检比' },
+          { id: '3-2-1', label: 'Accuracy准确率' },
+          { id: '3-2-2', label: 'Precision精确率' },
+          { id: '3-2-3', label: 'Recall召回率' },
+          { id: '3-2-4', label: 'Discovery_Rate发现率' },
+          { id: '3-2-4', label: 'error_rate误检比' },
         ],
       },
       {
         id: '3-3',
         label: '图像分割',
         children: [
-          { id: '3-1-1', label: 'Precision精确率' },
-          { id: '3-1-2', label: 'Recall召回率' },
-          { id: '3-1-3', label: 'F1-Score' },
+          { id: '3-3-1', label: 'Precision精确率' },
+          { id: '3-3-2', label: 'Recall召回率' },
+          { id: '3-3-3', label: 'F1-Score' },
         ],
       },
     ],
@@ -289,8 +289,20 @@ const treeData = ref([
     id: '5',
     label: '安全',
     children: [
-      { id: '5-1', label: '基础安全' },
-      { id: '5-2', label: '对抗安全' },
+      {
+        id: '5-1',
+        label: '基础安全',
+        children: [
+          { id: '5-1-1', label: '5大类31小类安全风险综合得分' },
+        ],
+      },
+      {
+        id: '5-2',
+        label: '对抗安全',
+        children: [
+          { id: '5-2-1', label: '对抗攻击综合得分对抗攻击综合得分' },
+        ],
+      },
     ],
   },
 ]);
@@ -324,7 +336,7 @@ const tableData = ref([
     assessmentType: '文本',
     subtaskType: '语义理解（问答）',
     createTime: '2026-02-06',
-  }
+  },
 ]);
 
 // 树形结构配置
@@ -522,7 +534,8 @@ onMounted(() => {
       display: flex;
       flex-direction: column;
       background-color: #fff;
-  
+      margin-bottom: 30px;
+
       .directory-header {
         width: 280px;
         padding: 16px;

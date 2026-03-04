@@ -188,13 +188,13 @@ const taskTypes = shallowRef([
     type: 'CV',
     tagType: 'warning',
   },
-  // {
-  //   value: '安全',
-  //   label: '安全评估',
-  //   icon: Camera,
-  //   type: '安全',
-  //   tagType: 'danger',
-  // },
+  {
+    value: '安全',
+    label: '安全评估',
+    icon: Camera,
+    type: '安全',
+    tagType: 'danger',
+  },
   {
     value: '时序',
     label: '时序评估',

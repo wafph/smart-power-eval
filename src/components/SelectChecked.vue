@@ -211,7 +211,10 @@ function getCustomIndicatorsList() {
     }));
     indicator.value = localStorage.getItem('item');
     if (indicator.value === 'mcq') {
-      filterCustomIndicators.value = [{ id: 'accuracy', name: 'accuracy-准确率' }];
+      filterCustomIndicators.value = [
+        { id: 'accuracy', name: 'Accuracy-准确率' },
+        { id: 'f1-score', name: 'F1-Score' },
+      ];
     } else if (indicator.value === 'qa') {
       filterCustomIndicators.value = [
         { id: 'rouge', name: 'ROUGE' },
@@ -219,41 +222,46 @@ function getCustomIndicatorsList() {
       ];
     } else if (indicator.value === 'object_recognition') {
       filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy-准确率' },
-        { id: 'precision', name: 'Precision' },
-        { id: 'recall', name: 'Recall' },
+        { id: 'accuracy', name: 'Accuracy准确率' },
+        { id: 'precision', name: 'Precision精确率' },
+        { id: 'recall', name: 'Recall召回率' },
         { id: 'f1-score', name: 'F1-Score' },
       ];
     } else if (indicator.value === 'scene_understanding') {
       filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Acc(VQA)' },
-        { id: 'clip_score', name: 'CLIP得分' },
+        { id: 'accuracy', name: 'Accuracy准确率' },
+        { id: 'clip_score', name: 'CLIPScore' },
       ];
     } else if (indicator.value === 'behavior_inference') {
       filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy-准确率' },
-        { id: 'clip_score', name: 'CLIP得分' },
+        { id: 'accuracy', name: 'Accuracy准确率' },
+        { id: 'clip_score', name: 'CLIPScore' },
       ];
     } else if (indicator.value === 'counting') {
-      filterCustomIndicators.value = [{ id: 'accuracy', name: 'Accuracy-准确率' }];
+      filterCustomIndicators.value = [{ id: 'accuracy', name: 'Accuracy准确率' }];
     } else if (indicator.value === 'image_classification') {
       filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'accuracy-准确率' },
-        { id: 'precision', name: 'Precision' },
-        { id: 'recall', name: 'Recall' },
+        { id: 'accuracy', name: 'Accuracy准确率' },
+        { id: 'precision', name: 'Precision精确率' },
+        { id: 'recall', name: 'Recall召回率' },
         { id: 'f1-score', name: 'F1-Score' },
       ];
     } else if (indicator.value === 'object_detection') {
       filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'accuracy-准确率' },
-        { id: 'recall', name: 'Recall' },
+        { id: 'accuracy', name: 'Accuracy准确率' },
+        { id: 'precision', name: 'Precision精确率' },
+        { id: 'recall', name: 'Recall召回率' },
+        { id: 'discoveryRate', name: 'Discovery_Rate发现率' },
+        { id: 'error_rate', name: 'Error_rate误检比' },
       ];
     } else if (indicator.value === 'image_segmentation') {
       filterCustomIndicators.value = [
-        { id: 'precision', name: 'Precision' },
-        { id: 'recall', name: 'Recall' },
+        { id: 'precision', name: 'Precision精确率' },
+        { id: 'recall', name: 'Recall召回率' },
         { id: 'f1-score', name: 'F1-Score' },
       ];
+    } else {
+      filterCustomIndicators.value = [];
     }
   });
 }
