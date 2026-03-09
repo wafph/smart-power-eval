@@ -115,7 +115,7 @@ const { options, formData, edit, update, isSystem } = defineProps({
   },
   update: {
     type: Function,
-    required: true,
+    required: false,
   },
   isSystem: {
     type: Boolean,

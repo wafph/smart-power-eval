@@ -317,3 +317,38 @@ export const getJudgeModels = () => {
     method: 'get',
   });
 };
+
+// 指标列表
+export const getMetricsList = (query: any) => {
+  return request({
+    url: `${baseUrl}/api/custom-metrics`,
+    method: 'get',
+    params: query,
+  });
+};
+
+// 创建自定义指标
+export const createMetrics = (query: any) => {
+  return request({
+    url: `${baseUrl}/api/custom-metrics`,
+    method: 'post',
+    data: query,
+  });
+};
+
+// 创建自定义指标
+export const updateMetrics = (id: string, query: any) => {
+  return request({
+    url: `${baseUrl}/api/custom-metrics/${id}`,
+    method: 'put',
+    data: query
+  });
+};
+
+
+export const delMetric = (id: string) => {
+  return request({
+    url: `${baseUrl}/api/custom-metrics/${id}`,
+    method: 'delete',
+  });
+};

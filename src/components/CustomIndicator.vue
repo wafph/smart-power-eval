@@ -42,147 +42,67 @@
               <el-icon class="el-icon--left"><Plus /></el-icon>
               新建指标体系
             </el-button>
+            <el-dialog
+              :title="isEdit ? '编辑指标体系' : '新增指标体系'"
+              v-model="visible"
+              width="700px"
+              destroy-on-close
+              :close-on-click-modal="false"
+              @close="closeDialog"
+              draggable
+            >
+              <TableEdit
+                :form-data="rowData"
+                :options="dialogOptions"
+                :edit="isEdit"
+                :isSystem="true"
+                @changeEmit="handleDatasetChange"
+                @emitForm="getFormValue"
+                @saveEdit="getChildDatas"
+              />
+            </el-dialog>
           </div>
         </div>
-
-        <!-- 表格区域 -->
-        <div class="table-container">
-          <el-table
-            :data="tableData"
-            style="width: 100%"
-            :header-cell-style="{
-              background: '#f5f7fa',
-              color: '#333',
-              fontWeight: 'bold',
-            }"
-            :row-style="{ background: '#fafafa' }"
-            border
-            stripe
-          >
-            <el-table-column prop="index" label="序号" width="80" align="center" />
-            <el-table-column prop="name" label="指标体系名称" min-width="180" />
-            <el-table-column prop="assessmentType" label="评估类型" width="120">
-              <template #default="scope">
-                <el-tag :type="getAssessmentTypeTagType(scope.row.assessmentType)">
-                  {{ scope.row.assessmentType }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="subtaskType" label="子任务类型" min-width="140" />
-            <el-table-column
-              prop="createTime"
-              label="创建时间"
-              width="120"
-              align="center"
-            />
-            <el-table-column label="操作" width="230" align="center" fixed="right">
-              <template #default="scope">
-                <div class="action-buttons">
-                  <el-button
-                    size="small"
-                    type="warning"
-                    :icon="View"
-                    title="查看"
-                    @click="handleView(scope.row)"
-                    >查看</el-button
-                  >
-                  <el-button
-                    size="small"
-                    type="primary"
-                    :icon="Edit"
-                    title="编辑"
-                    @click="handleEdit(scope.row)"
-                    >编辑</el-button
-                  >
-                  <el-button
-                    size="small"
-                    type="danger"
-                    :icon="Delete"
-                    title="删除"
-                    @click="handleDelete(scope.row)"
-                  >
-                    删除</el-button
-                  >
-                </div>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-
-        <!-- 分页 -->
-        <div class="pagination-container">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 30, 50]"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="total"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          />
-        </div>
+        <TableCustom
+          :columns="columns"
+          :tableData="pagedData"
+          :pageSizes="[10, 20, 50, 100]"
+          :pageSize="paramsObj.per_page"
+          :layouts="'total, sizes, prev, pager, next, jumper'"
+          :currentPage="paramsObj.page"
+          :total="tableDataFilter.length"
+          :editFunc="handleEdit"
+          :delFunc="handleDelete"
+          :viewFunc="handleView"
+          @changePage="changeCurrentPage"
+          @changeSize="changeSizePage"
+        ></TableCustom>
+        <el-dialog title="指标详情" v-model="isVisable" width="700px" destroy-on-close>
+          <TableDetail :data="viewData"></TableDetail>
+        </el-dialog>
       </div>
     </div>
-
-    <!-- 新建/编辑指标体系对话框 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      width="700px"
-      draggable=""
-      :before-close="handleDialogClose"
-    >
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="120px">
-        <el-form-item label="指标体系名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入指标体系名称" />
-        </el-form-item>
-        <el-form-item label="评估类型" prop="assessmentType">
-          <el-select v-model="formData.assessmentType" placeholder="请选择评估类型">
-            <el-option label="文本" value="文本" />
-            <el-option label="多模态" value="多模态" />
-            <el-option label="视觉" value="视觉" />
-            <el-option label="时序" value="时序" />
-            <el-option label="安全" value="安全" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="子任务类型" prop="subtaskType">
-          <el-select v-model="formData.subtaskType" placeholder="请选择子任务类型">
-            <el-option label="目标检测" value="目标检测" />
-            <el-option label="图像分割" value="图像分割" />
-            <el-option label="图像分类" value="图像分类" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="handleDialogClose">取消</el-button>
-          <el-button type="primary" @click="handleSubmitForm"> 确定 </el-button>
-        </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import {
-  ElTree,
-  ElTable,
-  ElTableColumn,
-  ElButton,
-  ElTag,
-  ElPagination,
-  ElDialog,
-  ElForm,
-  ElFormItem,
-  ElInput,
-  ElSelect,
-  ElOption,
-  ElMessage,
-  ElMessageBox,
-} from 'element-plus';
-import { View, Edit, Delete, Plus } from '@element-plus/icons-vue';
-
+  getMetricsList,
+  delMetric,
+  createMetrics,
+  updateMetrics,
+  getDatasetType,
+} from '@/api';
+const tableData = ref([]);
+const rowData = ref({});
+const isEdit = ref(false);
+const visible = ref(false);
+const isVisable = ref(false);
+const datasetParent = ref({});
+const selectOptions = ref([]);
+const childOptions = ref([]);
+import { ElMessage } from 'element-plus';
 // 树形结构数据
 const treeData = ref([
   {
@@ -292,53 +212,194 @@ const treeData = ref([
       {
         id: '5-1',
         label: '基础安全',
-        children: [
-          { id: '5-1-1', label: '5大类31小类安全风险综合得分' },
-        ],
+        children: [{ id: '5-1-1', label: '5大类31小类安全风险综合得分' }],
       },
       {
         id: '5-2',
         label: '对抗安全',
-        children: [
-          { id: '5-2-1', label: '对抗攻击综合得分对抗攻击综合得分' },
-        ],
+        children: [{ id: '5-2-1', label: '对抗攻击综合得分对抗攻击综合得分' }],
       },
     ],
   },
 ]);
 
-// 表格数据
-const tableData = ref([
-  {
-    index: 1,
-    name: '光伏预测',
-    assessmentType: '时序',
-    subtaskType: '文本内容',
-    createTime: '2026-01-02',
-  },
-  {
-    index: 2,
-    name: '设备缺陷识别',
-    assessmentType: '多模态',
-    subtaskType: '物体识别',
-    createTime: '2026-01-07',
-  },
-  {
-    index: 3,
-    name: '电力安全监控',
-    assessmentType: '视觉',
-    subtaskType: '目标检测',
-    createTime: '2026-02-13',
-  },
-  {
-    index: 4,
-    name: '营销知识理解',
-    assessmentType: '文本',
-    subtaskType: '语义理解（问答）',
-    createTime: '2026-02-06',
-  },
+// 表格相关
+let columns = ref([
+  { type: 'index', label: '序号', width: 55, align: 'center' },
+  { prop: 'name', label: '指标体系名称' },
+  { prop: 'evaluation_type', label: '评估类型' },
+  { prop: 'subtask_type', label: '子任务类型' },
+  { prop: 'created_at', label: '创建时间' },
+  { prop: 'operator', label: '操作', width: 300 },
 ]);
 
+const viewData = ref({
+  row: {},
+  list: [{}],
+});
+
+let dialogOptions = ref({
+  labelWidth: '130px',
+  span: 24,
+  list: [
+    { type: 'input', label: '指标体系名称', prop: 'name', required: true },
+    {
+      type: 'select1',
+      label: '评估类型',
+      opts: selectOptions,
+      prop: 'evaluation_type',
+      required: true,
+      placeholder: '数据集类型',
+    },
+    {
+      type: 'select2',
+      label: '子任务类型',
+      opts: childOptions,
+      prop: 'subtask_type',
+      required: true,
+      placeholder: '子任务类型',
+    },
+  ],
+});
+
+const pagedData = computed(() => {
+  const start = (paramsObj.page - 1) * paramsObj.per_page;
+  const end = start + paramsObj.per_page;
+  return tableDataFilter.value.slice(start, end);
+});
+
+const handleEdit = (row: any) => {
+  rowData.value = { ...row };
+  isEdit.value = true;
+  visible.value = true;
+};
+
+function getFormValue(val: any) {
+  val.subtask_type = '';
+}
+
+const handleView = (row: {}) => {
+  viewData.value.row = { ...row };
+  viewData.value.list = [
+    {
+      prop: 'name',
+      label: '指标名称',
+    },
+    {
+      prop: 'evaluation_type',
+      label: '评估类型',
+    },
+    {
+      prop: 'subtask_type',
+      label: '子任务类型',
+    },
+    {
+      prop: 'created_at',
+      label: '创建视觉',
+    },
+  ];
+  isVisable.value = true;
+};
+
+function changeCurrentPage(val: number) {
+  paramsObj.page = val;
+}
+
+function changeSizePage(val: number) {
+  paramsObj.per_page = val;
+}
+
+// 获取数据集子类
+function getDatasetTypes() {
+  getDatasetType().then((res: any) => {
+    datasetParent.value = res.data;
+    datasetParent.value.temporal = [{ a: '负荷预测' }, { b: '价格预测' }];
+    const keys = Object.keys(res.data);
+    selectOptions.value = keys.map((item) => ({
+      value:
+        item === 'text'
+          ? '文本'
+          : item === 'multimodal'
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
+      label:
+        item === 'text'
+          ? '文本'
+          : item === 'multimodal'
+            ? '多模态'
+            : item === 'vision'
+              ? '视觉'
+              : item === 'temporal'
+                ? '时序'
+                : '安全',
+    }));
+  });
+}
+
+const closeDialog = () => {
+  visible.value = false;
+  isEdit.value = false;
+};
+
+// 获取指标列表
+function getMetricsLists() {
+  getMetricsList({ username: localStorage.getItem('vuems_name') || 'testuser' }).then(
+    (res: any) => {
+      if (res && res.data) {
+        res.data.metrics.forEach((item: any) => {
+          item.subtask_type = getFormatName(item.subtask_type);
+        });
+        tableData.value = res.data.metrics;
+      }
+    },
+  );
+}
+
+// 映射函数
+function getFormatName(formatKey: any) {
+  const formatMap = {
+    qa: '语义理解（问答）',
+    mcq: '语义理解（选择题）',
+    image_generation: '图像生成',
+    image_captioning: '图像描述',
+    object_recognition: '物体识别',
+    scene_understanding: '场景理解',
+    behavior_inference: '行为推断',
+    counting: '计数',
+    custom: '自定义',
+    image_classification: '图像分类',
+    object_detection: '目标检测',
+    image_segmentation: '图像分割',
+  };
+  return formatMap[formatKey] || '未知格式';
+}
+
+const tableDataFilter = computed(() => {
+  let data = [...tableData.value];
+  return data;
+});
+
+function handleDatasetChange(e) {
+  getDatasetTypes();
+  const a =
+    e === '文本'
+      ? 'text'
+      : e === '多模态'
+        ? 'multimodal'
+        : e === '视觉'
+          ? 'vision'
+          : e === '时序'
+            ? 'temporal'
+            : 'safety';
+  childOptions.value = datasetParent.value[a].map((item: any) => ({
+    value: Object.keys(item).join(''),
+    label: Object.values(item).join(''),
+  }));
+}
 // 树形结构配置
 const defaultProps = {
   children: 'children',
@@ -346,154 +407,65 @@ const defaultProps = {
 };
 
 // 分页相关数据
-const currentPage = ref(1);
-const pageSize = ref(10);
-const total = computed(() => tableData.value.length);
-
-// 对话框相关数据
-const dialogVisible = ref(false);
-const dialogTitle = ref('新建指标体系');
-const formRef = ref(null);
-const formData = reactive({
-  id: null,
-  name: '',
-  assessmentType: '',
-  subtaskType: '',
-});
-
-// 表单验证规则
-const formRules = reactive({
-  name: [
-    { required: true, message: '请输入指标体系名称', trigger: 'blur' },
-    { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' },
-  ],
-  assessmentType: [{ required: true, message: '请选择评估类型', trigger: 'change' }],
-  subtaskType: [{ required: true, message: '请输入子任务类型', trigger: 'blur' }],
+const paramsObj = reactive({
+  page: 1,
+  per_page: 10,
+  type: 'all',
+  status: 'all',
+  username: localStorage.getItem('vuems_name') || 'testuser',
 });
 
 // 树节点点击事件
-const handleNodeClick = (data) => {
-  console.log('点击树节点:', data);
-  // 这里可以添加筛选表格数据的逻辑
+const handleNodeClick = () => {
 };
 
-// 评估类型标签样式
-const getAssessmentTypeTagType = (type) => {
-  const typeMap = {
-    文本: 'primary',
-    多模态: 'success',
-    视觉: 'warning',
-    时序: 'info',
-    安全: 'danger',
-  };
-  return typeMap[type] || '';
+const handleDelete = (row) => {
+  delMetric(row.id).then((res: any) => {
+    ElMessage.success(`删除${row.name}成功`);
+    getMetricsLists();
+  });
 };
+
+// 创建/更新数据集
+function getChildDatas(val: any) {
+  if (isEdit.value) {
+    // 更新数据集
+    updateMetrics(val.id, {
+      name: val.name,
+      evaluation_type: val.evaluation_type,
+      subtask_type: val.subtask_type,
+    }).then(() => {
+      getMetricsLists();
+      ElMessage.success('修改自定义指标成功');
+      visible.value = false;
+      isEdit.value = false;
+    });
+  } else {
+    // 添加数据集
+    const params = {
+      name: val.name,
+      evaluation_type: val.evaluation_type,
+      subtask_type: val.subtask_type,
+      username: localStorage.getItem('vuems_name') || 'testuser',
+    };
+
+    createMetrics(params).then((res: any) => {
+      visible.value = false;
+      ElMessage.success(`创建自定义指标成功`);
+      getMetricsLists();
+    });
+  }
+}
 
 // 新建指标体系
 const handleNewIndicator = () => {
-  dialogTitle.value = '新建指标体系';
-  // 清空表单数据
-  Object.keys(formData).forEach((key) => {
-    if (key !== 'id') formData[key] = '';
-  });
-  formData.id = null;
-  dialogVisible.value = true;
-};
-
-// 查看
-const handleView = (row) => {
-  ElMessage.info(`查看指标体系: ${row.name}`);
-  // 实际项目中这里可能跳转到详情页
-};
-
-// 编辑
-const handleEdit = (row) => {
-  dialogTitle.value = '编辑指标体系';
-  // 填充表单数据
-  formData.id = row.id;
-  formData.name = row.name;
-  formData.assessmentType = row.assessmentType;
-  formData.subtaskType = row.subtaskType;
-  dialogVisible.value = true;
-};
-
-// 删除
-const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定要删除指标体系 "${row.name}" 吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(() => {
-      const index = tableData.value.findIndex((item) => item.id === row.id);
-      if (index !== -1) {
-        tableData.value.splice(index, 1);
-        ElMessage.success('删除成功');
-      }
-    })
-    .catch(() => {
-      // 用户取消删除
-    });
-};
-
-// 分页大小改变
-const handleSizeChange = (val) => {
-  pageSize.value = val;
-  console.log(`每页 ${val} 条`);
-};
-
-// 页码改变
-const handleCurrentChange = (val) => {
-  currentPage.value = val;
-  console.log(`当前页: ${val}`);
-};
-
-// 关闭对话框
-const handleDialogClose = () => {
-  dialogVisible.value = false;
-  if (formRef.value) {
-    formRef.value.resetFields();
-  }
-};
-
-// 提交表单
-const handleSubmitForm = () => {
-  if (!formRef.value) return;
-
-  formRef.value.validate((valid) => {
-    if (valid) {
-      if (formData.id) {
-        // 编辑模式
-        const index = tableData.value.findIndex((item) => item.id === formData.id);
-        if (index !== -1) {
-          tableData.value[index] = {
-            ...formData,
-            createTime: tableData.value[index].createTime, // 保留原创建时间
-          };
-        }
-        ElMessage.success('编辑成功');
-      } else {
-        // 新建模式
-        const newItem = {
-          id: tableData.value.length + 1,
-          name: formData.name,
-          assessmentType: formData.assessmentType,
-          subtaskType: formData.subtaskType,
-          createTime: new Date().toISOString().split('T')[0], // 当前日期
-        };
-        tableData.value.unshift(newItem);
-        ElMessage.success('新建成功');
-      }
-      dialogVisible.value = false;
-    } else {
-      ElMessage.warning('请正确填写表单');
-    }
-  });
+  visible.value = true;
 };
 
 // 组件挂载时
 onMounted(() => {
-  console.log('指标体系管理页面已加载');
+  getMetricsLists();
+  getDatasetTypes();
 });
 </script>
 

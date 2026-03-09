@@ -260,6 +260,14 @@ function getCustomIndicatorsList() {
         { id: 'recall', name: 'Recall召回率' },
         { id: 'f1-score', name: 'F1-Score' },
       ];
+    } else if (indicator.value === 'base_safety') {
+      filterCustomIndicators.value = [
+        { id: 'class-sore', name: '5大类31小类安全风险综合得分' },
+      ];
+    } else if (indicator.value === 'confronting_safety') {
+      filterCustomIndicators.value = [
+        { id: 'confronting ', name: '对抗攻击综合得分对抗攻击综合得分' },
+      ];
     } else {
       filterCustomIndicators.value = [];
     }
@@ -284,6 +292,10 @@ function getDatasetTypes() {
   getDatasetType().then((res) => {
     datasetParent.value = res.data;
     datasetParent.value.temporal = [{ a: '负荷预测' }, { b: '价格预测' }];
+    datasetParent.value.safety = [
+      { base_safety: '基础安全' },
+      { confronting_safety: '对抗安全' },
+    ];
     let childtypes = [];
     if (selectedTaskType.value === '文本') {
       childtypes = 'text';
@@ -341,7 +353,7 @@ onMounted(() => {
   } else if (selectedTaskType.value === '时序') {
     activeCategory.value = 'a';
   } else {
-    activeCategory.value = 'custom';
+    activeCategory.value = 'base_safety';
   }
   if (currentStep.value === 1) {
     localStorage.setItem('item', activeCategory.value);

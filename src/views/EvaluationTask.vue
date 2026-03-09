@@ -216,8 +216,12 @@ function handleEdit(row: any) {
 
 //停止评测任务
 function handelStop(row: any) {
-  stopTask(row.id).then(() => {
-    stopPolling();
+  stopTask(row.id).then((res:any) => {
+     if (res.data && res.data.message) {
+       stopPolling();
+       getTaskslists();
+      ElMessage.success(`停止评测任务${row.task_name}成功`);
+     }
   });
 }
 
@@ -281,7 +285,7 @@ const handleViews = (row: any) => {
 };
 
 const handleDelete = (row: any) => {
-  deleteTask(row.id).then((res:any) => {
+  deleteTask(row.id).then((res: any) => {
     if (res.data && res.data.message) {
       ElMessage.success(`删除评测任务${row.task_name}成功`);
       getTaskslists();
