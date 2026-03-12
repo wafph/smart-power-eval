@@ -96,6 +96,15 @@ export const getModelList = (query: any) => {
   });
 };
 
+// 模型茉莉香镜像列表
+export const getModelMirrorList = (query: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images`,
+    method: 'get',
+    params: query,
+  });
+};
+
 // 获取指定模型的详细信息
 export const getModelDetail = (id: any) => {
   return request({
@@ -104,10 +113,27 @@ export const getModelDetail = (id: any) => {
   });
 };
 
+// 获取指定镜像的详细信息
+export const getMirrorDetail = (id: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}`,
+    method: 'get',
+  });
+};
+
 // 创建模型
 export const createModel = (query: any) => {
   return request({
     url: `${baseUrl}/api/models`,
+    method: 'post',
+    data: query,
+  });
+};
+
+// 创建模型镜像
+export const createModelMirror = (query: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images`,
     method: 'post',
     data: query,
   });
@@ -122,10 +148,27 @@ export const updateModel = (id: string, query: any) => {
   });
 };
 
+// 更新镜像
+export const updateModelMirror = (id: string, query: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}`,
+    method: 'put',
+    data: query,
+  });
+};
+
 // 删除模型
 export const delModel = (id: string) => {
   return request({
     url: `${baseUrl}/api/models/${id}`,
+    method: 'delete',
+  });
+};
+
+// 删除模型镜像
+export const delModelMirror = (id: string) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}`,
     method: 'delete',
   });
 };
@@ -137,6 +180,15 @@ export const getModelVersionList = (id: any) => {
     method: 'get',
   });
 };
+
+// 获取镜像版本列表
+export const getMirrorlVersionList = (id: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}/versions`,
+    method: 'get',
+  });
+};
+
 
 // 设置当前版本为默认版本
 export const setDefaultVersion = (id: any, version_id: any) => {
@@ -155,6 +207,15 @@ export const createModelVersion = (id: any, params: any) => {
   });
 };
 
+// 创建镜像版本（上传镜像）
+export const createMirrorVersion = (id: any, params: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}/versions`,
+    method: 'post',
+    data: params,
+  });
+};
+
 // 获取模型版本详情
 export const getModelVersionDetail = (id: any, version_id: any) => {
   return request({
@@ -163,10 +224,26 @@ export const getModelVersionDetail = (id: any, version_id: any) => {
   });
 };
 
+// 获取镜像版本详情
+export const getMirrorVersionDetail = (id: any, version_id: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}/versions/${version_id}`,
+    method: 'get',
+  });
+};
+
+
 // 删除模型版本
 export const delModelVersion = (id: any, version_id: any) => {
   return request({
     url: `${baseUrl}/api/models/${id}/versions/${version_id}`,
+    method: 'delete',
+  });
+};
+
+export const delMirrorVersion = (id: any, version_id: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}/versions/${version_id}`,
     method: 'delete',
   });
 };
@@ -179,6 +256,17 @@ export const updateModelVersion = (id: any, version_id: any, params: any) => {
     data: params,
   });
 };
+
+
+// 修改模型版本
+export const updateMirrorVersion = (id: any, version_id: any, params: any) => {
+  return request({
+    url: `${baseUrl}/api/model-images/${id}/versions/${version_id}`,
+    method: 'put',
+    data: params,
+  });
+};
+
 
 // 测试模型服务链接
 export const testConnection = (id: any) => {

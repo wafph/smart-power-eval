@@ -1,7 +1,7 @@
 <template>
   <el-form ref="formRef" :model="form" :rules="rules" :label-width="options.labelWidth">
     <el-row :gutter="50">
-      <el-col :span="options.span" v-for="item in options.list">
+      <el-col :span="options.span" v-for="item in options.list" :key="item.prop">
         <el-form-item :label="item.label" :prop="item.prop">
           <!-- 文本框、数字框、下拉框、日期框、开关、上传 -->
           <el-input
@@ -17,6 +17,12 @@
             :disabled="item.disabled"
             controls-position="right"
           ></el-input-number>
+            <el-input-tag
+            v-else-if="item.type === 'tag'"
+            v-model="form[item.prop]"
+            :disabled="item.disabled"
+             :placeholder="item.placeholder || '请输入' + item.label"
+          ></el-input-tag>
           <el-select
             v-else-if="item.type === 'select1'"
             v-model="form[item.prop]"
@@ -57,18 +63,34 @@
             :active-text="item.activeText"
             :inactive-text="item.inactiveText"
           ></el-switch>
-          <el-upload
-            v-else-if="item.type === 'upload'"
-            class="avatar-uploader"
-            action="#"
-            :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-          >
-            <img v-if="form[item.prop]" :src="form[item.prop]" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
-              <Plus />
-            </el-icon>
-          </el-upload>
+          <!-- 文件上传 -->
+          <div v-else-if="item.type === 'upload'" class="upload-container">
+            <input
+              type="file"
+              :id="`file-input-${item.prop}`"
+              :style="{ display: 'none' }"
+              :accept="item.accept"
+              :multiple="item.multiple === true"
+              @change="(e) => handleFileInputChange(e, item.prop)"
+            />
+            <el-button type="primary" @click="triggerFileInput(item.prop)">{{ 
+              getUploadButtonText(form[item.prop]) 
+            }}</el-button>
+            <div v-if="form[item.prop]" class="file-info">
+              <div class="file-name">
+                {{ getFileName(form[item.prop]) }}
+              </div>
+              <el-icon class="delete-icon" @click="handleFileRemove(item.prop)">
+                <Close />
+              </el-icon>
+            </div>
+            <template v-if="item.tip">
+              <div class="el-upload__tip">
+                {{ item.tip }}
+              </div>
+            </template>
+          </div>
+          
           <slot :name="item.prop" v-else> </slot>
         </el-form-item>
       </el-col>
@@ -97,9 +119,12 @@
 
 <script lang="ts" setup>
 import { FormOption } from '@/types/form-option';
-import { FormInstance, FormRules, UploadProps } from 'element-plus';
-import { PropType, ref } from 'vue';
-const emit = defineEmits(['saveEdit', 'changeEmit', 'emitForm']);
+import { FormInstance, FormRules, UploadProps, UploadFile, UploadInstance } from 'element-plus';
+import { PropType, ref, nextTick } from 'vue';
+import { Close } from '@element-plus/icons-vue'
+
+const emit = defineEmits(['saveEdit', 'changeEmit', 'emitForm', 'fileUpload']);
+
 const { options, formData, edit, update, isSystem } = defineProps({
   options: {
     type: Object as PropType<FormOption>,
@@ -150,6 +175,67 @@ const rules: FormRules = options.list
   .reduce((acc, cur) => ({ ...acc, ...cur }), {});
 
 const formRef = ref<FormInstance>();
+
+// 获取文件名
+const getFileName = (file: File | string) => {
+  if (!file) return '';
+  if (typeof file === 'string') {
+    // 如果是字符串，可能是文件路径
+    return file.split('/').pop() || file;
+  }
+  // 如果是File对象
+  return file.name;
+};
+
+// 获取上传按钮文字
+const getUploadButtonText = (file: File | string | null) => {
+  return file ? '重新上传' : '点击上传';
+};
+
+// 触发文件输入
+const triggerFileInput = (prop: string) => {
+  const fileInput = document.getElementById(`file-input-${prop}`) as HTMLInputElement;
+  if (fileInput) {
+    // 清空文件输入，以便可以重新选择相同的文件
+    fileInput.value = '';
+    fileInput.click();
+  }
+};
+
+// 处理文件输入变化
+const handleFileInputChange = (event: Event, prop: string) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0];
+    console.log(file)
+    // 将文件对象存储到form中
+    form.value[prop] = file;
+    
+    // 将文件传递给父组件
+    emit('fileUpload', {
+      file: file,
+      prop: prop,
+      formData: form.value
+    });
+  }
+};
+
+// 删除文件
+const handleFileRemove = (prop: string) => {
+  form.value[prop] = null;
+  // 清空文件输入
+  const fileInput = document.getElementById(`file-input-${prop}`) as HTMLInputElement;
+  if (fileInput) {
+    fileInput.value = '';
+  }
+  // 通知父组件文件已删除
+  emit('fileUpload', {
+    file: null,
+    prop: prop,
+    formData: form.value
+  });
+};
+
 const saveEdit = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.validate((valid) => {
@@ -168,36 +254,52 @@ const handleDatasetChange = (e) => {
 const resetForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.resetFields();
-};
-
-const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
-  form.value.thumb = URL.createObjectURL(uploadFile.raw!);
+  // 清空上传的文件
+  options.list.forEach(item => {
+    if (item.type === 'upload') {
+      form.value[item.prop] = null;
+      // 清空文件输入
+      const fileInput = document.getElementById(`file-input-${item.prop}`) as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    }
+  });
 };
 </script>
 
-<style>
-.avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
+<style scoped>
+.upload-container {
+  width: 100%;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  border: 1px solid #dcdfe6;
+}
+
+.file-name {
+  flex: 1;
   overflow: hidden;
-  transition: var(--el-transition-duration-fast);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: #606266;
 }
 
-.avatar-uploader .el-upload:hover {
-  border-color: var(--el-color-primary);
+.delete-icon {
+  margin-left: 8px;
+  color: #f56c6c;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.el-icon.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  text-align: center;
-}
-
-.bottom-button {
-  text-align: center;
+.delete-icon:hover {
+  color: #f78989;
 }
 </style>

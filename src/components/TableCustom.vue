@@ -126,7 +126,7 @@
                   删除
                 </el-button>
                 <el-button
-                  type="warning"
+                  type="success"
                   plain
                   size="small"
                   :icon="Download"

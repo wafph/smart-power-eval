@@ -298,6 +298,7 @@ const handleView = (row: {}) => {
 onMounted(() => {
   setCurrentTestTask(false);
 });
+
 const getDownLoadDataSet = (row: any) => {
   window.open(`/rest/api4/api/datasets/${row.id}/download`, '_blank');
 };

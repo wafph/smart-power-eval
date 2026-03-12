@@ -2,146 +2,260 @@
   <div class="data-container">
     <h2>模型管理</h2>
     <p>管理所有AI模型，包括文本模型，视觉模型，安全模型，多模态模型和时序模型</p>
-    <div class="form-top">
-      <el-form :inline="true" :model="form" class="demo-form-inline">
-        <el-form-item label="模型名称">
-          <el-input v-model="form.name" placeholder="搜索模型名称" />
-        </el-form-item>
-        <el-form-item label="模型状态">
-          <el-select
-            clearable
-            filterable
-            allow-create
-            v-model="form.status"
-            @clear="handleSingleClearStatus"
-            placeholder="模型状态"
-          >
-            <el-option label="草稿" value="草稿" />
-            <el-option label="就绪" value="就绪" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <el-button type="primary" @click="addModels"> 创建模型 </el-button>
-    </div>
-    <div class="bottom-content">
-      <div class="bottom-box">
-        <div class="table-content">
-          <el-tabs
-            v-model="activeName"
-            default-value="first"
-            class="demo-tabs"
-            @tab-click="handleClick"
-          >
+    <el-tabs v-model="activeTab" class="demo-tabs" @tab-click="handleTabClick">
+      <el-tab-pane label="模型管理" name="model">
+        <div class="form-top">
+          <el-form :inline="true" :model="form" class="demo-form-inline">
+            <el-form-item label="模型名称">
+              <el-input v-model="form.name" placeholder="搜索模型名称" />
+            </el-form-item>
+            <el-form-item label="模型状态">
+              <el-select
+                clearable
+                filterable
+                allow-create
+                v-model="form.status"
+                @clear="handleSingleClearStatus"
+                placeholder="模型状态"
+              >
+                <el-option label="草稿" value="草稿" />
+                <el-option label="就绪" value="就绪" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <el-button type="primary" @click="addModels"> 创建模型 </el-button>
+        </div>
+        <div class="bottom-content">
+          <div class="bottom-box">
+            <div class="table-content">
+              <el-tabs
+                v-model="activeName"
+                default-value="first"
+                class="demo-tabs"
+                @tab-click="handleClick"
+              >
+                <TableCustom
+                  :columns="columns"
+                  :tableData="activeName === 'first' ? pageData : tableDataTypeFilter"
+                  :total="
+                    activeName === 'first'
+                      ? tableDataFilter.length
+                      : tableDataTypeFilter.length
+                  "
+                  @changePage="changeCurrentPage"
+                  @changeSize="changeSizePage"
+                  :delFunc="handleDelete"
+                  :editFunc="handleEdit"
+                  :versionFn="getVersionList"
+                  :isShowVersion="true"
+                  :viewFunc="handleView"
+                  :isShowTest="true"
+                  @versionId="getVersionId"
+                  @connectionId="getConnectionId"
+                ></TableCustom>
+                <el-tab-pane
+                  v-for="tab in tabs"
+                  :key="tab.name"
+                  :label="tab.label"
+                  :name="tab.name"
+                >
+                </el-tab-pane>
+              </el-tabs>
+              <el-dialog
+                title="查看详情"
+                v-model="modelDetailVisible"
+                width="700px"
+                destroy-on-close
+              >
+                <TableDetail :data="viewData"></TableDetail>
+              </el-dialog>
+            </div>
+          </div>
+        </div>
+        <el-dialog
+          :title="isEdit ? '编辑模型' : '创建模型'"
+          v-model="visible"
+          width="700px"
+          destroy-on-close
+          :close-on-click-modal="false"
+          @close="closeDialog"
+          draggable
+        >
+          <TableEdit
+            :form-data="rowData"
+            :options="dialogOptions"
+            :edit="isEdit"
+            @saveEdit="getChildDatas"
+            :update="updateData"
+            :isSystem="true"
+          />
+        </el-dialog>
+
+        <el-dialog
+          title="模型版本列表"
+          v-model="visibleVersion"
+          width="80%"
+          destroy-on-close
+          :close-on-click-modal="false"
+          @close="closeDialog"
+          draggable
+        >
+          <div style="padding: 10px">
             <TableCustom
-              :columns="columns"
-              :tableData="activeName === 'first' ? pageData : tableDataTypeFilter"
-              :total="
-                activeName === 'first'
-                  ? tableDataFilter.length
-                  : tableDataTypeFilter.length
-              "
-              @changePage="changeCurrentPage"
-              @changeSize="changeSizePage"
-              :delFunc="handleDelete"
-              :editFunc="handleEdit"
-              :versionFn="getVersionList"
-              :isShowVersion="true"
-              :viewFunc="handleView"
-              :isShowTest="true"
-              @versionId="getVersionId"
-              @connectionId="getConnectionId"
+              :columns="columnsVersion"
+              :tableData="tableDataVersion"
+              :setDefaultFn="handleDefaultVersion"
+              :total="totalVersion"
+              :delFunc="handleDeleteVersion"
+              :viewFunc="handleViewVersion"
+              :editFunc="handleEditVersion"
+              :isShowDefault="true"
+              :isShowTest="false"
+              @connectionId="getConnectionVersionId"
             ></TableCustom>
-            <el-tab-pane
-              v-for="tab in tabs"
-              :key="tab.name"
-              :label="tab.label"
-              :name="tab.name"
-            >
-            </el-tab-pane>
-          </el-tabs>
+            <el-button type="primary" @click="createVersions" style="margin-top: 50px">
+              创建模型版本
+            </el-button>
+          </div>
           <el-dialog
-            title="查看详情"
-            v-model="modelDetailVisible"
-            width="700px"
+            :title="isEditVersion ? '修改模型版本' : '创建模型版本'"
+            v-model="visibleCreateVersion"
+            width="800px"
+            destroy-on-close
+            :close-on-click-modal="false"
+            @close="closeDialog"
+            draggable
+          >
+            <TableEdit
+              :form-data="rowData"
+              :options="dialogVersionOptions"
+              :edit="isEditVersion"
+              @saveEdit="getChildDatasVersion"
+              :update="updateData"
+              :isSystem="true"
+            />
+          </el-dialog>
+          <el-dialog
+            title="查看版本详情"
+            v-model="versionDetailVisible"
+            width="80%"
             destroy-on-close
           >
             <TableDetail :data="viewData"></TableDetail>
           </el-dialog>
+        </el-dialog>
+      </el-tab-pane>
+      <el-tab-pane label="镜像管理" name="mirror">
+        <div class="form-top">
+          <el-form :inline="true" :model="form" class="demo-form-inline">
+            <el-form-item label="模型名称">
+              <el-input v-model="form.name" placeholder="搜索模型名称" />
+            </el-form-item>
+          </el-form>
+          <el-button type="primary" @click="addMirrors"> 创建模型镜像 </el-button>
         </div>
-      </div>
-    </div>
-    <el-dialog
-      :title="isEdit ? '编辑模型' : '创建模型'"
-      v-model="visible"
-      width="700px"
-      destroy-on-close
-      :close-on-click-modal="false"
-      @close="closeDialog"
-      draggable
-    >
-      <TableEdit
-        :form-data="rowData"
-        :options="dialogOptions"
-        :edit="isEdit"
-        @saveEdit="getChildDatas"
-        :update="updateData"
-        :isSystem="true"
-      />
-    </el-dialog>
+        <div class="bottom-content">
+          <div class="bottom-box">
+            <div class="table-content">
+              <TableCustom
+                :columns="columns"
+                :tableData="MirrorData"
+                :total="total"
+                @changePage="changeCurrentPage"
+                @changeSize="changeSizePage"
+                :delFunc="handleDel"
+                :editFunc="handleEdit"
+                :versionFn="getVersionList"
+                :isShowVersion="true"
+                :viewFunc="handleView"
+                @versionId="getVersionId"
+                @connectionId="getConnectionId"
+              ></TableCustom>
+              <el-dialog
+                title="查看详情"
+                v-model="modelDetailVisible"
+                width="700px"
+                destroy-on-close
+              >
+                <TableDetail :data="viewData"></TableDetail>
+              </el-dialog>
+            </div>
+          </div>
+        </div>
+        <el-dialog
+          :title="isEdit ? '编辑镜像' : '创建镜像'"
+          v-model="visible"
+          width="700px"
+          destroy-on-close
+          :close-on-click-modal="false"
+          @close="closeDialog"
+          draggable
+        >
+          <TableEdit
+            :form-data="rowData"
+            :options="dialogOptions2"
+            :edit="isEdit"
+            @saveEdit="getChildDatas"
+            :update="updateData"
+            :isSystem="true"
+          />
+        </el-dialog>
 
-    <el-dialog
-      title="模型版本列表"
-      v-model="visibleVersion"
-      width="80%"
-      destroy-on-close
-      :close-on-click-modal="false"
-      @close="closeDialog"
-      draggable
-    >
-      <div style="padding: 10px">
-        <TableCustom
-          :columns="columnsVersion"
-          :tableData="tableDataVersion"
-          :setDefaultFn="handleDefaultVersion"
-          :total="totalVersion"
-          :delFunc="handleDeleteVersion"
-          :viewFunc="handleViewVersion"
-          :editFunc="handleEditVersion"
-          :isShowDefault="true"
-          :isShowTest="false"
-          @connectionId="getConnectionVersionId"
-        ></TableCustom>
-        <el-button type="primary" @click="createVersions" style="margin-top: 50px">
-          创建模型版本
-        </el-button>
-      </div>
-      <el-dialog
-        :title="isEditVersion ? '修改模型版本' : '创建模型版本'"
-        v-model="visibleCreateVersion"
-        width="800px"
-        destroy-on-close
-        :close-on-click-modal="false"
-        @close="closeDialog"
-        draggable
-      >
-        <TableEdit
-          :form-data="rowData"
-          :options="dialogVersionOptions"
-          :edit="isEditVersion"
-          @saveEdit="getChildDatasVersion"
-          :update="updateData"
-          :isSystem="true"
-        />
-      </el-dialog>
-      <el-dialog
-        title="查看版本详情"
-        v-model="versionDetailVisible"
-        width="80%"
-        destroy-on-close
-      >
-        <TableDetail :data="viewData"></TableDetail>
-      </el-dialog>
-    </el-dialog>
+        <el-dialog
+          title="镜像版本列表"
+          v-model="visibleVersion"
+          width="80%"
+          destroy-on-close
+          :close-on-click-modal="false"
+          @close="closeDialog"
+          draggable
+        >
+          <div style="padding: 10px">
+            <TableCustom
+              :columns="columnsMirrorVersion"
+              :tableData="tableDataVersion"
+              :total="totalVersion"
+              :delFunc="handleDeleteVersion"
+              :viewFunc="handleViewVersion"
+              :editFunc="handleEditVersion"
+              :isShowTest="false"
+              @connectionId="getConnectionVersionId"
+              :isShowDownload="true"
+              :downLoadFn="getDownLoadMirror"
+            ></TableCustom>
+            <el-button type="primary" @click="createVersions" style="margin-top: 50px">
+              创建镜像版本
+            </el-button>
+          </div>
+          <el-dialog
+            :title="isEditVersion ? '修改镜像版本' : '创建镜像版本'"
+            v-model="visibleCreateVersion"
+            width="800px"
+            destroy-on-close
+            :close-on-click-modal="false"
+            @close="closeDialog"
+            draggable
+          >
+            <TableEdit
+              :form-data="rowData"
+              :options="dialogMirrorOptions"
+              :edit="isEditVersion"
+              @saveEdit="getChildDatasVersion"
+              :update="updateData"
+              :isSystem="true"
+            />
+          </el-dialog>
+          <el-dialog
+            title="查看镜像版本详情"
+            v-model="versionDetailVisible"
+            width="80%"
+            destroy-on-close
+          >
+            <TableDetail :data="viewData"></TableDetail>
+          </el-dialog>
+        </el-dialog>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 <script lang="ts" setup>
@@ -149,11 +263,17 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { FormOption } from '@/types/form-option';
 import {
   getModelList,
+  getModelMirrorList,
+  createModelMirror,
   getModelDetail,
+  getMirrorDetail,
   createModel,
   delModel,
+  delModelMirror,
   updateModel,
+  updateModelMirror,
   getModelVersionList,
+  getMirrorlVersionList,
   createModelVersion,
   delModelVersion,
   getModelVersionDetail,
@@ -162,6 +282,10 @@ import {
   testVersionConnection,
   setDefaultVersion,
   getModelType,
+  createMirrorVersion,
+  delMirrorVersion,
+  updateMirrorVersion,
+  getMirrorVersionDetail,
 } from '@/api';
 import type { TabsPaneContext } from 'element-plus';
 const activeName = ref('first');
@@ -174,6 +298,7 @@ const isEdit = ref(false);
 const isEditVersion = ref(false);
 const isUpdate = ref(false);
 const tableData = ref([]);
+const MirrorData = ref([]);
 const tableDataVersion = ref([]);
 const selectOptions = ref([]);
 const loading = ref(false);
@@ -182,6 +307,8 @@ const modelType = ref('');
 const modelVersion = ref([]);
 const childOptions = ref([]);
 import { ElMessage } from 'element-plus';
+import { totalmem } from 'node:os';
+const activeTab = ref('model');
 const form = reactive({
   industryNature: '',
   name: '',
@@ -205,83 +332,170 @@ const viewData = ref({
 
 // 查看模型获取指定模型的详细信息
 const handleView = (row: any) => {
-  getModelDetail(row.id).then((res) => {
-    viewData.value.row = res.data;
-    if (res.data) {
-      modelDetailVisible.value = true;
-      viewData.value.list = [
-        {
-          prop: 'name',
-          label: '模型名称',
-        },
-        {
-          prop: 'type',
-          label: '模型类型',
-        },
-        {
-          prop: 'is_preset',
-          label: '是否预制模型',
-        },
-        {
-          prop: 'status',
-          label: '模型状态',
-        },
-        {
-          prop: 'description',
-          label: '模型描述',
-        },
-        {
-          prop: 'created_at',
-          label: '创建时间',
-        },
-      ];
-    }
-  });
+  if (activeTab.value === 'model') {
+    getModelDetail(row.id).then((res) => {
+      viewData.value.row = res.data;
+      if (res.data) {
+        modelDetailVisible.value = true;
+        viewData.value.list = [
+          {
+            prop: 'name',
+            label: '模型名称',
+          },
+          {
+            prop: 'type',
+            label: '模型类型',
+          },
+          {
+            prop: 'is_preset',
+            label: '是否预制模型',
+          },
+          {
+            prop: 'status',
+            label: '模型状态',
+          },
+          {
+            prop: 'description',
+            label: '模型描述',
+          },
+          {
+            prop: 'created_at',
+            label: '创建时间',
+          },
+        ];
+      }
+    });
+  } else {
+    getMirrorDetail(row.id).then((res) => {
+      viewData.value.row = res.data;
+      if (res.data) {
+        modelDetailVisible.value = true;
+        viewData.value.list = [
+          {
+            prop: 'name',
+            label: '镜像模型名称',
+          },
+          {
+            prop: 'type',
+            label: '镜像模型类型',
+          },
+          {
+            prop: 'is_preset',
+            label: '是否预制模型',
+          },
+          {
+            prop: 'status',
+            label: '镜像状态',
+          },
+          {
+            prop: 'description',
+            label: '镜像描述',
+          },
+          {
+            prop: 'created_at',
+            label: '创建时间',
+          },
+        ];
+      }
+    });
+  }
 };
+
 // 查看模型版本
 const handleViewVersion = (row: any) => {
   viewData.value.row = { ...row };
-  // 此处1应该是模型id
-  getModelVersionDetail(modelId.value, row.id).then((res) => {
-    const detailObj = res.data?.version;
-    if (detailObj) {
-      viewData.value.list = [
-        {
-          prop: 'version',
-          label: '模型版本',
-        },
-        {
-          prop: 'description',
-          label: '版本描述',
-        },
-        {
-          prop: 'status',
-          label: '版本状态',
-        },
-        {
-          prop: 'service_type',
-          label: '服务类型',
-        },
-        {
-          prop: 'service_url',
-          label: '服务地址',
-        },
-        {
-          prop: 'model_name',
-          label: '模型名称',
-        },
-        {
-          prop: 'created_at',
-          label: '创建时间',
-        },
-        {
-          prop: 'api_key',
-          label: 'api键',
-        },
-      ];
-    }
-    versionDetailVisible.value = true;
-  });
+  if (activeTab.value === 'model') {
+    // 此处1应该是模型id
+    getModelVersionDetail(modelId.value, row.id).then((res) => {
+      const detailObj = res.data?.version;
+      if (detailObj) {
+        viewData.value.list = [
+          {
+            prop: 'version',
+            label: '模型版本',
+          },
+          {
+            prop: 'description',
+            label: '版本描述',
+          },
+          {
+            prop: 'status',
+            label: '版本状态',
+          },
+          {
+            prop: 'service_type',
+            label: '服务类型',
+          },
+          {
+            prop: 'service_url',
+            label: '服务地址',
+          },
+          {
+            prop: 'model_name',
+            label: '模型名称',
+          },
+          {
+            prop: 'created_at',
+            label: '创建时间',
+          },
+          {
+            prop: 'api_key',
+            label: 'api键',
+          },
+        ];
+      }
+      versionDetailVisible.value = true;
+    });
+  } else {
+    getMirrorVersionDetail(modelId.value, row.id).then((res) => {
+      const detailObj = res.data?.version;
+      if (detailObj) {
+        viewData.value.list = [
+          {
+            prop: 'image_model_name',
+            label: '模型名称',
+          },
+          {
+            prop: 'image_name',
+            label: '镜像名称',
+          },
+          {
+            prop: 'image_description',
+            label: '镜像描述',
+          },
+          {
+            prop: 'metadata',
+            label: '元数据',
+          },
+          {
+            prop: 'file_path',
+            label: '文件路径',
+          },
+          {
+            prop: 'file_name',
+            label: '文件名称',
+          },
+          {
+            prop: 'file_format',
+            label: '文件格式',
+          },
+          {
+            prop: 'file_size',
+            label: '文件大小',
+          },
+          {
+            prop: 'created_at',
+            label: '创建时间',
+          },
+          {
+            prop: 'status',
+            label: '状态',
+          },
+        ];
+      }
+      versionDetailVisible.value = true;
+    });
+  }
 };
 // 表格相关
 let columns = ref([
@@ -305,6 +519,22 @@ let columnsVersion = ref([
   { prop: 'operator', label: '操作', width: 400 },
 ]);
 
+// 镜像版本表格
+let columnsMirrorVersion = ref([
+  { prop: 'image_model_name', label: '模型名称' },
+  { prop: 'image_name', label: '镜像名称' },
+  { prop: 'image_description', label: '镜像描述' },
+  { prop: 'version', label: '镜像版本' },
+  { prop: 'status', label: '状态' },
+  { prop: 'metadata', label: '元数据' },
+  { prop: 'file_path', label: '文件地址' },
+  { prop: 'file_name', label: '文件名称' },
+  { prop: 'file_format', label: '文件格式' },
+  { prop: 'file_size', label: '文件d大小' },
+  { prop: 'created_at', label: '创建时间' },
+  { prop: 'operator', label: '操作', width: 360 },
+]);
+
 // 创建/编辑弹窗相关
 let dialogOptions = ref<FormOption>({
   labelWidth: '130px',
@@ -323,12 +553,22 @@ let dialogOptions = ref<FormOption>({
   ],
 });
 
-// 创建/编辑吗版本弹窗相关
+//  创建/编辑镜像弹窗相关
+let dialogOptions2 = ref<FormOption>({
+  labelWidth: '130px',
+  span: 12,
+  list: [
+    { type: 'input', label: '镜像模型名称', prop: 'name', required: true },
+    { type: 'input', label: '镜像模型描述', prop: 'description', required: true },
+  ],
+});
+
+// 创建/编辑版本弹窗相关
 let dialogVersionOptions = ref<FormOption>({
   labelWidth: '120px',
   span: 12,
   list: [
-    { type: 'input', label: '模型名称', prop: 'model_name', required: false },
+    { type: 'input', label: '模型名称', prop: 'model_name', required: true },
     { type: 'input', label: '版本描述', prop: 'description', required: true },
     {
       type: 'select1',
@@ -343,6 +583,18 @@ let dialogVersionOptions = ref<FormOption>({
     { type: 'input', label: 'API密钥', prop: 'api_key', required: true },
   ],
 });
+
+// 创建/编辑镜像版本弹窗相关
+let dialogMirrorOptions = ref<FormOption>({
+  labelWidth: '120px',
+  span: 12,
+  list: [
+    { type: 'input', label: '镜像版本名称', prop: 'image_name', required: true },
+    { type: 'input', label: '镜像版本描述', prop: 'image_description', required: true },
+    { type: 'tag', label: '元数据', prop: 'metadata', required: true },
+    { type: 'upload', label: '上传镜像', prop: 'file', required: false },
+  ],
+});
 const rowData = ref({});
 const updateData = () => {};
 const total = ref(0);
@@ -354,6 +606,12 @@ const handleDelete = (row) => {
   });
 };
 
+const handleDel = (row) => {
+  delModelMirror(row.id).then((res) => {
+    ElMessage.success(`删除模型${row.name}成功`);
+    getModelMirrorLists();
+  });
+};
 function changeCurrentPage(val: number) {
   paramsObj.page = val;
   getModelLists();
@@ -372,13 +630,26 @@ function handleDefaultVersion(row: any) {
   });
 }
 
+const handleTabClick = (tab: TabsPaneContext, event: Event) => {
+  console.log(tab, event);
+};
+
 function handleDeleteVersion(row: any) {
-  delModelVersion(modelId.value, row.id).then((res) => {
-    if (res && res.data) {
-      getVersionId(modelId.value);
-    }
-    ElMessage.success(`删除模型版本${row.model_name}成功`);
-  });
+  if (activeTab.value === 'model') {
+    delModelVersion(modelId.value, row.id).then((res) => {
+      if (res && res.data) {
+        getVersionId(modelId.value);
+      }
+      ElMessage.success(`删除模型版本${row.model_name}成功`);
+    });
+  } else {
+    delMirrorVersion(modelId.value, row.id).then((res) => {
+      if (res && res.data) {
+        getVersionId(modelId.value);
+      }
+      ElMessage.success(`删除镜像版本成功`);
+    });
+  }
 }
 
 function handleSingleClearStatus() {
@@ -402,6 +673,10 @@ function addModels() {
   isUpdate.value = false;
 }
 
+function addMirrors() {
+  visible.value = true;
+  isUpdate.value = false;
+}
 // 获取模型版本列表
 async function getVersionList(row: any) {
   modelType.value = row.type;
@@ -409,14 +684,20 @@ async function getVersionList(row: any) {
 
 async function getVersionId(id: any) {
   visibleVersion.value = true;
+  tableDataVersion.value = [];
   modelId.value = id;
-  const res = await getModelVersionList(id);
-  tableDataVersion.value = res.data.versions;
-  res.data.versions.forEach((item: any) => {
-    const endIndex = item.created_at.indexOf('T');
-    item.created_at = item.created_at.substring(0, endIndex);
-  });
-  totalVersion.value = res.data.total;
+  if (activeTab.value === 'model') {
+    const res = await getModelVersionList(id);
+    tableDataVersion.value = res.data.versions;
+    totalVersion.value = res.data.total;
+  } else {
+    const res = await getMirrorlVersionList(id);
+    tableDataVersion.value = res.data.versions;
+    res.data.versions.forEach((item: any) => {
+      item.metadata = item.metadata.split(',')
+    });
+    totalVersion.value = res.data.total;
+  }
 }
 // 测试模型服务连接
 async function getConnectionId(id: any) {
@@ -435,98 +716,184 @@ async function getConnectionVersionId(versionId: any) {
 // 模型确认
 function getChildDatas(val: any) {
   loading.value = true;
-  if (isUpdate.value) {
-    // 更新模型
-    updateModel(val.id, {
-      name: val.name,
-      description: val.description,
-      type: val.type,
-    }).then(() => {
-      getModelLists();
-      ElMessage.success('修改模型成功');
-      visible.value = false;
-      loading.value = false;
-      isUpdate.value = false;
-    });
-  } else {
-    // 添加模型
-    const params = {
-      name: val.name,
-      username: localStorage.getItem('vuems_name') || 'testuser',
-      type: val.type,
-      description: val.description,
-    };
-
-    createModel(params)
-      .then(() => {
+  if (activeTab.value === 'model') {
+    if (isUpdate.value) {
+      // 更新模型
+      updateModel(val.id, {
+        name: val.name,
+        description: val.description,
+        type: val.type,
+      }).then(() => {
+        getModelLists();
+        ElMessage.success('修改模型成功');
         visible.value = false;
         loading.value = false;
-        ElMessage.success(`添加模型${val.name}成功`);
-        getModelLists();
-      })
-      .catch(() => {
-        ElMessage.error(`添加模型失败`);
+        isUpdate.value = false;
       });
+    } else {
+      // 添加模型
+      const params = {
+        name: val.name,
+        username: localStorage.getItem('vuems_name') || 'testuser',
+        type: val.type,
+        description: val.description,
+      };
+      createModel(params)
+        .then(() => {
+          visible.value = false;
+          loading.value = false;
+          ElMessage.success(`添加模型${val.name}成功`);
+          getModelLists();
+        })
+        .catch(() => {
+          ElMessage.error(`添加模型失败`);
+        });
+    }
+  } else {
+    if (isUpdate.value) {
+      // 更新镜像
+      updateModelMirror(val.id, {
+        name: val.name,
+        description: val.description,
+      }).then(() => {
+        getModelMirrorLists();
+        ElMessage.success('修改镜像成功');
+        visible.value = false;
+        loading.value = false;
+        isUpdate.value = false;
+      });
+    } else {
+      // 添加镜像
+      const params = {
+        name: val.name,
+        username: localStorage.getItem('vuems_name') || 'testuser',
+        type: val.type,
+        description: val.description,
+      };
+
+      createModelMirror(params)
+        .then(() => {
+          visible.value = false;
+          loading.value = false;
+          ElMessage.success(`添加镜像${val.name}成功`);
+          getModelMirrorLists();
+        })
+        .catch(() => {
+          ElMessage.error(`添加镜像失败`);
+        });
+    }
   }
 }
 
 // 创建模型版本
 function createVersions() {
   isEditVersion.value = false;
-  getModelTypes();
-  if (modelType.value === '文本') {
-    modelType.value = 'text';
-  } else if (modelType.value === '多模态') {
-    modelType.value = 'multimodal';
-  } else if (modelType.value === '视觉') {
-    modelType.value = 'vision';
-  } else if (modelType.value === '时序') {
-    modelType.value = 'temporal';
-  } else if (modelType.value === '安全') {
-    modelType.value = 'safety';
+  if (activeTab.value === 'model') {
+    getModelTypes();
+    if (modelType.value === '文本') {
+      modelType.value = 'text';
+    } else if (modelType.value === '多模态') {
+      modelType.value = 'multimodal';
+    } else if (modelType.value === '视觉') {
+      modelType.value = 'vision';
+    } else if (modelType.value === '时序') {
+      modelType.value = 'temporal';
+    } else if (modelType.value === '安全') {
+      modelType.value = 'safety';
+    }
+    setTimeout(() => {
+      const a = modelVersion.value[modelType.value][0];
+      const keysss = Object.entries(a);
+      childOptions.value = keysss.map((item) => ({
+        value: item[0],
+        label: item[0] + '-' + item[1],
+      }));
+    }, 1000);
   }
-  setTimeout(() => {
-    const a = modelVersion.value[modelType.value][0];
-    const keysss = Object.entries(a);
-    childOptions.value = keysss.map((item) => ({
-      value: item[0],
-      label: item[0] + '-' + item[1],
-    }));
-  }, 1000);
   visibleCreateVersion.value = true;
 }
 
 // 模型版本确认
 function getChildDatasVersion(val: any) {
-  loading.value = true;
-  const params = {
-    model_name: val.name,
-    version: val.version,
-    description: val.description,
-    status: val.status,
-    service_type: val.service_type,
-    service_url: val.service_url,
-    api_key: val.api_key,
-  };
-  if (isEditVersion.value) {
-    // 修改模型版本
-    updateModelVersion(modelId.value, val.id, params)
-      .then(() => {
-        getVersionId(modelId.value);
-        ElMessage.success(`修改模型版本成功`);
-      })
-      .catch(() => {
-        ElMessage.error(`修改模型版本失败`);
-      })
-      .finally(() => {
-        visibleCreateVersion.value = false;
-        loading.value = false;
-      });
+  if (activeTab.value === 'model') {
+    const params = {
+      model_name: val.name,
+      version: val.version,
+      description: val.description,
+      status: val.status,
+      service_type: val.service_type,
+      service_url: val.service_url,
+      api_key: val.api_key,
+    };
+    if (isEditVersion.value) {
+      // 修改模型版本
+      updateModelVersion(modelId.value, val.id, params)
+        .then(() => {
+          getVersionId(modelId.value);
+          ElMessage.success(`修改模型版本成功`);
+        })
+        .catch(() => {
+          ElMessage.error(`修改模型版本失败`);
+        })
+        .finally(() => {
+          visibleCreateVersion.value = false;
+        });
+    } else {
+      // 添加模型版本
+      createVersion(val);
+    }
   } else {
-    // 添加模型版本
-    createVersion(val);
+    if (isEditVersion.value) {
+      const formData = new FormData();
+      formData.append('file', val.file); // 'file' 是参数名，需与后端约定
+      formData.append('image_name', val.image_name);
+      formData.append('image_description', val.image_description);
+      formData.append('metadata', val.metadata);
+      formData.append('username', localStorage.getItem('vuems_name') || 'testuser');
+      // 修改镜像版本
+      updateMirrorVersion(modelId.value, val.id, formData)
+        .then(() => {
+          getVersionId(modelId.value);
+          ElMessage.success(`修改镜像版本成功`);
+        })
+        .catch(() => {
+          ElMessage.error(`修改镜像版本失败`);
+        })
+        .finally(() => {
+          visibleCreateVersion.value = false;
+        });
+    } else {
+      // 添加镜像版本
+      createMirrors(val);
+    }
   }
 }
+
+// 添加镜像
+async function createMirrors(val: any) {
+  isEditVersion.value = false;
+  const formData = new FormData();
+  formData.append('file', val.file); // 'file' 是参数名，需与后端约定
+  formData.append('image_name', val.image_name);
+  formData.append('image_description', val.image_description);
+  formData.append('metadata', val.metadata);
+  formData.append('username', localStorage.getItem('vuems_name') || 'testuser');
+  const res = await createMirrorVersion(modelId.value, formData);
+  console.log(res);
+  getVersionId(modelId.value);
+  if (res && res.data.message) {
+    ElMessage.success('添加镜像成功');
+  }
+  visibleCreateVersion.value = false;
+}
+
+// 下载镜像文件
+const getDownLoadMirror = (row: any) => {
+  window.open(
+    `/rest/api4/api/model-images/${modelId.value}/versions/${row.id}/download`,
+    '_blank',
+  );
+};
 
 // 添加模型版本
 async function createVersion(val: any) {
@@ -560,6 +927,7 @@ const handleEditVersion = (row: any) => {
 
 onMounted(() => {
   getModelLists();
+  getModelMirrorLists();
 });
 
 function getModelTypes() {
@@ -597,6 +965,16 @@ async function getModelLists() {
   });
   if (res && res.data) {
     tableData.value = res.data.models;
+  }
+}
+
+async function getModelMirrorLists() {
+  const res = await getModelMirrorList({
+    username: localStorage.getItem('vuems_name') || 'testuser',
+  });
+  if (res && res.data) {
+    MirrorData.value = res.data.model_images;
+    total.value = res.data.total;
   }
 }
 
@@ -712,6 +1090,7 @@ const handleClick = (tab: TabsPaneContext) => {};
 .bottom-content {
   background: #eef0fc;
   flex-direction: column;
+  // flex: 1;
   width: 100%;
 
   .bottom-box {
