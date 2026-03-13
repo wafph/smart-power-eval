@@ -8,7 +8,10 @@
     <!-- 主内容区域 -->
     <div class="main-contents">
       <!-- 左侧分类菜单 -->
-      <div class="category-menu" v-if="currentStep === 1">
+      <div
+        class="category-menu"
+        v-if="currentStep === 1 && selectedTaskType !== 'benchmark'"
+      >
         <div
           v-for="category in categories"
           :key="category.id"
@@ -22,12 +25,20 @@
       </div>
       <!-- 右侧数据集列表 -->
       <div class="dataset-list">
-        <div v-if="filteredDatasets.length === 0 && currentStep === 1" class="no-data">
+        <!-- {{ selectedTaskType }} -->
+        <div
+          v-if="
+            filteredDatasets.length === 0 &&
+            currentStep === 1 &&
+            selectedTaskType !== 'benchmark'
+          "
+          class="no-data"
+        >
           暂无数据
         </div>
         <div class="datasets-container">
           <el-checkbox-group v-model="selectedDatasets" class="dataset-checkbox-group">
-            <template v-if="currentStep == 1">
+            <template v-if="currentStep == 1 && selectedTaskType !== 'benchmark'">
               <div
                 v-for="dataset in filteredDatasets"
                 :key="dataset.id"
@@ -38,6 +49,23 @@
                   :label="dataset.id"
                   class="dataset-checkbox"
                   @change="handleDatasetSelect(dataset.id)"
+                >
+                  <span class="dataset-name">{{ dataset.name }}</span>
+                </el-checkbox>
+              </div>
+            </template>
+            <template v-if="currentStep == 1 && selectedTaskType === 'benchmark'">
+              {{ tableData }}
+              <div
+                v-for="dataset in tableData"
+                :key="dataset.name"
+                class="dataset-checkbox-item"
+              >
+                {{ dataset }}
+                <el-checkbox
+                  :label="dataset.name"
+                  class="dataset-checkbox"
+                  @change="handleDatasetSelect(dataset.name)"
                 >
                   <span class="dataset-name">{{ dataset.name }}</span>
                 </el-checkbox>
@@ -134,7 +162,6 @@ const filteredDatasets = ref([]);
 const selectOptions = ref([]);
 const activeCategory = ref('mcq');
 const indicator = ref('mcq');
-
 // 搜索关键词
 const datasetParent = ref({});
 // 选中的数据集ID列表
@@ -187,6 +214,31 @@ function getDatasetsList() {
         filteredDatasets.value = as.map((item) => {
           return { id: item.id, name: item.name };
         });
+      }
+      if (selectedTaskType.value === 'benchmark') {
+        tableData.value = [
+          {
+            id: 'gsm8k',
+            name: 'gsm8k',
+            type: 'benchmark',
+          },
+          {
+            id: 'mmlu',
+            name: 'mmlu',
+            type: 'benchmark',
+          },
+          {
+            id: 'ceval',
+            name: 'ceval',
+            type: 'benchmark',
+          },
+        ];
+        if (tableData.value.length > 0) {
+          tableData.value = tableData.value.map((item) => {
+            return { id: item.id, name: item.name };
+          });
+        }
+        console.log(tableData)
       }
     }
   });
@@ -286,6 +338,11 @@ async function getModelLists() {
   filtereModal.value = ms.map((item) => {
     return { id: item.id, name: item.name };
   });
+  if (selectedTaskType.value === 'benchmark') {
+    filtereModal.value = modalTableData.value.map((item) => {
+      return { id: item.id, name: item.name };
+    });
+  }
 }
 
 function getDatasetTypes() {
@@ -305,10 +362,12 @@ function getDatasetTypes() {
       childtypes = 'vision';
     } else if (selectedTaskType.value === '时序') {
       childtypes = 'temporal';
-    } else {
+    } else if (selectedTaskType.value === '安全') {
       childtypes = 'safety';
+    } else {
+      childtypes = 'benchmark';
     }
-    categories.value = datasetParent.value[childtypes].map((item) => ({
+    categories.value = datasetParent.value[childtypes]?.map((item) => ({
       id: Object.keys(item).join(''),
       name: Object.values(item).join(''),
     }));
@@ -352,8 +411,10 @@ onMounted(() => {
     activeCategory.value = 'image_classification';
   } else if (selectedTaskType.value === '时序') {
     activeCategory.value = 'a';
-  } else {
+  } else if (selectedTaskType.value === '安全') {
     activeCategory.value = 'base_safety';
+  } else {
+    activeCategory.value = 'benchmark';
   }
   if (currentStep.value === 1) {
     localStorage.setItem('item', activeCategory.value);

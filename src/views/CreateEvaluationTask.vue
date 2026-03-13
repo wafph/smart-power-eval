@@ -105,19 +105,7 @@
           上一步
         </el-button>
         <template v-if="currentStep !== 4">
-          <el-button
-            :disabled="
-              currentStep === 0
-                ? !selectedTaskType || ruleForm.taskName === ''
-                : currentStep === 1
-                  ? dataSetIds.length === 0
-                  : currentStep === 2
-                    ? modelIds.length === 0
-                    : metricsIds.length === 0
-            "
-            type="primary"
-            @click="handleNext"
-          >
+          <el-button :disabled="handleNextDisabled" type="primary" @click="handleNext">
             下一步
           </el-button>
         </template>
@@ -202,6 +190,13 @@ const taskTypes = shallowRef([
     type: '时序',
     tagType: 'info',
   },
+  {
+    value: 'benchmark',
+    label: '开源Benchmark',
+    icon: Clock,
+    type: 'benchmark',
+    tagType: 'primary',
+  },
 ]);
 
 // 响应式数据
@@ -237,6 +232,16 @@ function getjudgeModelSelectId(id: any) {
   localStorage.setItem('judge_model_id', judgeModelsId.value);
 }
 
+const handleNextDisabled = computed(() => {
+  return currentStep.value === 0
+    ? !selectedTaskType.value || ruleForm.taskName === ''
+    : currentStep.value === 1
+      ? dataSetIds.value.length === 0
+      : currentStep.value === 2
+        ? modelIds.value.length === 0
+        : metricsIds.value.length === 0 && selectedTaskType.value !== 'benchmark';
+});
+
 const handleGroupChange = (value: any) => {
   selectedTaskType.value = value;
 };
@@ -258,6 +263,9 @@ function handlCreate() {
     user_name: localStorage.getItem('vuems_name'),
     judge_model_id: judgeModelsId,
   };
+  if (selectedTaskType.value === 'benchmark') {
+    paramData.indicator_ids = 'benchmark';
+  }
   if (radioValue.value === '2') {
     delete paramData.judge_model_id;
   }

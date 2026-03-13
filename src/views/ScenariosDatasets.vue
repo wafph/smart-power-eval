@@ -253,6 +253,8 @@ function getFormatName(formatKey: any) {
     image_classification: '图像分类',
     object_detection: '目标检测',
     image_segmentation: '图像分割',
+    base_safety: '基础安全',
+    confronting_safety: '对抗安全',
   };
   return formatMap[formatKey] || '未知格式';
 }

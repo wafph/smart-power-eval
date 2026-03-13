@@ -22,7 +22,6 @@ service.interceptors.request.use(
   },
   (error: AxiosError) => {
     loadingInstance.close();
-    console.error(error);
     return Promise.reject();
   },
 );
@@ -37,7 +36,6 @@ service.interceptors.response.use(
     }
   },
   (error: AxiosError) => {
-    console.error(error);
     if (error.response) {
       const status = error.response.status;
       let errorMessage =

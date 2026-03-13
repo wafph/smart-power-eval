@@ -57,4 +57,10 @@ export const menuData: Menus[] = [
     index: '/evaluation-report',
     title: '评估报告管理',
   },
+   {
+    id: '5',
+    icon: 'MessageBox',
+    index: '/evaluation-tool',
+    title: '评估工具管理',
+  },
 ];

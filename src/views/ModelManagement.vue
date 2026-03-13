@@ -631,7 +631,6 @@ function handleDefaultVersion(row: any) {
 }
 
 const handleTabClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
 };
 
 function handleDeleteVersion(row: any) {
@@ -879,7 +878,6 @@ async function createMirrors(val: any) {
   formData.append('metadata', val.metadata);
   formData.append('username', localStorage.getItem('vuems_name') || 'testuser');
   const res = await createMirrorVersion(modelId.value, formData);
-  console.log(res);
   getVersionId(modelId.value);
   if (res && res.data.message) {
     ElMessage.success('添加镜像成功');
