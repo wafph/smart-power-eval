@@ -203,44 +203,19 @@ const handleDatasetSelect = (datasetId) => {
 function getDatasetsList() {
   getDatasets(paramsObj).then((res) => {
     if (res && res.data) {
-      if (selectedTaskType.value !== 'benchmark') {
-        tableData.value = res.data.datasets;
-        if (tableData.value.length > 0) {
-          const as = tableData.value.filter((item) => {
-            return (
-              item.type.includes(selectedTaskType.value) &&
-              item.extension_fields.dataset_format === activeCategory.value
-            );
-          });
-          filteredDatasets.value = as.map((item) => {
-            return { id: item.id, name: item.name };
-          });
-        }
-      } else {
-        tableData.value = [
-          {
-            id: 'gsm8k',
-            name: 'gsm8k',
-            type: 'benchmark',
-          },
-          {
-            id: 'mmlu',
-            name: 'mmlu',
-            type: 'benchmark',
-          },
-          {
-            id: 'ceval',
-            name: 'ceval',
-            type: 'benchmark',
-          },
-        ];
-        if (tableData.value.length > 0) {
-          tableData.value = tableData.value.map((item) => {
-            return { id: item.id, name: item.name };
-          });
-        }
-        console.log(tableData);
+      tableData.value = res.data.datasets;
+      if (tableData.value.length > 0) {
+        const as = tableData.value.filter((item) => {
+          return (
+            item.type.includes(selectedTaskType.value) &&
+            item.extension_fields.dataset_format === activeCategory.value
+          );
+        });
+        filteredDatasets.value = as.map((item) => {
+          return { id: item.id, name: item.name };
+        });
       }
+
     }
   });
 }
@@ -420,7 +395,33 @@ onMounted(() => {
   if (currentStep.value === 1) {
     localStorage.setItem('item', activeCategory.value);
   }
-  getDatasetsList();
+  if (selectedTaskType.value !== 'benchmark') {
+    getDatasetsList();
+  } else {
+    tableData.value = [
+      {
+        id: 'gsm8k',
+        name: 'gsm8k',
+        type: 'benchmark',
+      },
+      {
+        id: 'mmlu',
+        name: 'mmlu',
+        type: 'benchmark',
+      },
+      {
+        id: 'ceval',
+        name: 'ceval',
+        type: 'benchmark',
+      },
+    ];
+    if (tableData.value.length > 0) {
+      tableData.value = tableData.value.map((item) => {
+        return { id: item.id, name: item.name };
+      });
+    }
+    console.log(tableData);
+  }
   getDatasetTypes();
   getModelLists();
   getModelTypes();

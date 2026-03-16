@@ -444,7 +444,7 @@ const tableDataFilter = computed(() => {
       .toLowerCase()
       .includes(form.scenario?.toLowerCase());
     const typeFilter = item.type.toLowerCase().includes(form.type?.toLowerCase());
-    const datasetFormatFilter = item.extension_fields.dataset_format
+    const datasetFormatFilter = item.extension_fields?.dataset_format
       .toLowerCase()
       .includes(form.dataset_format?.toLowerCase());
     const statusFilter = item.status.toLowerCase().includes(form.status?.toLowerCase());
