@@ -264,7 +264,7 @@ function handlCreate() {
     judge_model_id: judgeModelsId,
   };
   if (selectedTaskType.value === 'benchmark') {
-    paramData.indicator_ids = 'benchmark';
+    paramData.indicator_ids = ['benchmark'];
   }
   if (radioValue.value === '2') {
     delete paramData.judge_model_id;

@@ -203,19 +203,20 @@ const handleDatasetSelect = (datasetId) => {
 function getDatasetsList() {
   getDatasets(paramsObj).then((res) => {
     if (res && res.data) {
-      tableData.value = res.data.datasets;
-      if (tableData.value.length > 0) {
-        const as = tableData.value.filter((item) => {
-          return (
-            item.type.includes(selectedTaskType.value) &&
-            item.extension_fields.dataset_format === activeCategory.value
-          );
-        });
-        filteredDatasets.value = as.map((item) => {
-          return { id: item.id, name: item.name };
-        });
-      }
-      if (selectedTaskType.value === 'benchmark') {
+      if (selectedTaskType.value !== 'benchmark') {
+        tableData.value = res.data.datasets;
+        if (tableData.value.length > 0) {
+          const as = tableData.value.filter((item) => {
+            return (
+              item.type.includes(selectedTaskType.value) &&
+              item.extension_fields.dataset_format === activeCategory.value
+            );
+          });
+          filteredDatasets.value = as.map((item) => {
+            return { id: item.id, name: item.name };
+          });
+        }
+      } else {
         tableData.value = [
           {
             id: 'gsm8k',
@@ -238,7 +239,7 @@ function getDatasetsList() {
             return { id: item.id, name: item.name };
           });
         }
-        console.log(tableData)
+        console.log(tableData);
       }
     }
   });
