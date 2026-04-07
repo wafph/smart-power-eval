@@ -30,23 +30,7 @@
                 />
               </el-select>
             </el-form-item>
-            <el-form-item label="">
-              <el-select
-                clearable
-                filterable
-                @clear="handleChildTypeClear"
-                allow-create
-                v-model="form.dataset_format"
-                placeholder="子任务类型"
-              >
-                <el-option
-                  v-for="item in childOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
-              </el-select>
-            </el-form-item>
+
             <el-form-item label="数据集状态">
               <el-select
                 clearable
@@ -91,7 +75,7 @@
         <el-dialog
           :title="isEdit ? '编辑数据集' : '新增数据集'"
           v-model="visible"
-          width="700px"
+          width="850px"
           destroy-on-close
           :close-on-click-modal="false"
           @close="closeDialog"
@@ -105,7 +89,8 @@
             :update="updateData"
             :isSystem="true"
             @changeEmit="handleDatasetChange"
-            @emitForm="getFormValue"
+            @changeEmits="handleDatasetChanges"
+            @emitForm="getformValue"
           />
         </el-dialog>
         <el-dialog
@@ -142,6 +127,8 @@ import {
   auditDataset,
   getDataSetlist,
   getDatasetType,
+  getMetricsByTages,
+  getTages,
 } from '@/api';
 const { setCurrentTestTask } = useState();
 import { ElMessage } from 'element-plus';
@@ -156,16 +143,18 @@ const isShowEdit = ref(true);
 const isUpdate = ref(false);
 const isShowUpload = ref(true);
 const directoryData = ref([]);
-const selectOptions = ref([]);
-const childOptions = ref([]);
+const selectOptions = ref<string[]>([]);
 const total = ref(0);
+const dataset_type = ref('');
+const datasetsOptions = ref([]);
+const tagMetricsOptions = ref([]);
+const handelchangeTag = ref(false);
 const fileId = ref(2);
 const datasetParent = ref({});
 const form = reactive({
   name: '', // 数据集名称
   scenario: '', //应用场景
   type: '', //数据集类型
-  dataset_format: '', //子任务类型
   status: '', //数据集状态
 });
 
@@ -175,24 +164,33 @@ let dialogOptions = ref<FormOption>({
   span: 12,
   list: [
     { type: 'input', label: '数据集名称', prop: 'name', required: true },
-    { type: 'input', label: '数据集场景', prop: 'scenario', required: true },
+    { type: 'input', label: '场景任务', prop: 'scenario', required: true },
     {
       type: 'select1',
       label: '数据集类型',
       opts: selectOptions,
       prop: 'type',
-      disabled: isEdit,
       required: true,
       placeholder: '数据集类型',
     },
     {
       type: 'select2',
-      label: '子任务类型',
-      opts: childOptions,
-      prop: 'dataset_format',
-      disabled: isEdit,
+      label: '数据集标签',
+      opts:  [ {label:'通用', value: '通用'}, {label:'专用', value: '专用'}, {label:'安全', value: '安全'}, {label:'可信', value: '可信'}],
+      isMultiple: false,
+      prop: 'tag',
       required: true,
-      placeholder: '子任务类型',
+      placeholder: '数据集标签',
+    },
+    {
+      type: 'select2',
+      label: '指标标签',
+      // opts:["Accuracy准确率", "Precision精确率", "Recall召回率", "F1-Score", "CLIPScore"],
+      opts:  [ {label:'Accuracy准确率', value: 'Accuracy准确率'}, {label:'Precision精确率', value: 'Precision精确率'}, {label:'Recall召回率', value: 'Recall召回率'}, {label:'F1-Score', value: 'F1-Score'}],
+      isMultiple: true,
+      prop: 'metrics',
+      required: true,
+      placeholder: '指标标签',
     },
     { type: 'input', label: '样本数量', prop: 'sample_count', required: true },
   ],
@@ -204,6 +202,8 @@ let columns = ref([
   { prop: 'type', label: '类型' },
   { prop: 'scenario', label: '应用场景' },
   { prop: 'is_preset', label: '是否预制数据集' },
+  { prop: 'tag', label: '数据集标签' },
+  { prop: 'metrics', label: '指标标签' },
   { prop: 'status', label: '状态' },
   { prop: 'created_at', label: '创建时间' },
   { prop: 'operator', label: '操作', width: 400 },
@@ -216,13 +216,11 @@ function handleStatusClear() {
 function handleTypeClear() {
   form.type = '';
 }
-function handleChildTypeClear() {
-  form.dataset_format = '';
-}
 
 const addDataSet = () => {
   visible.value = true;
   isUpdate.value = false;
+  // getDatasetTages();
 };
 
 const rowData = ref({});
@@ -231,36 +229,11 @@ const handleEdit = (row: any) => {
   isEdit.value = true;
   visible.value = true;
   isUpdate.value = true;
-  rowData.value.dataset_format = rowData.value.extension_fields.dataset_format;
-  const data = { dataset_format: rowData.value.extension_fields.dataset_format };
-  rowData.value.dataset_format = getFormatName(data.dataset_format);
   // 回显数据集
   getdatasetDetail(rowData.value.id).then((res: any) => {});
 };
 
-// 映射函数
-function getFormatName(formatKey: any) {
-  const formatMap = {
-    qa: '语义理解（问答）',
-    mcq: '语义理解（选择题）',
-    image_generation: '图像生成',
-    image_captioning: '图像描述',
-    object_recognition: '物体识别',
-    scene_understanding: '场景理解',
-    behavior_inference: '行为推断',
-    counting: '计数',
-    custom: '自定义',
-    image_classification: '图像分类',
-    object_detection: '目标检测',
-    image_segmentation: '图像分割',
-    base_safety: '基础安全',
-    confronting_safety: '对抗安全',
-  };
-  return formatMap[formatKey] || '未知格式';
-}
-
 // 使用函数
-
 const handleCheck = (row: {}) => {
   const params = { review_status: 'approved', review_comment: '审核通过' };
   auditDataset(row.id, params).then((res: any) => {
@@ -271,13 +244,25 @@ const handleCheck = (row: {}) => {
   });
 };
 
+// 获取数据集标签
+function getDatasetTages() {
+  getTages().then((res) => {
+    datasetParent.value = res.data;
+    datasetsOptions.value = datasetParent.value?.map((item) => ({
+      label: item,
+      value: item,
+    }));
+    console.log(datasetsOptions.value);
+  });
+}
+
 const closeEvent = (event: any) => {
   isVisable.value = event;
 };
 
 const handleView = (row: {}) => {
   getDataSetlist(row.id, { path: row.file_path }).then((res: any) => {
-    if(res && res.data.files){
+    if (res && res.data.files) {
       directoryData.value = [
         {
           id: '1',
@@ -328,34 +313,13 @@ const paramsObj = reactive({
   username: localStorage.getItem('vuems_name') || 'testuser',
 });
 
-// 获取数据集子类
+// 获取数据集类型
 function getDatasetTypes() {
   getDatasetType().then((res: any) => {
     datasetParent.value = res.data;
-    datasetParent.value.temporal = [{ a: '负荷预测' }, { b: '价格预测' }];
-    const keys = Object.keys(res.data);
-    selectOptions.value = keys.map((item) => ({
-      value:
-        item === 'text'
-          ? '文本'
-          : item === 'multimodal'
-            ? '多模态'
-            : item === 'vision'
-              ? '视觉'
-              : item === 'temporal'
-                ? '时序'
-                : '安全',
-      label:
-        item === 'text'
-          ? '文本'
-          : item === 'multimodal'
-            ? '多模态'
-            : item === 'vision'
-              ? '视觉'
-              : item === 'temporal'
-                ? '时序'
-                : '安全',
-    }));
+    let keys = Object.keys(datasetParent.value);
+    console.log(keys);
+    selectOptions.value = keys.map((item) => ({ value: item, label: item }));
   });
 }
 
@@ -371,7 +335,8 @@ function getChildDatas(val: any) {
       status: val.status,
       size: val.size,
       type: val.type,
-      dataset_format: val.dataset_format,
+      tag: val.tag,
+      metrics: val.metrics,
       description: val.description,
     }).then(() => {
       getDatasetsList();
@@ -388,7 +353,8 @@ function getChildDatas(val: any) {
       sample_count: val.sample_count,
       type: val.type,
       username: localStorage.getItem('vuems_name') || 'testuser',
-      dataset_format: val.dataset_format,
+      tag: val.tag,
+      metrics: val.metrics,
     };
 
     addDataSets(params).then((res: any) => {
@@ -398,10 +364,6 @@ function getChildDatas(val: any) {
       getDatasetsList();
     });
   }
-}
-
-function getFormValue(val: any) {
-  val.dataset_format = '';
 }
 
 function changeCurrentPage(val: number) {
@@ -428,8 +390,10 @@ function getDatasetsList() {
     (res: any) => {
       if (res && res.data) {
         tableData.value = res.data.datasets;
-        res.data.datasets.forEach((item: any) => {
+        tableData.value.forEach((item: any) => {
           item.is_preset = item.is_preset ? '是' : '否';
+          item.tag = Math.random()>0.4 ?'通用': '专用'
+          item.metrics = Math.random()>0.4 ?'Accuracy准确率': 'Precision精确率'
         });
       }
     },
@@ -444,13 +408,8 @@ const tableDataFilter = computed(() => {
       .toLowerCase()
       .includes(form.scenario?.toLowerCase());
     const typeFilter = item.type.toLowerCase().includes(form.type?.toLowerCase());
-    const datasetFormatFilter = item.extension_fields?.dataset_format
-      .toLowerCase()
-      .includes(form.dataset_format?.toLowerCase());
     const statusFilter = item.status.toLowerCase().includes(form.status?.toLowerCase());
-    return (
-      namefilter && datasetFormatFilter && scenariofilter && typeFilter && statusFilter
-    );
+    return namefilter && scenariofilter && typeFilter && statusFilter;
   });
 
   return data;
@@ -463,24 +422,31 @@ const pagedData = computed(() => {
   return tableDataFilter.value.slice(start, end);
 });
 
-function handleDatasetChange(e) {
-  getDatasetTypes();
-  form.dataset_format = '';
-  const a =
-    e === '文本'
-      ? 'text'
-      : e === '多模态'
-        ? 'multimodal'
-        : e === '视觉'
-          ? 'vision'
-          : e === '时序'
-            ? 'temporal'
-            : 'safety';
+function handleDatasetChange(e: string) {
+  dataset_type.value = e;
+}
 
-  childOptions.value = datasetParent.value[a].map((item: any) => ({
-    value: Object.keys(item).join(''),
-    label: Object.values(item).join(''),
-  }));
+function handleDatasetChanges(tags: string) {
+  handelchangeTag.value = true;
+  // if (handelchangeTag.value) {
+  //   getMetricsByTages(dataset_type.value, tags).then((res: any) => {
+  //     if (res.data.metrics?.length > 0) {
+  //       tagMetricsOptions.value = res.data.metrics?.map((item) => ({
+  //         value: item,
+  //         label: item,
+  //       }));
+  //       console.log(tagMetricsOptions.value);
+  //     }
+  //   });
+  // }
+}
+
+function getformValue(value: any) {
+  console.log(value);
+  // handelchangeTag.value = false;
+  // if (!handelchangeTag.value) {
+  //   value.metrics = [];
+  // }
 }
 </script>
 

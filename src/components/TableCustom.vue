@@ -212,7 +212,6 @@
               </span>
             </slot>
           </template>
-          <!-- {{ setDisabled }} -->
         </el-table-column>
       </template>
     </el-table>

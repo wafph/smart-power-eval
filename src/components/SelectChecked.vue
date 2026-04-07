@@ -141,9 +141,9 @@ import {
   getDatasets,
   getModelList,
   getModelType,
-  getDatasetType,
   getindicators,
   getJudgeModels,
+  getTages
 } from '@/api';
 const props = defineProps(['currentStep', 'selectedTaskType']);
 const emit = defineEmits(['emitIds', 'radioValue']);
@@ -181,7 +181,7 @@ const switchCategory = (categoryId) => {
   const as = tableData.value.filter((item) => {
     return (
       item.type.includes(selectedTaskType.value) &&
-      item.extension_fields.dataset_format === categoryId
+      item.extension_fields?.tag === categoryId
     );
   });
   filteredDatasets.value = as.map((item) => {
@@ -199,26 +199,25 @@ const handleDatasetSelect = (datasetId) => {
   emit('emitIds', [...selectedDatasets.value]);
 };
 
-// 获取数据集列表
-function getDatasetsList() {
-  getDatasets(paramsObj).then((res) => {
-    if (res && res.data) {
-      tableData.value = res.data.datasets;
-      if (tableData.value.length > 0) {
-        const as = tableData.value.filter((item) => {
-          return (
-            item.type.includes(selectedTaskType.value) &&
-            item.extension_fields.dataset_format === activeCategory.value
-          );
-        });
-        filteredDatasets.value = as.map((item) => {
-          return { id: item.id, name: item.name };
-        });
-      }
-
-    }
-  });
-}
+// // 获取数据集列表
+// function getDatasetsList() {
+//   getDatasets(paramsObj).then((res) => {
+//     if (res && res.data) {
+//       tableData.value = res.data.datasets;
+//       if (tableData.value.length > 0) {
+//         const as = tableData.value.filter((item) => {
+//           return (
+//             item.type.includes(selectedTaskType.value) &&
+//             item.extension_fields.dataset_format === activeCategory.value
+//           );
+//         });
+//         filteredDatasets.value = as.map((item) => {
+//           return { id: item.id, name: item.name };
+//         });
+//       }
+//     }
+//   });
+// }
 
 function getJudgeModelsList() {
   getJudgeModels().then((res) => {
@@ -321,33 +320,19 @@ async function getModelLists() {
   }
 }
 
-function getDatasetTypes() {
-  getDatasetType().then((res) => {
-    datasetParent.value = res.data;
-    datasetParent.value.temporal = [{ a: '负荷预测' }, { b: '价格预测' }];
-    datasetParent.value.safety = [
-      { base_safety: '基础安全' },
-      { confronting_safety: '对抗安全' },
-    ];
-    let childtypes = [];
-    if (selectedTaskType.value === '文本') {
-      childtypes = 'text';
-    } else if (selectedTaskType.value === '多模态') {
-      childtypes = 'multimodal';
-    } else if (selectedTaskType.value === '视觉') {
-      childtypes = 'vision';
-    } else if (selectedTaskType.value === '时序') {
-      childtypes = 'temporal';
-    } else if (selectedTaskType.value === '安全') {
-      childtypes = 'safety';
-    } else {
-      childtypes = 'benchmark';
-    }
-    categories.value = datasetParent.value[childtypes]?.map((item) => ({
-      id: Object.keys(item).join(''),
-      name: Object.values(item).join(''),
+function getDatasetTages() {
+  // getTages().then((res) => {
+  //   datasetParent.value = res.data;
+  //   categories.value = datasetParent.value?.map((item) => ({
+  //     id: item,
+  //     name: item,
+  //   }));
+  // });
+  datasetParent.value = ['通用', '专用','安全', '可信']
+    categories.value = datasetParent.value?.map((item) => ({
+      id: item,
+      name: item,
     }));
-  });
 }
 
 function getModelTypes() {
@@ -379,50 +364,50 @@ function getModelTypes() {
 }
 
 onMounted(() => {
-  if (selectedTaskType.value === '文本') {
-    activeCategory.value = 'mcq';
+  if (selectedTaskType.value === '语义') {
+    activeCategory.value = '通用';
   } else if (selectedTaskType.value === '多模态') {
-    activeCategory.value = 'object_recognition';
+    activeCategory.value = '通用';
   } else if (selectedTaskType.value === '视觉') {
-    activeCategory.value = 'image_classification';
+    activeCategory.value = '通用';
   } else if (selectedTaskType.value === '时序') {
-    activeCategory.value = 'a';
-  } else if (selectedTaskType.value === '安全') {
-    activeCategory.value = 'base_safety';
+    activeCategory.value = '通用';
+  } else if (selectedTaskType.value === '科学计算') {
+    activeCategory.value = '通用';
   } else {
     activeCategory.value = 'benchmark';
   }
   if (currentStep.value === 1) {
     localStorage.setItem('item', activeCategory.value);
   }
-  if (selectedTaskType.value !== 'benchmark') {
-    getDatasetsList();
-  } else {
-    tableData.value = [
-      {
-        id: 'gsm8k',
-        name: 'gsm8k',
-        type: 'benchmark',
-      },
-      {
-        id: 'mmlu',
-        name: 'mmlu',
-        type: 'benchmark',
-      },
-      {
-        id: 'ceval',
-        name: 'ceval',
-        type: 'benchmark',
-      },
-    ];
-    if (tableData.value.length > 0) {
-      tableData.value = tableData.value.map((item) => {
-        return { id: item.id, name: item.name };
-      });
-    }
-    console.log(tableData);
-  }
-  getDatasetTypes();
+  // if (selectedTaskType.value !== 'benchmark') {
+  //   getDatasetsList();
+  // } else {
+  //   tableData.value = [
+  //     {
+  //       id: 'gsm8k',
+  //       name: 'gsm8k',
+  //       type: 'benchmark',
+  //     },
+  //     {
+  //       id: 'mmlu',
+  //       name: 'mmlu',
+  //       type: 'benchmark',
+  //     },
+  //     {
+  //       id: 'ceval',
+  //       name: 'ceval',
+  //       type: 'benchmark',
+  //     },
+  //   ];
+  //   if (tableData.value.length > 0) {
+  //     tableData.value = tableData.value.map((item) => {
+  //       return { id: item.id, name: item.name };
+  //     });
+  //   }
+  //   console.log(tableData);
+  // }
+  getDatasetTages();
   getModelLists();
   getModelTypes();
   getCustomIndicatorsList();

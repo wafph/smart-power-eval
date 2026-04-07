@@ -769,7 +769,6 @@ function getChildDatas(val: any) {
         type: val.type,
         description: val.description,
       };
-
       createModelMirror(params)
         .then(() => {
           visible.value = false;

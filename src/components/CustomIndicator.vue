@@ -107,97 +107,35 @@ import { ElMessage } from 'element-plus';
 const treeData = ref([
   {
     id: '1',
-    label: '文本',
+    label: '语义',
     children: [
-      {
-        id: '1-1',
-        label: '语义理解（问答）',
-        children: [
-          { id: '1-1-1', label: 'BLEU' },
-          { id: '1-1-2', label: 'ROUGE' },
-        ],
-      },
-      {
-        id: '1-2',
-        label: '语义理解（选择）',
-        children: [
-          { id: '1-2-1', label: 'Accuracy准确率' },
-          { id: '1-2-2', label: 'F1-Score' },
-        ],
-      },
+      { id: '1-1', label: 'BLEU' },
+      { id: '1-2', label: 'ROUGE' },
+      { id: '1-3', label: 'Accuracy准确率' },
+      { id: '1-4', label: 'F1-Score' },
     ],
   },
   {
     id: '2',
     label: '多模态',
     children: [
-      {
-        id: '2-1',
-        label: '物体识别',
-        children: [
-          { id: '2-1-1', label: 'Accuracy准确率' },
-          { id: '2-1-2', label: 'Precision精确率' },
-          { id: '2-1-3', label: 'Recall召回率' },
-          { id: '2-1-4', label: 'F1-Score' },
-        ],
-      },
-      {
-        id: '2-2',
-        label: '场景理解',
-        children: [
-          { id: '2-2-1', label: 'Accuracy准确率' },
-          { id: '2-2-2', label: 'CLIPScore' },
-        ],
-      },
-      {
-        id: '2-3',
-        label: '行为推断',
-        children: [
-          { id: '2-3-1', label: 'Accuracy准确率' },
-          { id: '2-3-2', label: 'CLIPScore' },
-        ],
-      },
-      {
-        id: '2-4',
-        label: '计数',
-        children: [{ id: '2-4-1', label: 'Accuracy准确率' }],
-      },
+      { id: '2-1-1', label: 'Accuracy准确率' },
+      { id: '2-1-2', label: 'Precision精确率' },
+      { id: '2-1-3', label: 'Recall召回率' },
+      { id: '2-1-4', label: 'F1-Score' },
+      { id: '2-2-2', label: 'CLIPScore' },
     ],
   },
   {
     id: '3',
     label: '视觉',
     children: [
-      {
-        id: '3-1',
-        label: '图像分类',
-        children: [
-          { id: '3-1-1', label: 'Accuracy准确率' },
-          { id: '3-1-2', label: 'Precision精确率' },
-          { id: '3-1-3', label: 'Recall召回率' },
-          { id: '3-1-4', label: 'F1-Score' },
-        ],
-      },
-      {
-        id: '3-2',
-        label: '目标检测',
-        children: [
-          { id: '3-2-1', label: 'Accuracy准确率' },
-          { id: '3-2-2', label: 'Precision精确率' },
-          { id: '3-2-3', label: 'Recall召回率' },
-          { id: '3-2-4', label: 'Discovery_Rate发现率' },
-          { id: '3-2-4', label: 'error_rate误检比' },
-        ],
-      },
-      {
-        id: '3-3',
-        label: '图像分割',
-        children: [
-          { id: '3-3-1', label: 'Precision精确率' },
-          { id: '3-3-2', label: 'Recall召回率' },
-          { id: '3-3-3', label: 'F1-Score' },
-        ],
-      },
+      { id: '3-1', label: 'Accuracy准确率' },
+      { id: '3-2', label: 'Precision精确率' },
+      { id: '3-3', label: 'Recall召回率' },
+      { id: '3-4', label: 'F1-Score' },
+      { id: '3-5', label: 'Discovery_Rate发现率' },
+      { id: '3-6', label: 'error_rate误检比' },
     ],
   },
   {
@@ -207,18 +145,10 @@ const treeData = ref([
   },
   {
     id: '5',
-    label: '安全',
+    label: '科学计算',
     children: [
-      {
-        id: '5-1',
-        label: '基础安全',
-        children: [{ id: '5-1-1', label: '5大类31小类安全风险综合得分' }],
-      },
-      {
-        id: '5-2',
-        label: '对抗安全',
-        children: [{ id: '5-2-1', label: '对抗攻击综合得分对抗攻击综合得分' }],
-      },
+      { id: '5-1-1', label: '5大类31小类安全风险综合得分' },
+      { id: '5-2-1', label: '对抗攻击综合得分对抗攻击综合得分' }
     ],
   },
 ]);
@@ -418,8 +348,7 @@ const paramsObj = reactive({
 });
 
 // 树节点点击事件
-const handleNodeClick = () => {
-};
+const handleNodeClick = () => {};
 
 const handleDelete = (row) => {
   delMetric(row.id).then((res: any) => {

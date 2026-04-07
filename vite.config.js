@@ -40,8 +40,9 @@ export default defineConfig({
     proxy: {
       '/rest/api4': {
         // target: 'http://218.30.123.195:8601', // 信通院后端服务器地址
-        target: 'http://120.46.162.200:8601', // 软通后端服务器地址
-        // target: 'http://localhost:8601', // 本地后端服务器地址
+        // target: 'http://120.46.162.200:8601', // 软通后端服务器地址
+        target: 'http://1.94.244.72:7081', // 软通后端服务器地址
+        // target: 'http://120.46.162.200:8069', // 
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/rest\/api4/, ''), // 移除前缀
       },

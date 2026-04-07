@@ -26,6 +26,23 @@ export const getdatasetDetail = (id: string) => {
   });
 };
 
+
+// 获取指定模型的详细信息
+export const getMetricsByTages = (dataset_type: any, tag:any) => {
+  return request({
+    url: `${baseUrl}/api/datasets/metrics/${dataset_type}/${tag}`,
+    method: 'get',
+  });
+};
+
+// 获取所有数据集标签
+export const getTages = () => {
+  return request({
+    url: `${baseUrl}/api/datasets/tags`,
+    method: 'get',
+  });
+};
+
 // 更新数据集
 export const getUpdateDatasetDetail = (id: string, query: any) => {
   return request({

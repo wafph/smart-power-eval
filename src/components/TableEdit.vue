@@ -17,11 +17,11 @@
             :disabled="item.disabled"
             controls-position="right"
           ></el-input-number>
-            <el-input-tag
+          <el-input-tag
             v-else-if="item.type === 'tag'"
             v-model="form[item.prop]"
             :disabled="item.disabled"
-             :placeholder="item.placeholder || '请输入' + item.label"
+            :placeholder="item.placeholder || '请输入' + item.label"
           ></el-input-tag>
           <el-select
             v-else-if="item.type === 'select1'"
@@ -38,9 +38,12 @@
           </el-select>
           <el-select
             v-else-if="item.type === 'select2'"
+            filterable
             v-model="form[item.prop]"
             :disabled="item.disabled"
+            :multiple="item.isMultiple"
             :placeholder="'请选择' + item.label"
+            @change="handleDatasetChanges(form[item.prop])"
           >
             <el-option
               v-for="opt in item.opts"
@@ -73,8 +76,8 @@
               :multiple="item.multiple === true"
               @change="(e) => handleFileInputChange(e, item.prop)"
             />
-            <el-button type="primary" @click="triggerFileInput(item.prop)">{{ 
-              getUploadButtonText(form[item.prop]) 
+            <el-button type="primary" @click="triggerFileInput(item.prop)">{{
+              getUploadButtonText(form[item.prop])
             }}</el-button>
             <div v-if="form[item.prop]" class="file-info">
               <div class="file-name">
@@ -90,7 +93,7 @@
               </div>
             </template>
           </div>
-          
+
           <slot :name="item.prop" v-else> </slot>
         </el-form-item>
       </el-col>
@@ -119,11 +122,23 @@
 
 <script lang="ts" setup>
 import { FormOption } from '@/types/form-option';
-import { FormInstance, FormRules, UploadProps, UploadFile, UploadInstance } from 'element-plus';
-import { PropType, ref, nextTick } from 'vue';
-import { Close } from '@element-plus/icons-vue'
+import {
+  FormInstance,
+  FormRules,
+  UploadProps,
+  UploadFile,
+  UploadInstance,
+} from 'element-plus';
+import { PropType, ref } from 'vue';
+import { Close } from '@element-plus/icons-vue';
 
-const emit = defineEmits(['saveEdit', 'changeEmit', 'emitForm', 'fileUpload']);
+const emit = defineEmits([
+  'saveEdit',
+  'changeEmit',
+  'changeEmits',
+  'emitForm',
+  'fileUpload',
+]);
 
 const { options, formData, edit, update, isSystem } = defineProps({
   options: {
@@ -162,7 +177,7 @@ const { options, formData, edit, update, isSystem } = defineProps({
 const form = ref({ ...(edit ? formData : {}) });
 
 const rules: FormRules = options.list
-  .map((item) => {
+  .map((item: any) => {
     if (item.required) {
       return {
         [item.prop]: [
@@ -207,15 +222,14 @@ const handleFileInputChange = (event: Event, prop: string) => {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
     const file = input.files[0];
-    console.log(file)
     // 将文件对象存储到form中
     form.value[prop] = file;
-    
+
     // 将文件传递给父组件
     emit('fileUpload', {
       file: file,
       prop: prop,
-      formData: form.value
+      formData: form.value,
     });
   }
 };
@@ -232,7 +246,7 @@ const handleFileRemove = (prop: string) => {
   emit('fileUpload', {
     file: null,
     prop: prop,
-    formData: form.value
+    formData: form.value,
   });
 };
 
@@ -246,20 +260,26 @@ const saveEdit = (formEl: FormInstance | undefined) => {
   });
 };
 
-const handleDatasetChange = (e) => {
+const handleDatasetChange = (e: any) => {
   emit('changeEmit', e);
   emit('emitForm', form.value);
 };
 
+const handleDatasetChanges = (e: any) => {
+  emit('changeEmits', e);
+  emit('emitForm', form.value);
+};
 const resetForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   formEl.resetFields();
   // 清空上传的文件
-  options.list.forEach(item => {
+  options.list.forEach((item: any) => {
     if (item.type === 'upload') {
       form.value[item.prop] = null;
       // 清空文件输入
-      const fileInput = document.getElementById(`file-input-${item.prop}`) as HTMLInputElement;
+      const fileInput = document.getElementById(
+        `file-input-${item.prop}`,
+      ) as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
       }

@@ -7,7 +7,7 @@ import axios, {
 import { ElLoading, ElMessage } from 'element-plus';
 import { HTTP_ERRORS, errorMessageMap } from '@/utils/errorMapping';
 const service: AxiosInstance = axios.create({
-  timeout: 5000,
+  timeout: 150000,
 });
 
 let loadingInstance: any;

@@ -64,11 +64,42 @@
           </el-radio-group>
         </div>
         <div v-if="currentStep == 1">
-          <SelectChecked
-            :currentStep="currentStep"
-            :selectedTaskType="selectedTaskType"
-            @emitIds="getOneSelectId"
+          <el-input
+            class="search-input"
+            v-model="datasetName"
+            type="text"
+            placeholder="搜索数据集名称"
+            autocomplete="off"
           />
+          <el-select
+            class="filter-input"
+            clearable
+            filterable
+            @clear="handleTypeClear"
+            allow-create
+            v-model="form.type"
+            placeholder="类型"
+            @change="handleDatasetChange(form.type)"
+          >
+            <el-option
+              v-for="item in selectOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <TableCustom
+            :columns="columns"
+            :tableData="pagedData"
+            :pageSizes="[10, 20, 50, 100]"
+            :pageSize="paramsObj.per_page"
+            :layouts="'total, sizes, prev, pager, next, jumper'"
+            :currentPage="paramsObj.page"
+            :total="tableDataFilter.length"
+            @changePage="changeCurrentPage"
+            @changeSize="changeSizePage"
+            @sendsSelec="handelselection"
+          ></TableCustom>
         </div>
         <div v-if="currentStep == 2">
           <SelectChecked
@@ -129,16 +160,44 @@ import { ArrowLeft, Document, Camera, View, Clock, Box } from '@element-plus/ico
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
-import { createTaskslist } from '@/api';
+import { getDatasets, createTaskslist } from '@/api';
 const selectType = defineProps(['selectType']);
 const dataSetIds = ref('');
 const modelIds = ref('');
+const datasetName = ref('');
 const metricsIds = ref<string[]>([]);
 const placeholders = ref('请输入任务名称');
 const judgeModelsId = ref('');
+const selectionLength = ref([]);
 const radioValue = ref('1');
 const ruleForm = reactive({
   taskName: '',
+});
+const selectOptions = ref([
+  { value: '通用', label: '通用' },
+  { value: '专用', label: '专用' },
+  { value: '安全', label: '安全' },
+  { value: '可信', label: '可信' },
+]);
+const tableData = ref([]);
+const paramsObj = reactive({
+  page: 1,
+  per_page: 10,
+  type: 'all',
+  status: 'all',
+  username: localStorage.getItem('vuems_name'),
+});
+let columns = ref([
+  { type: 'index', label: '序号', width: 55, align: 'center' },
+  { type: 'selection', label: '', width: 55, align: 'center' },
+  { prop: 'name', label: '数据集名称' },
+  { prop: 'type', label: '类型' },
+  { prop: 'scenario', label: '应用场景' },
+  { prop: 'tag', label: '数据集标签' },
+  { prop: 'metrics', label: '指标标签' },
+]);
+const form = reactive({
+  type: '', //数据集类型
 });
 const rules = reactive<FormRules>({
   taskName: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
@@ -156,8 +215,8 @@ const steps = ref([
 // 任务类型数据
 const taskTypes = shallowRef([
   {
-    value: '文本',
-    label: '文本评估',
+    value: '语义',
+    label: '语义评估',
     icon: Document,
     type: 'NLP',
     tagType: 'primary',
@@ -177,8 +236,8 @@ const taskTypes = shallowRef([
     tagType: 'warning',
   },
   {
-    value: '安全',
-    label: '安全评估',
+    value: '科学计算',
+    label: '科学计算评估',
     icon: Camera,
     type: '安全',
     tagType: 'danger',
@@ -208,6 +267,12 @@ function handleBack() {
   router.back();
 }
 
+function handleTypeClear() {
+  form.type = '';
+}
+
+function handleDatasetChange(e: string) {}
+
 function getOneSelectId(id: any) {
   dataSetIds.value = id;
   localStorage.setItem('dataset_id', dataSetIds.value);
@@ -220,6 +285,47 @@ function getModelSelectId(id: any) {
 
 function getRadioValue(value: any) {
   radioValue.value = value;
+}
+
+function handelselection(e: any) {
+  selectionLength.value = e;
+}
+
+const tableDataFilter = computed(() => {
+  let data = [...tableData.value];
+  data.forEach((item) => {
+    item.tag = Math.random() > 0.4 ? '通用' : '专用';
+    item.metrics = Math.random() > 0.4 ? 'Accuracy准确率' : 'Precision精确率';
+  });
+  data = data.filter((item: any) => {
+    const nameFilter = item.name.toLowerCase().includes(datasetName.value?.toLowerCase());
+    const typeFilter = item.tag.toLowerCase().includes(form.type?.toLowerCase());
+    return nameFilter && typeFilter;
+  });
+  return data;
+});
+
+// 获取数据集列表
+function getDatasetsList() {
+  getDatasets(paramsObj).then((res) => {
+    if (res && res.data) {
+      tableData.value = res.data.datasets;
+    }
+  });
+}
+
+const pagedData = computed(() => {
+  const start = (paramsObj.page - 1) * paramsObj.per_page;
+  const end = start + paramsObj.per_page;
+  return tableDataFilter.value.slice(start, end);
+});
+
+function changeCurrentPage(val: number) {
+  paramsObj.page = val;
+}
+
+function changeSizePage(val: number) {
+  paramsObj.per_page = val;
 }
 
 function getMetricsSelectId(id: any) {
@@ -236,7 +342,7 @@ const handleNextDisabled = computed(() => {
   return currentStep.value === 0
     ? !selectedTaskType.value || ruleForm.taskName === ''
     : currentStep.value === 1
-      ? dataSetIds.value.length === 0
+      ? selectionLength.value.length === 0
       : currentStep.value === 2
         ? modelIds.value.length === 0
         : metricsIds.value.length === 0 && selectedTaskType.value !== 'benchmark';
@@ -281,7 +387,9 @@ function handlPrevius() {
 }
 
 // 模拟加载
-onMounted(() => {});
+onMounted(() => {
+  getDatasetsList();
+});
 </script>
 
 <style lang="less" scoped>
@@ -363,6 +471,14 @@ onMounted(() => {});
         margin-bottom: 8px;
         text-align: center;
         margin-bottom: 40px;
+      }
+
+      .search-input {
+        width: 220px;
+      }
+
+      .filter-input {
+        width: 90px;
       }
 
       .task-type-options {
