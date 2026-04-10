@@ -294,7 +294,6 @@ function getDatasetTages() {
       label: item,
       value: item,
     }));
-    console.log(datasetsOptions.value);
   });
 }
 

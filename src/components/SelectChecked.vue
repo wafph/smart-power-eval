@@ -292,11 +292,6 @@ async function getModelLists() {
   filtereModal.value = ms.map((item) => {
     return { id: item.id, name: item.name };
   });
-  if (selectedTaskType.value === 'benchmark') {
-    filtereModal.value = modalTableData.value.map((item) => {
-      return { id: item.id, name: item.name };
-    });
-  }
 }
 
 function getDatasetTages() {

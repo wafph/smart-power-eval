@@ -77,9 +77,9 @@
             filterable
             @clear="handleTypeClear"
             allow-create
-            v-model="form.type"
+            v-model="form.tag"
             placeholder="类型"
-            @change="handleDatasetChange(form.type)"
+            @change="handleDatasetChange(form.tag)"
           >
             <el-option
               v-for="item in selectOptions"
@@ -197,7 +197,7 @@ let columns = ref([
   { prop: 'metrics', label: '指标标签' },
 ]);
 const form = reactive({
-  type: '', //数据集类型
+  tag: '', //数据集类型
 });
 const rules = reactive<FormRules>({
   taskName: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
@@ -253,7 +253,7 @@ const taskTypes = shallowRef([
 
 // 响应式数据
 const currentStep = ref(0);
-const selectedTaskType = ref('文本');
+const selectedTaskType = ref('语义');
 
 // 方法
 function handleBack() {
@@ -261,7 +261,7 @@ function handleBack() {
 }
 
 function handleTypeClear() {
-  form.type = '';
+  form.tag = '';
 }
 
 function handleDatasetChange(e: string) {}
@@ -284,13 +284,9 @@ function handelselection(e: any) {
 
 const tableDataFilter = computed(() => {
   let data = [...tableData.value];
-  data.forEach((item) => {
-    item.tag = Math.random() > 0.4 ? '通用' : '专用';
-    item.metrics = Math.random() > 0.4 ? 'Accuracy准确率' : 'Precision精确率';
-  });
   data = data.filter((item: any) => {
     const nameFilter = item.name.toLowerCase().includes(datasetName.value?.toLowerCase());
-    const typeFilter = item.tag.toLowerCase().includes(form.type?.toLowerCase());
+    const typeFilter = item.tag?.toLowerCase().includes(form.tag?.toLowerCase());
     return nameFilter && typeFilter;
   });
   return data;
@@ -361,9 +357,6 @@ function handlCreate() {
     user_name: localStorage.getItem('vuems_name'),
     judge_model_id: judgeModelsId,
   };
-  if (selectedTaskType.value === 'benchmark') {
-    paramData.indicator_ids = ['benchmark'];
-  }
   if (radioValue.value === '2') {
     delete paramData.judge_model_id;
   }
