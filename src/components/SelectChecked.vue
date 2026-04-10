@@ -198,27 +198,6 @@ function handleChange(label) {
 const handleDatasetSelect = (datasetId) => {
   emit('emitIds', [...selectedDatasets.value]);
 };
-
-// // 获取数据集列表
-// function getDatasetsList() {
-//   getDatasets(paramsObj).then((res) => {
-//     if (res && res.data) {
-//       tableData.value = res.data.datasets;
-//       if (tableData.value.length > 0) {
-//         const as = tableData.value.filter((item) => {
-//           return (
-//             item.type.includes(selectedTaskType.value) &&
-//             item.extension_fields.dataset_format === activeCategory.value
-//           );
-//         });
-//         filteredDatasets.value = as.map((item) => {
-//           return { id: item.id, name: item.name };
-//         });
-//       }
-//     }
-//   });
-// }
-
 function getJudgeModelsList() {
   getJudgeModels().then((res) => {
     judgeModelName.value = res.data.judge_models.map((item) => ({
@@ -237,67 +216,67 @@ function getCustomIndicatorsList() {
       name: item.name + '-' + item.chinese_name,
     }));
     indicator.value = localStorage.getItem('item');
-    if (indicator.value === 'mcq') {
-      filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy-准确率' },
-        { id: 'f1-score', name: 'F1-Score' },
-      ];
-    } else if (indicator.value === 'qa') {
-      filterCustomIndicators.value = [
-        { id: 'rouge', name: 'ROUGE' },
-        { id: 'bleu', name: 'BLEU' },
-      ];
-    } else if (indicator.value === 'object_recognition') {
-      filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy准确率' },
-        { id: 'precision', name: 'Precision精确率' },
-        { id: 'recall', name: 'Recall召回率' },
-        { id: 'f1-score', name: 'F1-Score' },
-      ];
-    } else if (indicator.value === 'scene_understanding') {
-      filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy准确率' },
-        { id: 'clip_score', name: 'CLIPScore' },
-      ];
-    } else if (indicator.value === 'behavior_inference') {
-      filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy准确率' },
-        { id: 'clip_score', name: 'CLIPScore' },
-      ];
-    } else if (indicator.value === 'counting') {
-      filterCustomIndicators.value = [{ id: 'accuracy', name: 'Accuracy准确率' }];
-    } else if (indicator.value === 'image_classification') {
-      filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy准确率' },
-        { id: 'precision', name: 'Precision精确率' },
-        { id: 'recall', name: 'Recall召回率' },
-        { id: 'f1-score', name: 'F1-Score' },
-      ];
-    } else if (indicator.value === 'object_detection') {
-      filterCustomIndicators.value = [
-        { id: 'accuracy', name: 'Accuracy准确率' },
-        { id: 'precision', name: 'Precision精确率' },
-        { id: 'recall', name: 'Recall召回率' },
-        { id: 'discoveryRate', name: 'Discovery_Rate发现率' },
-        { id: 'error_rate', name: 'Error_rate误检比' },
-      ];
-    } else if (indicator.value === 'image_segmentation') {
-      filterCustomIndicators.value = [
-        { id: 'precision', name: 'Precision精确率' },
-        { id: 'recall', name: 'Recall召回率' },
-        { id: 'f1-score', name: 'F1-Score' },
-      ];
-    } else if (indicator.value === 'base_safety') {
-      filterCustomIndicators.value = [
-        { id: 'class-sore', name: '5大类31小类安全风险综合得分' },
-      ];
-    } else if (indicator.value === 'confronting_safety') {
-      filterCustomIndicators.value = [
-        { id: 'confronting ', name: '对抗攻击综合得分对抗攻击综合得分' },
-      ];
-    } else {
-      filterCustomIndicators.value = [];
-    }
+    // if (indicator.value === 'mcq') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'accuracy', name: 'Accuracy-准确率' },
+    //     { id: 'f1-score', name: 'F1-Score' },
+    //   ];
+    // } else if (indicator.value === 'qa') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'rouge', name: 'ROUGE' },
+    //     { id: 'bleu', name: 'BLEU' },
+    //   ];
+    // } else if (indicator.value === 'object_recognition') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'accuracy', name: 'Accuracy准确率' },
+    //     { id: 'precision', name: 'Precision精确率' },
+    //     { id: 'recall', name: 'Recall召回率' },
+    //     { id: 'f1-score', name: 'F1-Score' },
+    //   ];
+    // } else if (indicator.value === 'scene_understanding') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'accuracy', name: 'Accuracy准确率' },
+    //     { id: 'clip_score', name: 'CLIPScore' },
+    //   ];
+    // } else if (indicator.value === 'behavior_inference') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'accuracy', name: 'Accuracy准确率' },
+    //     { id: 'clip_score', name: 'CLIPScore' },
+    //   ];
+    // } else if (indicator.value === 'counting') {
+    //   filterCustomIndicators.value = [{ id: 'accuracy', name: 'Accuracy准确率' }];
+    // } else if (indicator.value === 'image_classification') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'accuracy', name: 'Accuracy准确率' },
+    //     { id: 'precision', name: 'Precision精确率' },
+    //     { id: 'recall', name: 'Recall召回率' },
+    //     { id: 'f1-score', name: 'F1-Score' },
+    //   ];
+    // } else if (indicator.value === 'object_detection') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'accuracy', name: 'Accuracy准确率' },
+    //     { id: 'precision', name: 'Precision精确率' },
+    //     { id: 'recall', name: 'Recall召回率' },
+    //     { id: 'discoveryRate', name: 'Discovery_Rate发现率' },
+    //     { id: 'error_rate', name: 'Error_rate误检比' },
+    //   ];
+    // } else if (indicator.value === 'image_segmentation') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'precision', name: 'Precision精确率' },
+    //     { id: 'recall', name: 'Recall召回率' },
+    //     { id: 'f1-score', name: 'F1-Score' },
+    //   ];
+    // } else if (indicator.value === 'base_safety') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'class-sore', name: '5大类31小类安全风险综合得分' },
+    //   ];
+    // } else if (indicator.value === 'confronting_safety') {
+    //   filterCustomIndicators.value = [
+    //     { id: 'confronting ', name: '对抗攻击综合得分对抗攻击综合得分' },
+    //   ];
+    // } else {
+    //   filterCustomIndicators.value = [];
+    // }
   });
 }
 
@@ -321,18 +300,13 @@ async function getModelLists() {
 }
 
 function getDatasetTages() {
-  // getTages().then((res) => {
-  //   datasetParent.value = res.data;
-  //   categories.value = datasetParent.value?.map((item) => ({
-  //     id: item,
-  //     name: item,
-  //   }));
-  // });
-  datasetParent.value = ['通用', '专用','安全', '可信']
+  getTages().then((res) => {
+    datasetParent.value = res.data;
     categories.value = datasetParent.value?.map((item) => ({
       id: item,
       name: item,
     }));
+  });
 }
 
 function getModelTypes() {

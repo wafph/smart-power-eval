@@ -249,13 +249,6 @@ const taskTypes = shallowRef([
     type: '时序',
     tagType: 'info',
   },
-  {
-    value: 'benchmark',
-    label: '开源Benchmark',
-    icon: Clock,
-    type: 'benchmark',
-    tagType: 'primary',
-  },
 ]);
 
 // 响应式数据
@@ -272,12 +265,6 @@ function handleTypeClear() {
 }
 
 function handleDatasetChange(e: string) {}
-
-function getOneSelectId(id: any) {
-  dataSetIds.value = id;
-  localStorage.setItem('dataset_id', dataSetIds.value);
-}
-
 function getModelSelectId(id: any) {
   modelIds.value = id;
   localStorage.setItem('model_id', modelIds.value);
@@ -288,7 +275,11 @@ function getRadioValue(value: any) {
 }
 
 function handelselection(e: any) {
+  console.log(e);
   selectionLength.value = e;
+  dataSetIds.value= e[0].id
+  console.log(dataSetIds.value);
+
 }
 
 const tableDataFilter = computed(() => {
@@ -357,12 +348,13 @@ function handleNext() {
 }
 
 function handlCreate() {
-  const datasetId = localStorage.getItem('dataset_id');
+  // const datasetId = localStorage.getItem('dataset_id');
+  console.log(dataSetIds.value);
   const modelIds = localStorage.getItem('model_id');
   const metricsId = JSON.parse(localStorage.getItem('indicator_ids'));
   const judgeModelsId = localStorage.getItem('judge_model_id');
   const paramData = {
-    dataset_id: datasetId,
+    dataset_id: dataSetIds.value,
     model_id: modelIds,
     indicator_ids: metricsId,
     name: ruleForm.taskName,

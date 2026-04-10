@@ -151,6 +151,36 @@ const tagMetricsOptions = ref([]);
 const handelchangeTag = ref(false);
 const fileId = ref(2);
 const datasetParent = ref({});
+const datasetsSonOptions = [
+  {
+    label: 'IFEval',
+    value: 'IFEval',
+  },
+  {
+    label: 'aime2024',
+    value: 'aime2024',
+  },
+  {
+    label: 'human eval',
+    value: 'human eval',
+  },
+  {
+    label: 'human eval',
+    value: 'human eval',
+  },
+  {
+    label: 'ceva',
+    value: 'ceva',
+  },
+  {
+    label: 'Math_vista（1000）',
+    value: 'Math_vista（1000）',
+  },
+  {
+    label: 'MMMU（900）',
+    value: 'MMMU（900）',
+  },
+];
 const form = reactive({
   name: '', // 数据集名称
   scenario: '', //应用场景
@@ -164,7 +194,6 @@ let dialogOptions = ref<FormOption>({
   span: 12,
   list: [
     { type: 'input', label: '数据集名称', prop: 'name', required: true },
-    { type: 'input', label: '场景任务', prop: 'scenario', required: true },
     {
       type: 'select1',
       label: '数据集类型',
@@ -175,8 +204,17 @@ let dialogOptions = ref<FormOption>({
     },
     {
       type: 'select2',
+      label: '场景任务',
+      opts: datasetsSonOptions,
+      isMultiple: false,
+      prop: 'scenario',
+      required: true,
+      placeholder: '场景任务',
+    },
+    {
+      type: 'select2',
       label: '数据集标签',
-      opts:  [ {label:'通用', value: '通用'}, {label:'专用', value: '专用'}, {label:'安全', value: '安全'}, {label:'可信', value: '可信'}],
+      opts: datasetsOptions,
       isMultiple: false,
       prop: 'tag',
       required: true,
@@ -185,8 +223,12 @@ let dialogOptions = ref<FormOption>({
     {
       type: 'select2',
       label: '指标标签',
-      // opts:["Accuracy准确率", "Precision精确率", "Recall召回率", "F1-Score", "CLIPScore"],
-      opts:  [ {label:'Accuracy准确率', value: 'Accuracy准确率'}, {label:'Precision精确率', value: 'Precision精确率'}, {label:'Recall召回率', value: 'Recall召回率'}, {label:'F1-Score', value: 'F1-Score'}],
+      opts: [
+        { label: 'Accuracy准确率', value: 'Accuracy准确率' },
+        { label: 'Precision精确率', value: 'Precision精确率' },
+        { label: 'Recall召回率', value: 'Recall召回率' },
+        { label: 'F1-Score', value: 'F1-Score' },
+      ],
       isMultiple: true,
       prop: 'metrics',
       required: true,
@@ -200,7 +242,7 @@ let columns = ref([
   { type: 'index', label: '序号', width: 55, align: 'center' },
   { prop: 'name', label: '数据集名称' },
   { prop: 'type', label: '类型' },
-  { prop: 'scenario', label: '应用场景' },
+  // { prop: 'scenario', label: '应用场景' },
   { prop: 'is_preset', label: '是否预制数据集' },
   { prop: 'tag', label: '数据集标签' },
   { prop: 'metrics', label: '指标标签' },
@@ -220,7 +262,7 @@ function handleTypeClear() {
 const addDataSet = () => {
   visible.value = true;
   isUpdate.value = false;
-  // getDatasetTages();
+  getDatasetTages();
 };
 
 const rowData = ref({});
@@ -392,8 +434,6 @@ function getDatasetsList() {
         tableData.value = res.data.datasets;
         tableData.value.forEach((item: any) => {
           item.is_preset = item.is_preset ? '是' : '否';
-          item.tag = Math.random()>0.4 ?'通用': '专用'
-          item.metrics = Math.random()>0.4 ?'Accuracy准确率': 'Precision精确率'
         });
       }
     },
@@ -424,29 +464,15 @@ const pagedData = computed(() => {
 
 function handleDatasetChange(e: string) {
   dataset_type.value = e;
+  console.log(e);
 }
 
 function handleDatasetChanges(tags: string) {
   handelchangeTag.value = true;
-  // if (handelchangeTag.value) {
-  //   getMetricsByTages(dataset_type.value, tags).then((res: any) => {
-  //     if (res.data.metrics?.length > 0) {
-  //       tagMetricsOptions.value = res.data.metrics?.map((item) => ({
-  //         value: item,
-  //         label: item,
-  //       }));
-  //       console.log(tagMetricsOptions.value);
-  //     }
-  //   });
-  // }
 }
 
 function getformValue(value: any) {
   console.log(value);
-  // handelchangeTag.value = false;
-  // if (!handelchangeTag.value) {
-  //   value.metrics = [];
-  // }
 }
 </script>
 
