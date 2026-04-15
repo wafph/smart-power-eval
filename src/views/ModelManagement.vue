@@ -1,7 +1,7 @@
 <template>
   <div class="data-container">
     <h2>模型管理</h2>
-    <p>管理所有AI模型，包括文本模型，视觉模型，安全模型，多模态模型和时序模型</p>
+    <p>管理所有AI模型，包括语义模型，视觉模型，科学计算模型，多模态模型和时序模型</p>
     <el-tabs v-model="activeTab" class="demo-tabs" @tab-click="handleTabClick">
       <el-tab-pane label="模型管理" name="model">
         <div class="form-top">
@@ -318,11 +318,11 @@ const form = reactive({
 
 const tabs = ref([
   { label: '全部模型', name: 'first' },
-  { label: '文本模型', name: '文本模型' },
+  { label: '语义模型', name: '语义模型' },
   { label: '视觉模型', name: '视觉模型' },
   { label: '多模态模型', name: '多模态模型' },
   { label: '时序模型', name: '时序模型' },
-  { label: '安全模型', name: '安全模型' },
+  { label: '科学计算模型', name: '科学计算模型' },
 ]);
 
 const viewData = ref({
@@ -788,7 +788,7 @@ function createVersions() {
   isEditVersion.value = false;
   if (activeTab.value === 'model') {
     getModelTypes();
-    if (modelType.value === '文本') {
+    if (modelType.value === '语义') {
       modelType.value = 'text';
     } else if (modelType.value === '多模态') {
       modelType.value = 'multimodal';
@@ -796,7 +796,7 @@ function createVersions() {
       modelType.value = 'vision';
     } else if (modelType.value === '时序') {
       modelType.value = 'temporal';
-    } else if (modelType.value === '安全') {
+    } else if (modelType.value === '可续计算') {
       modelType.value = 'safety';
     }
     setTimeout(() => {
@@ -934,24 +934,24 @@ function getModelTypes() {
     selectOptions.value = keys.map((item) => ({
       value:
         item === 'text'
-          ? '文本'
+          ? '语义'
           : item === 'multimodal'
             ? '多模态'
             : item === 'vision'
               ? '视觉'
               : item === 'temporal'
                 ? '时序'
-                : '安全',
+                : '科学计算',
       label:
         item === 'text'
-          ? '文本'
+          ? '语义'
           : item === 'multimodal'
             ? '多模态'
             : item === 'vision'
               ? '视觉'
               : item === 'temporal'
                 ? '时序'
-                : '安全',
+                : '科学计算',
     }));
   });
 }

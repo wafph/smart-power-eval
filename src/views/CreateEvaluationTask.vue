@@ -277,17 +277,19 @@ function getRadioValue(value: any) {
 function handelselection(e: any) {
   console.log(e);
   selectionLength.value = e;
-  dataSetIds.value= e[0].id
+  dataSetIds.value = e[0].id;
   console.log(dataSetIds.value);
-
 }
 
 const tableDataFilter = computed(() => {
   let data = [...tableData.value];
   data = data.filter((item: any) => {
     const nameFilter = item.name.toLowerCase().includes(datasetName.value?.toLowerCase());
-    const typeFilter = item.tag?.toLowerCase().includes(form.tag?.toLowerCase());
-    return nameFilter && typeFilter;
+    const tagFilter = item.tag?.toLowerCase().includes(form.tag?.toLowerCase());
+    const typeFilter = item.type
+      ?.toLowerCase()
+      .includes(selectedTaskType.value?.toLowerCase());
+    return nameFilter && tagFilter && typeFilter;
   });
   return data;
 });
@@ -337,6 +339,7 @@ const handleNextDisabled = computed(() => {
 
 const handleGroupChange = (value: any) => {
   selectedTaskType.value = value;
+  console.log(selectedTaskType.value);
 };
 
 function handleNext() {
