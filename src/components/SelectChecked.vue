@@ -7,30 +7,12 @@
     <h3 class="dataset-title" v-else>请选择裁判模型</h3>
     <!-- 主内容区域 -->
     <div class="main-contents">
-      <!-- 左侧分类菜单 -->
-      <div
-        class="category-menu"
-        v-if="currentStep === 1 && selectedTaskType !== 'benchmark'"
-      >
-        <div
-          v-for="category in categories"
-          :key="category.id"
-          class="category-item"
-          :class="{ active: activeCategory === category.id }"
-          @click="switchCategory(category.id)"
-        >
-          {{ category.name }}
-          <div v-if="activeCategory === category.id" class="active-indicator"></div>
-        </div>
-      </div>
       <!-- 右侧数据集列表 -->
       <div class="dataset-list">
-        <!-- {{ selectedTaskType }} -->
         <div
           v-if="
             filteredDatasets.length === 0 &&
-            currentStep === 1 &&
-            selectedTaskType !== 'benchmark'
+            currentStep === 1
           "
           class="no-data"
         >
@@ -38,58 +20,9 @@
         </div>
         <div class="datasets-container">
           <el-checkbox-group v-model="selectedDatasets" class="dataset-checkbox-group">
-            <template v-if="currentStep == 1 && selectedTaskType !== 'benchmark'">
-              <div
-                v-for="dataset in filteredDatasets"
-                :key="dataset.id"
-                class="dataset-checkbox-item"
-              >
-                {{ dataset }}
-                <el-checkbox
-                  :label="dataset.id"
-                  class="dataset-checkbox"
-                  @change="handleDatasetSelect(dataset.id)"
-                >
-                  <span class="dataset-name">{{ dataset.name }}</span>
-                </el-checkbox>
-              </div>
-            </template>
-            <template v-if="currentStep == 1 && selectedTaskType === 'benchmark'">
-              {{ tableData }}
-              <div
-                v-for="dataset in tableData"
-                :key="dataset.name"
-                class="dataset-checkbox-item"
-              >
-                {{ dataset }}
-                <el-checkbox
-                  :label="dataset.name"
-                  class="dataset-checkbox"
-                  @change="handleDatasetSelect(dataset.name)"
-                >
-                  <span class="dataset-name">{{ dataset.name }}</span>
-                </el-checkbox>
-              </div>
-            </template>
-            <div v-else-if="currentStep == 2">
+            <div v-if="currentStep == 2">
               <template
                 v-for="dataset in filtereModal"
-                :key="dataset.id"
-                class="dataset-checkbox-item"
-              >
-                {{ dataset }}
-                <el-checkbox
-                  :label="dataset.id"
-                  class="dataset-checkbox"
-                  @change="handleDatasetSelect(dataset.id)"
-                >
-                  <span class="dataset-name">{{ dataset.name }}</span>
-                </el-checkbox>
-              </template>
-            </div>
-            <div v-else-if="currentStep == 3">
-              <template
-                v-for="dataset in filterCustomIndicators"
                 :key="dataset.id"
                 class="dataset-checkbox-item"
               >
@@ -145,9 +78,9 @@ import {
   getJudgeModels,
   getTages
 } from '@/api';
-const props = defineProps(['currentStep', 'selectedTaskType']);
+const props = defineProps(['currentStep', 'selectedTaskType', 'selectMetrics']);
 const emit = defineEmits(['emitIds', 'radioValue']);
-const { currentStep, selectedTaskType } = toRefs(props);
+const { currentStep, selectedTaskType, selectMetrics } = toRefs(props);
 // 分类数据
 const categories = ref([]);
 const radio1 = ref('1');
@@ -187,7 +120,6 @@ const switchCategory = (categoryId) => {
   filteredDatasets.value = as.map((item) => {
     return { id: item.id, name: item.name };
   });
-  getCustomIndicatorsList();
 };
 
 function handleChange(label) {
@@ -204,79 +136,6 @@ function getJudgeModelsList() {
       id: item.id,
       name: item.name,
     }));
-  });
-}
-
-// 获取指标列表
-function getCustomIndicatorsList() {
-  getindicators().then((res) => {
-    customIndicators.value = res.data.metrics;
-    filterCustomIndicators.value = customIndicators?.value.map((item) => ({
-      id: item.id,
-      name: item.name + '-' + item.chinese_name,
-    }));
-    indicator.value = localStorage.getItem('item');
-    // if (indicator.value === 'mcq') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'accuracy', name: 'Accuracy-准确率' },
-    //     { id: 'f1-score', name: 'F1-Score' },
-    //   ];
-    // } else if (indicator.value === 'qa') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'rouge', name: 'ROUGE' },
-    //     { id: 'bleu', name: 'BLEU' },
-    //   ];
-    // } else if (indicator.value === 'object_recognition') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'accuracy', name: 'Accuracy准确率' },
-    //     { id: 'precision', name: 'Precision精确率' },
-    //     { id: 'recall', name: 'Recall召回率' },
-    //     { id: 'f1-score', name: 'F1-Score' },
-    //   ];
-    // } else if (indicator.value === 'scene_understanding') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'accuracy', name: 'Accuracy准确率' },
-    //     { id: 'clip_score', name: 'CLIPScore' },
-    //   ];
-    // } else if (indicator.value === 'behavior_inference') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'accuracy', name: 'Accuracy准确率' },
-    //     { id: 'clip_score', name: 'CLIPScore' },
-    //   ];
-    // } else if (indicator.value === 'counting') {
-    //   filterCustomIndicators.value = [{ id: 'accuracy', name: 'Accuracy准确率' }];
-    // } else if (indicator.value === 'image_classification') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'accuracy', name: 'Accuracy准确率' },
-    //     { id: 'precision', name: 'Precision精确率' },
-    //     { id: 'recall', name: 'Recall召回率' },
-    //     { id: 'f1-score', name: 'F1-Score' },
-    //   ];
-    // } else if (indicator.value === 'object_detection') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'accuracy', name: 'Accuracy准确率' },
-    //     { id: 'precision', name: 'Precision精确率' },
-    //     { id: 'recall', name: 'Recall召回率' },
-    //     { id: 'discoveryRate', name: 'Discovery_Rate发现率' },
-    //     { id: 'error_rate', name: 'Error_rate误检比' },
-    //   ];
-    // } else if (indicator.value === 'image_segmentation') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'precision', name: 'Precision精确率' },
-    //     { id: 'recall', name: 'Recall召回率' },
-    //     { id: 'f1-score', name: 'F1-Score' },
-    //   ];
-    // } else if (indicator.value === 'base_safety') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'class-sore', name: '5大类31小类安全风险综合得分' },
-    //   ];
-    // } else if (indicator.value === 'confronting_safety') {
-    //   filterCustomIndicators.value = [
-    //     { id: 'confronting ', name: '对抗攻击综合得分对抗攻击综合得分' },
-    //   ];
-    // } else {
-    //   filterCustomIndicators.value = [];
-    // }
   });
 }
 
@@ -333,26 +192,12 @@ function getModelTypes() {
 }
 
 onMounted(() => {
-  if (selectedTaskType.value === '语义') {
-    activeCategory.value = '通用';
-  } else if (selectedTaskType.value === '多模态') {
-    activeCategory.value = '通用';
-  } else if (selectedTaskType.value === '视觉') {
-    activeCategory.value = '通用';
-  } else if (selectedTaskType.value === '时序') {
-    activeCategory.value = '通用';
-  } else if (selectedTaskType.value === '科学计算') {
-    activeCategory.value = '通用';
-  } else {
-    activeCategory.value = 'benchmark';
-  }
   if (currentStep.value === 1) {
     localStorage.setItem('item', activeCategory.value);
   }
   getDatasetTages();
   getModelLists();
   getModelTypes();
-  getCustomIndicatorsList();
   getJudgeModelsList();
 });
 </script>

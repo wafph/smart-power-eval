@@ -109,11 +109,13 @@
           />
         </div>
         <div v-if="currentStep == 3">
-          <SelectChecked
-            :currentStep="currentStep"
-            :selectedTaskType="selectedTaskType"
-            @emitIds="getMetricsSelectId"
-          />
+          <el-checkbox-group v-model="selectMetrics" class="dataset-checkbox-group">
+            <template v-for="(metrics, index) in getMetrics" :key="index">
+              <el-checkbox border  :label="metrics">
+                <span class="dataset-name">{{ metrics }}</span>
+              </el-checkbox>
+            </template>
+          </el-checkbox-group>
         </div>
         <div v-if="currentStep == 4">
           <SelectChecked
@@ -163,9 +165,10 @@ import { useRouter } from 'vue-router';
 import { getDatasets, createTaskslist } from '@/api';
 const selectType = defineProps(['selectType']);
 const dataSetIds = ref('');
+const getMetrics = ref([]);
 const modelIds = ref('');
 const datasetName = ref('');
-const metricsIds = ref<string[]>([]);
+const selectMetrics = ref<string[]>([]);
 const placeholders = ref('请输入任务名称');
 const judgeModelsId = ref('');
 const selectionLength = ref([]);
@@ -275,8 +278,11 @@ function getRadioValue(value: any) {
 }
 
 function handelselection(e: any) {
+  console.log(e);
   selectionLength.value = e;
   dataSetIds.value = e[0].id;
+  getMetrics.value = e[0].metrics;
+  localStorage.setItem('model_id', modelIds.value);
 }
 
 const tableDataFilter = computed(() => {
@@ -315,11 +321,6 @@ function changeSizePage(val: number) {
   paramsObj.per_page = val;
 }
 
-function getMetricsSelectId(id: any) {
-  metricsIds.value = id;
-  localStorage.setItem('indicator_ids', JSON.stringify(metricsIds.value));
-}
-
 function getjudgeModelSelectId(id: any) {
   judgeModelsId.value = id;
   localStorage.setItem('judge_model_id', judgeModelsId.value);
@@ -332,7 +333,7 @@ const handleNextDisabled = computed(() => {
       ? selectionLength.value.length === 0
       : currentStep.value === 2
         ? modelIds.value.length === 0
-        : metricsIds.value.length === 0 && selectedTaskType.value !== 'benchmark';
+        : selectMetrics.value.length === 0;
 });
 
 const handleGroupChange = (value: any) => {
@@ -345,12 +346,11 @@ function handleNext() {
 
 function handlCreate() {
   const modelIds = localStorage.getItem('model_id');
-  const metricsId = JSON.parse(localStorage.getItem('indicator_ids'));
   const judgeModelsId = localStorage.getItem('judge_model_id');
   const paramData = {
     dataset_id: dataSetIds.value,
     model_id: modelIds,
-    indicator_ids: metricsId,
+    indicator_ids: selectMetrics.value,
     name: ruleForm.taskName,
     user_name: localStorage.getItem('vuems_name'),
     judge_model_id: judgeModelsId,

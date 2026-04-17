@@ -150,7 +150,6 @@ const handelchangeTag = ref(false);
 const fileId = ref(2);
 const datasetParent = ref({});
 const datasetsSonOptions = ref<string[]>([]);
-const metricOptions = ref([]);
 const form = reactive({
   name: '', // 数据集名称
   scenario: '', //应用场景
@@ -192,12 +191,7 @@ let dialogOptions = ref<FormOption>({
     {
       type: 'select2',
       label: '指标标签',
-      opts: [
-        { label: 'Accuracy准确率', value: 'Accuracy准确率' },
-        { label: 'Precision精确率', value: 'Precision精确率' },
-        { label: 'Recall召回率', value: 'Recall召回率' },
-        { label: 'F1-Score', value: 'F1-Score' },
-      ],
+      opts: tagMetricsOptions,
       isMultiple: true,
       prop: 'metrics',
       required: true,
@@ -231,7 +225,6 @@ function handleTypeClear() {
 const addDataSet = () => {
   visible.value = true;
   isUpdate.value = false;
-  // getDatasetTages();
   getAllTagesList();
 };
 
@@ -265,7 +258,8 @@ const getAllTagesList = () => {
       value: getFormatName(item),
       label: getFormatName(item),
     }));
-     datasetsOptions.value =res.data.dataset_tags?.map((item) => ({
+    // 数据集标签
+    datasetsOptions.value = res.data.dataset_tags?.map((item) => ({
       label: getFormatName(item),
       value: getFormatName(item),
     }));
@@ -283,7 +277,7 @@ function getFormatName(formatKey: Object) {
     general: '通用',
     specialized: '专用',
     safety: '安全',
-    trustworthy:'可信'
+    trustworthy: '可信',
   };
   return formatMap[formatKey] || '未知格式';
 }
@@ -487,45 +481,41 @@ const pagedData = computed(() => {
 
 function handleDatasetChange(e: string) {
   dataset_type.value = e;
-  const englishType = getFormatNames(e);  // 获取英文类型，如："multimodal"
-  
+  const englishType = getFormatNames(e);
+
   // 1. 获取场景任务选项
   const scenarios = datasetParent.value[englishType] || {};
   datasetsSonOptions.value = Object.keys(scenarios).map((item: any) => ({
     label: getFormatSonName(item),
-    value: item,  // 这里用英文值，方便后续查找
+    value: item, // 这里用英文值，方便后续查找
   }));
-  
-  // 2. 同时可以获取该类型下所有指标的合集（可选）
-  const allMetrics = new Set();
-  Object.values(scenarios).forEach((metrics: string[]) => {
-    metrics.forEach(metric => allMetrics.add(metric));
-  });
-  console.log('该数据集类型下的所有指标:', Array.from(allMetrics));
+  console.log(datasetsSonOptions.value);
 }
 
-// 3. 新增函数：根据选择的场景任务获取指标标签
-function getMetricsByScenario(scenarioValue: string) {
-  if (!dataset_type.value || !scenarioValue) return [];
-  
-  const englishType = getFormatNames(dataset_type.value);
-  const scenarios = datasetParent.value[englishType] || {};
-  
-  // scenarioValue 是英文的，如 "behavior_inference"
-  const metrics = scenarios[scenarioValue] || [];
-  
-  // 格式化显示
-  return metrics.map(metric => ({
-    label: metric,  // 这里可以根据需要添加中文翻译
-    value: metric
-  }));
+function handleDatasetChanges(e: any) {
 }
 
-function handleDatasetChanges(tags: string) {
-  handelchangeTag.value = true;
-}
+function getformValue(value: any) {
+  console.log(value);
+  if (!value) {
+    console.warn('getformValue 收到空值:', value);
+    return;
+  }
 
-function getformValue(value: any) {}
+  // 确保 value 是对象
+  if (typeof value !== 'object') {
+    console.warn('getformValue 期望对象，但收到:', typeof value, value);
+    return;
+  }
+
+  const keys = getFormatNames(value.type);
+  if (datasetParent?.value && value.scenario && getFormatNames(value.type)) {
+    tagMetricsOptions.value =  Object.values(datasetParent?.value[keys][value.scenario]).map((item) => ({
+      label: item,
+      value: item,
+    }))
+  }
+}
 </script>
 
 <style lang="less" scoped>
