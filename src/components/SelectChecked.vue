@@ -349,33 +349,6 @@ onMounted(() => {
   if (currentStep.value === 1) {
     localStorage.setItem('item', activeCategory.value);
   }
-  // if (selectedTaskType.value !== 'benchmark') {
-  //   getDatasetsList();
-  // } else {
-  //   tableData.value = [
-  //     {
-  //       id: 'gsm8k',
-  //       name: 'gsm8k',
-  //       type: 'benchmark',
-  //     },
-  //     {
-  //       id: 'mmlu',
-  //       name: 'mmlu',
-  //       type: 'benchmark',
-  //     },
-  //     {
-  //       id: 'ceval',
-  //       name: 'ceval',
-  //       type: 'benchmark',
-  //     },
-  //   ];
-  //   if (tableData.value.length > 0) {
-  //     tableData.value = tableData.value.map((item) => {
-  //       return { id: item.id, name: item.name };
-  //     });
-  //   }
-  //   console.log(tableData);
-  // }
   getDatasetTages();
   getModelLists();
   getModelTypes();

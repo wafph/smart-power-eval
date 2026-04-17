@@ -43,6 +43,14 @@ export const getTages = () => {
   });
 };
 
+export const getAllTages = () => {
+  return request({
+    url: `${baseUrl}/api/datasets/task-subtypes`,
+    method: 'get',
+  });
+};
+
+
 // 更新数据集
 export const getUpdateDatasetDetail = (id: string, query: any) => {
   return request({

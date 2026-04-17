@@ -275,10 +275,8 @@ function getRadioValue(value: any) {
 }
 
 function handelselection(e: any) {
-  console.log(e);
   selectionLength.value = e;
   dataSetIds.value = e[0].id;
-  console.log(dataSetIds.value);
 }
 
 const tableDataFilter = computed(() => {
@@ -339,7 +337,6 @@ const handleNextDisabled = computed(() => {
 
 const handleGroupChange = (value: any) => {
   selectedTaskType.value = value;
-  console.log(selectedTaskType.value);
 };
 
 function handleNext() {
@@ -347,8 +344,6 @@ function handleNext() {
 }
 
 function handlCreate() {
-  // const datasetId = localStorage.getItem('dataset_id');
-  console.log(dataSetIds.value);
   const modelIds = localStorage.getItem('model_id');
   const metricsId = JSON.parse(localStorage.getItem('indicator_ids'));
   const judgeModelsId = localStorage.getItem('judge_model_id');

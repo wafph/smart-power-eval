@@ -126,9 +126,7 @@ import {
   deleteDatasetDetail,
   auditDataset,
   getDataSetlist,
-  getDatasetType,
-  getMetricsByTages,
-  getTages,
+  getAllTages,
 } from '@/api';
 const { setCurrentTestTask } = useState();
 import { ElMessage } from 'element-plus';
@@ -151,43 +149,14 @@ const tagMetricsOptions = ref([]);
 const handelchangeTag = ref(false);
 const fileId = ref(2);
 const datasetParent = ref({});
-const datasetsSonOptions = [
-  {
-    label: 'IFEval',
-    value: 'IFEval',
-  },
-  {
-    label: 'aime2024',
-    value: 'aime2024',
-  },
-  {
-    label: 'human eval',
-    value: 'human eval',
-  },
-  {
-    label: 'human eval',
-    value: 'human eval',
-  },
-  {
-    label: 'ceva',
-    value: 'ceva',
-  },
-  {
-    label: 'Math_vista（1000）',
-    value: 'Math_vista（1000）',
-  },
-  {
-    label: 'MMMU（900）',
-    value: 'MMMU（900）',
-  },
-];
+const datasetsSonOptions = ref<string[]>([]);
+const metricOptions = ref([]);
 const form = reactive({
   name: '', // 数据集名称
   scenario: '', //应用场景
   type: '', //数据集类型
   status: '', //数据集状态
 });
-
 // 新增/编辑弹窗相关
 let dialogOptions = ref<FormOption>({
   labelWidth: '130px',
@@ -262,7 +231,8 @@ function handleTypeClear() {
 const addDataSet = () => {
   visible.value = true;
   isUpdate.value = false;
-  getDatasetTages();
+  // getDatasetTages();
+  getAllTagesList();
 };
 
 const rowData = ref({});
@@ -286,17 +256,82 @@ const handleCheck = (row: {}) => {
   });
 };
 
-// 获取数据集标签
-function getDatasetTages() {
-  getTages().then((res) => {
-    datasetParent.value = res.data;
-    datasetsOptions.value = datasetParent.value?.map((item) => ({
-      label: item,
-      value: item,
+// 获取所有标签
+const getAllTagesList = () => {
+  getAllTages().then((res) => {
+    datasetParent.value = res.data.data;
+    let keys = Object.keys(datasetParent.value);
+    selectOptions.value = keys.map((item) => ({
+      value: getFormatName(item),
+      label: getFormatName(item),
+    }));
+     datasetsOptions.value =res.data.dataset_tags?.map((item) => ({
+      label: getFormatName(item),
+      value: getFormatName(item),
     }));
   });
+};
+
+function getFormatName(formatKey: Object) {
+  const formatMap = {
+    multimodal: '多模态',
+    science: '科学计算',
+    semantic: '语义',
+    temporal: '时序',
+    benchmark: 'Benchmark',
+    vision: '视觉',
+    general: '通用',
+    specialized: '专用',
+    safety: '安全',
+    trustworthy:'可信'
+  };
+  return formatMap[formatKey] || '未知格式';
 }
 
+// 定义类型
+type FormatKey = '多模态' | '科学计算' | '语义' | '时序' | 'benchmark' | '视觉' | string; // 允许其他字符串
+
+type FormatValue =
+  | 'multimodal'
+  | 'science'
+  | 'semantic'
+  | 'temporal'
+  | 'benchmark'
+  | 'vision'
+  | '未知格式';
+
+function getFormatNames(formatKey: FormatKey): FormatValue {
+  const formatMap: Record<string, FormatValue> = {
+    多模态: 'multimodal',
+    科学计算: 'science',
+    语义: 'semantic',
+    时序: 'temporal',
+    Benchmark: 'benchmark',
+    视觉: 'vision',
+  };
+
+  return formatMap[formatKey] || '未知格式';
+}
+
+function getFormatSonName(formatKey: Object) {
+  const formatMap = {
+    benchmark: 'benchmark',
+    semantic_choice: '语义理解（选择）',
+    semantic_qa: '语义理解（问答)',
+    image_captioning: '图像描述',
+    object_recognition: '物体识别',
+    scene_understanding: '场景理解',
+    behavior_inference: '行为推断',
+    pending: '待定',
+    counting: '计数',
+    image_classification: '图像分类',
+    object_detection: '目标检测',
+    image_segmentation: '图像分割',
+    base_safety: '基础安全',
+    confronting_safety: '对抗安全',
+  };
+  return formatMap[formatKey] || '未知格式';
+}
 const closeEvent = (event: any) => {
   isVisable.value = event;
 };
@@ -353,16 +388,6 @@ const paramsObj = reactive({
   status: 'all',
   username: localStorage.getItem('vuems_name') || 'testuser',
 });
-
-// 获取数据集类型
-function getDatasetTypes() {
-  getDatasetType().then((res: any) => {
-    datasetParent.value = res.data;
-    let keys = Object.keys(datasetParent.value);
-    console.log(keys);
-    selectOptions.value = keys.map((item) => ({ value: item, label: item }));
-  });
-}
 
 // 创建/更新数据集
 function getChildDatas(val: any) {
@@ -422,7 +447,6 @@ const closeDialog = () => {
 
 onMounted(() => {
   getDatasetsList();
-  getDatasetTypes();
 });
 
 // 获取数据集列表
@@ -442,12 +466,12 @@ function getDatasetsList() {
 const tableDataFilter = computed(() => {
   let data = [...tableData.value];
   data = data.filter((item: any) => {
-    const namefilter = item.name.toLowerCase().includes(form.name?.toLowerCase());
+    const namefilter = item.name?.toLowerCase().includes(form.name?.toLowerCase());
     const scenariofilter = item.scenario
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(form.scenario?.toLowerCase());
-    const typeFilter = item.type.toLowerCase().includes(form.type?.toLowerCase());
-    const statusFilter = item.status.toLowerCase().includes(form.status?.toLowerCase());
+    const typeFilter = item.type?.toLowerCase().includes(form.type?.toLowerCase());
+    const statusFilter = item.status?.toLowerCase().includes(form.status?.toLowerCase());
     return namefilter && scenariofilter && typeFilter && statusFilter;
   });
 
@@ -463,16 +487,45 @@ const pagedData = computed(() => {
 
 function handleDatasetChange(e: string) {
   dataset_type.value = e;
-  console.log(e);
+  const englishType = getFormatNames(e);  // 获取英文类型，如："multimodal"
+  
+  // 1. 获取场景任务选项
+  const scenarios = datasetParent.value[englishType] || {};
+  datasetsSonOptions.value = Object.keys(scenarios).map((item: any) => ({
+    label: getFormatSonName(item),
+    value: item,  // 这里用英文值，方便后续查找
+  }));
+  
+  // 2. 同时可以获取该类型下所有指标的合集（可选）
+  const allMetrics = new Set();
+  Object.values(scenarios).forEach((metrics: string[]) => {
+    metrics.forEach(metric => allMetrics.add(metric));
+  });
+  console.log('该数据集类型下的所有指标:', Array.from(allMetrics));
+}
+
+// 3. 新增函数：根据选择的场景任务获取指标标签
+function getMetricsByScenario(scenarioValue: string) {
+  if (!dataset_type.value || !scenarioValue) return [];
+  
+  const englishType = getFormatNames(dataset_type.value);
+  const scenarios = datasetParent.value[englishType] || {};
+  
+  // scenarioValue 是英文的，如 "behavior_inference"
+  const metrics = scenarios[scenarioValue] || [];
+  
+  // 格式化显示
+  return metrics.map(metric => ({
+    label: metric,  // 这里可以根据需要添加中文翻译
+    value: metric
+  }));
 }
 
 function handleDatasetChanges(tags: string) {
   handelchangeTag.value = true;
 }
 
-function getformValue(value: any) {
-  console.log(value);
-}
+function getformValue(value: any) {}
 </script>
 
 <style lang="less" scoped>
