@@ -2,7 +2,7 @@
   <div class="task-type-select-container">
     <!-- 返回按钮 -->
     <div class="back-button">
-      <el-button type="text" :icon="ArrowLeft" @click="handleBack()" class="back-btn">
+      <el-button :icon="ArrowLeft" @click="handleBack()" class="back-btn">
         返回
       </el-button>
     </div>
@@ -88,7 +88,9 @@
               :value="item.value"
             />
           </el-select>
+          {{ form.tag }}
           <TableCustom
+            v-if="form.tag !== '安全'"
             :columns="columns"
             :tableData="pagedData"
             :pageSizes="[10, 20, 50, 100]"
@@ -100,6 +102,25 @@
             @changeSize="changeSizePage"
             @sendsSelec="handelselection"
           ></TableCustom>
+          <div v-else>
+            <!-- <div v-for="item in safyList">
+              <span>类别： {{ item.category }}</span>
+              <span>范围： {{ item.domain }}</span>
+              <span>提示： {{ item.prompt }}</span>
+            </div> -->
+            <TableCustom
+              :columns="columnsSafty"
+              :tableData="safyList"
+              :pageSizes="[10, 20, 50, 100]"
+              :pageSize="paramsObj.per_page"
+              :layouts="'total, sizes, prev, pager, next, jumper'"
+              :currentPage="paramsObj.page"
+              :total="safyList.length"
+              @changePage="changeCurrentPage"
+              @changeSize="changeSizePage"
+              @sendsSelec="handelselection"
+            ></TableCustom>
+          </div>
         </div>
         <div v-if="currentStep == 2">
           <SelectChecked
@@ -109,10 +130,26 @@
           />
         </div>
         <div v-if="currentStep == 3">
+          {{ selectMetrics }}
           <el-checkbox-group v-model="selectMetrics" class="dataset-checkbox-group">
-            <template v-for="(metrics, index) in getMetrics" :key="index">
-              <el-checkbox border  :label="metrics">
+            <template v-if="form.tag !== '安全'">
+              <el-checkbox
+                v-for="(metrics, index) in getMetrics"
+                :key="index"
+                border
+                :label="metrics"
+              >
                 <span class="dataset-name">{{ metrics }}</span>
+              </el-checkbox>
+            </template>
+            <template v-else>
+              <el-checkbox
+                border
+                :label="metrics"
+                v-for="(metrics, index) in safeMetrics"
+                :key="index"
+              >
+                <span class="dataset-name">{{ metrics.id }}</span>
               </el-checkbox>
             </template>
           </el-checkbox-group>
@@ -162,10 +199,11 @@ import { ArrowLeft, Document, Camera, View, Clock, Box } from '@element-plus/ico
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
-import { getDatasets, createTaskslist } from '@/api';
+import { getDatasets, createTaskslist, getSafetyDatasets, getSafetyMetrics } from '@/api';
 const selectType = defineProps(['selectType']);
 const dataSetIds = ref('');
 const getMetrics = ref([]);
+const safeMetrics = ref([]);
 const modelIds = ref('');
 const datasetName = ref('');
 const selectMetrics = ref<string[]>([]);
@@ -176,6 +214,7 @@ const radioValue = ref('1');
 const ruleForm = reactive({
   taskName: '',
 });
+const safyList = ref([]);
 const selectOptions = ref([
   { value: '通用', label: '通用' },
   { value: '专用', label: '专用' },
@@ -198,6 +237,14 @@ let columns = ref([
   { prop: 'scenario', label: '应用场景' },
   { prop: 'tag', label: '数据集标签' },
   { prop: 'metrics', label: '指标标签' },
+]);
+
+let columnsSafty = ref([
+  { type: 'index', label: '序号', width: 55, align: 'center' },
+  { type: 'selection', label: '', width: 55, align: 'center' },
+  { prop: 'category', label: '数据集名称' },
+  { prop: 'domain', label: '范围' },
+  { prop: 'prompt', label: '提示' },
 ]);
 const form = reactive({
   tag: '', //数据集类型
@@ -267,7 +314,19 @@ function handleTypeClear() {
   form.tag = '';
 }
 
-function handleDatasetChange(e: string) {}
+function handleDatasetChange(e: string) {
+  if (e === '安全') {
+    getSafetyDatasets().then((res: any) => {
+      safyList.value = res.data.items;
+    });
+
+    getSafetyMetrics().then((res: any) => {
+      safeMetrics.value = res.data.metrics;
+    });
+  } else {
+    getDatasetsList();
+  }
+}
 function getModelSelectId(id: any) {
   modelIds.value = id;
   localStorage.setItem('model_id', modelIds.value);
@@ -278,7 +337,6 @@ function getRadioValue(value: any) {
 }
 
 function handelselection(e: any) {
-  console.log(e);
   selectionLength.value = e;
   dataSetIds.value = e[0].id;
   getMetrics.value = e[0].metrics;
@@ -350,10 +408,11 @@ function handlCreate() {
   const paramData = {
     dataset_id: dataSetIds.value,
     model_id: modelIds,
-    indicator_ids: selectMetrics.value,
+    indicator_ids: form.tag !== '安全' ? selectMetrics.value : [selectMetrics.value[0].id],
     name: ruleForm.taskName,
     user_name: localStorage.getItem('vuems_name'),
     judge_model_id: judgeModelsId,
+    ataset_name: '文本-安全评测',
   };
   if (radioValue.value === '2') {
     delete paramData.judge_model_id;

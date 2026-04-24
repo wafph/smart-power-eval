@@ -28,7 +28,7 @@
               >
                 {{ dataset }}
                 <el-checkbox
-                  :label="dataset.id"
+                  :value="dataset.id"
                   class="dataset-checkbox"
                   @change="handleDatasetSelect(dataset.id)"
                 >
@@ -52,7 +52,7 @@
                 >
                   {{ dataset }}
                   <el-checkbox
-                    :label="dataset.id"
+                    :value="dataset.id"
                     class="dataset-checkbox"
                     @change="handleDatasetSelect(dataset.id)"
                   >

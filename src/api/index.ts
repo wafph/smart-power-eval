@@ -1,5 +1,5 @@
 import request from '../utils/request';
-const baseUrl = 'rest/api4';
+const baseUrl = '';
 // 获取数据集管理
 export const getDatasets = (query: any) => {
   return request({
@@ -8,6 +8,26 @@ export const getDatasets = (query: any) => {
     params: query,
   });
 };
+
+// 获取安全数据集
+export const getSafetyDatasets = (query: any) => {
+  return request({
+    url: `${baseUrl}/api/epass/safety-datasets`,
+    method: 'get',
+    params: query,
+  });
+};
+
+export const getSafetyMetrics = (query: any) => {
+  return request({
+    url: `${baseUrl}/api/epass/safety-metrics`,
+    method: 'get',
+    params: query,
+  });
+};
+
+
+
 
 // 创建数据集管理
 export const addDataSets = (query: any) => {

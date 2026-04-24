@@ -234,6 +234,7 @@ const handleEdit = (row: any) => {
   isEdit.value = true;
   visible.value = true;
   isUpdate.value = true;
+  getAllTagesList();
   // 回显数据集
   getdatasetDetail(rowData.value.id).then((res: any) => {});
 };
@@ -489,31 +490,28 @@ function handleDatasetChange(e: string) {
     label: getFormatSonName(item),
     value: item, // 这里用英文值，方便后续查找
   }));
-  console.log(datasetsSonOptions.value);
 }
 
-function handleDatasetChanges(e: any) {
-}
+function handleDatasetChanges(e: any) {}
 
 function getformValue(value: any) {
-  console.log(value);
   if (!value) {
-    console.warn('getformValue 收到空值:', value);
     return;
   }
 
   // 确保 value 是对象
   if (typeof value !== 'object') {
-    console.warn('getformValue 期望对象，但收到:', typeof value, value);
     return;
   }
 
   const keys = getFormatNames(value.type);
   if (datasetParent?.value && value.scenario && getFormatNames(value.type)) {
-    tagMetricsOptions.value =  Object.values(datasetParent?.value[keys][value.scenario]).map((item) => ({
+    tagMetricsOptions.value = Object.values(
+      datasetParent?.value[keys][value.scenario],
+    ).map((item) => ({
       label: item,
       value: item,
-    }))
+    }));
   }
 }
 </script>
