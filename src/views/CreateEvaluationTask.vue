@@ -88,7 +88,6 @@
               :value="item.value"
             />
           </el-select>
-          {{ form.tag }}
           <TableCustom
             v-if="form.tag !== '安全'"
             :columns="columns"
@@ -103,11 +102,6 @@
             @sendsSelec="handelselection"
           ></TableCustom>
           <div v-else>
-            <!-- <div v-for="item in safyList">
-              <span>类别： {{ item.category }}</span>
-              <span>范围： {{ item.domain }}</span>
-              <span>提示： {{ item.prompt }}</span>
-            </div> -->
             <TableCustom
               :columns="columnsSafty"
               :tableData="safyList"
@@ -130,7 +124,6 @@
           />
         </div>
         <div v-if="currentStep == 3">
-          {{ selectMetrics }}
           <el-checkbox-group v-model="selectMetrics" class="dataset-checkbox-group">
             <template v-if="form.tag !== '安全'">
               <el-checkbox

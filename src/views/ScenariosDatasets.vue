@@ -146,7 +146,6 @@ const total = ref(0);
 const dataset_type = ref('');
 const datasetsOptions = ref([]);
 const tagMetricsOptions = ref([]);
-const handelchangeTag = ref(false);
 const fileId = ref(2);
 const datasetParent = ref({});
 const datasetsSonOptions = ref<string[]>([]);
