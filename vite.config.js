@@ -6,9 +6,10 @@ import Components from 'unplugin-vue-components/vite';
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 export default defineConfig({
   build: {
-    chunkSizeWarningLimit: 1000, // 设为 1000 KiB
+    chunkSizeWarningLimit: 1000,
   },
-  base: './',
+
+  base: '/',
   plugins: [
     vue(),
     VueSetupExtend(),
@@ -19,12 +20,14 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+
   resolve: {
     alias: {
       '@': '/src',
       '~': '/src/assets',
     },
   },
+
   css: {
     preprocessorOptions: {
       less: {
@@ -32,20 +35,21 @@ export default defineConfig({
       },
     },
   },
+
   server: {
-    port: 5174, // 设置默认端口为3001
-    strictPort: true, // 如果端口被占用，直接退出而不是尝试下一个可用端口
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+    port: 9527,
+    strictPort: true,
     host: '0.0.0.0',
     open: true,
     proxy: {
       '/api': {
-        // target: 'http://218.30.123.195:8601', // 信通院后端服务器地址
-        // target: 'http://120.46.162.200:8601', // 软通后端服务器地址
-        // target: 'http://218.30.123.195:8601', // 信通院后端服务器地址
-        target: 'http://1.94.244.72:7081', // 
+        target: 'http://1.94.244.72:7081',
         changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      
     },
   },
 });

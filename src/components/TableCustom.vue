@@ -4,19 +4,6 @@
       <div class="table-toolbar-left">
         <slot name="toolbarBtn"></slot>
       </div>
-      <div class="table-toolbar-right flex-center">
-        <template v-if="multipleSelection.length > 0">
-          <el-tooltip effect="dark" content="删除选中" placement="top">
-            <el-icon
-              class="columns-setting-icon"
-              @click="delSelection(multipleSelection)"
-            >
-              <Delete />
-            </el-icon>
-          </el-tooltip>
-          <el-divider direction="vertical" />
-        </template>
-      </div>
     </div>
     <el-table
       class="mgb20"

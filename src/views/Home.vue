@@ -1,18 +1,14 @@
 <template>
   <div class="wrapper">
-    <Header />
-    <Sidebar />
-    <div class="content-box" :class="{ 'content-collapse': sidebar.collapse }">
-      <Tabs />
-      <div class="content">
-        <router-view v-slot="{ Component }">
-          <transition name="move" mode="out-in">
-            <keep-alive :include="tabs.nameList">
-              <component :is="Component"></component>
-            </keep-alive>
-          </transition>
-        </router-view>
-      </div>
+    <Tabs />
+    <div class="content">
+      <router-view v-slot="{ Component }">
+        <transition name="move" mode="out-in">
+          <keep-alive :include="tabs.nameList">
+            <component :is="Component"></component>
+          </keep-alive>
+        </transition>
+      </router-view>
     </div>
   </div>
 </template>
@@ -26,17 +22,6 @@ const tabs = useTabsStore();
 <style>
 .wrapper {
   height: 100vh;
-  overflow: hidden;
-}
-.content-box {
-  position: absolute;
-  left: 250px;
-  right: 0;
-  top: 70px;
-  bottom: 0;
-  -webkit-transition: left 0.3s ease-in-out;
-  transition: left 0.3s ease-in-out;
-  background: #f3f4f6;
   overflow: hidden;
 }
 

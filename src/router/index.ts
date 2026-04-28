@@ -7,7 +7,7 @@ import 'nprogress/nprogress.css';
 const routes: RouteRecordRaw[] = [
   {
     path: '',
-    redirect: 'login',
+    redirect: 'scenarios-datasets',
   },
   {
     path: '/',
@@ -120,7 +120,9 @@ const routes: RouteRecordRaw[] = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHashHistory(
+    window.__MICRO_APP_BASE_ROUTE__ || '/', //
+  ),
   routes,
 });
 
