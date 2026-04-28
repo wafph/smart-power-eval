@@ -47,7 +47,6 @@ if (window.__MICRO_APP_ENVIRONMENT__) {
   // ✅ 监听主应用发送的路由变化
   window.microApp?.addDataListener((data) => {
     if (data.type === 'route-change') {
-      console.log('收到路由变化:', data.path);
       router.push(data.path);
     }
   });
@@ -56,12 +55,3 @@ if (window.__MICRO_APP_ENVIRONMENT__) {
     app?.unmount();
   };
 }
-
-// // 子应用 main.ts
-// if (window.__MICRO_APP_ENVIRONMENT__) {
-//    console.log('我在微前端环境中')
-//   window.microApp.addGlobalDataListener((data: any) => {
-//     console.log('收到主应用全局数据：', data);
-//     // localStorage.setItem('token', data.token)
-//   });
-// }

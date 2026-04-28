@@ -9,15 +9,9 @@ import { ElConfigProvider } from 'element-plus';
 import { onMounted } from 'vue';
 onMounted(() => {
   let mainData = window.microApp.getGlobalData();
-  console.log(mainData);
   const { token, userInfo } = mainData;
-  console.log(JSON.parse(userInfo));
   const a = JSON.parse(userInfo);
-  const { account, avatar, name, roleCodeList } = a;
-  console.log(account);
-  console.log(avatar);
-  console.log(name);
-  console.log(roleCodeList);
+  const { name } = a;
   localStorage.setItem('vuems_name', name || 'testuser');
 });
 </script>

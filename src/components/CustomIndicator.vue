@@ -39,7 +39,7 @@
           </div>
           <div class="header-right">
             <el-button type="primary" @click="handleNewIndicator">
-              <el-icon class="el-icon--left"><Plus /></el-icon>
+              <el-icon class="el-icon--left"></el-icon>
               新建指标体系
             </el-button>
             <el-dialog
